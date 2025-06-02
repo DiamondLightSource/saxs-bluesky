@@ -61,15 +61,9 @@ class PandaConfigBuilderGUI(tk.Tk):
 	def theme(self, theme_name):
 
 		style = ttk.Style(self.window)
-
-		print(style.theme_names())
-
+		print("All themes:",style.theme_names())
 		style.theme_use(THEME_NAME)
 
-		self.theme_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)),"themes",theme_name+'.tcl')
-
-		# self.window.tk.eval(self.theme_dir)
-		# self.window.tk.call("package", "require", theme_name)
 
 	def add_profile_tab(self, event):
 

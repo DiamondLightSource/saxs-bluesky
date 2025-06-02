@@ -50,11 +50,11 @@ from dodal.common.beamlines.beamline_utils import (
     get_path_provider,
     set_path_provider)
 
-from .ProfileGroups import (Profile, 
+from ProfileGroups import (Profile, 
                            Group, 
                            ProfileLoader)
 
-from .stubs.PandAStubs import (return_connected_device,
+from stubs.PandAStubs import (return_connected_device,
 								  return_module_name,
 								  make_beamline_devices,
                                   fly_and_collect_with_wait,
