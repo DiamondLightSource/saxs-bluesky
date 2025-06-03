@@ -107,6 +107,3 @@ lint.select = [
     "I001", # isort
     "SLF",  # self - https://docs.astral.sh/ruff/settings/#lintflake8-self
 ]
-
-[tool.ruff.format]
-indent-style = "tab"
