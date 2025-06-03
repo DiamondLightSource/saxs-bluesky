@@ -535,11 +535,12 @@ DEFAULT_GROUP = Group(frames=1,
                       wait_pulses=[0,0,0,0],
                       run_pulses=[1,1,1,1])
 
-
 DEFAULT_PROFILE = Profile(cycles=1,
                           seq_trigger="IMMEDIATE",
                           groups=[DEFAULT_GROUP],
                           multiplier=[1, 1, 1, 1])
+
+
 
 
 if __name__ == "__main__":

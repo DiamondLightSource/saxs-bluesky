@@ -23,11 +23,11 @@ from dodal.utils import get_beamline_name
 from ProfileGroups import DEFAULT_GROUP, Group, Profile
 from utils.ncdcore import ncdcore
 
-
 BL = get_beamline_name(os.environ['BEAMLINE'])
 BL_config = import_module(f"beamline_configs.{BL}_config")
 
 PULSEBLOCKS = BL_config.PULSEBLOCKS
+USE_MULTIPLIERS = BL_config.USE_MULTIPLIERS
 THEME_NAME = BL_config.THEME_NAME
 PULSEBLOCKASENTRYBOX = BL_config.PULSEBLOCKASENTRYBOX
 PULSE_BLOCK_NAMES = BL_config.PULSE_BLOCK_NAMES
@@ -508,6 +508,7 @@ class ProfileTab(ttk.Frame):
 
         cycles = self.get_n_cycles_value()
         profile_trigger = self.get_start_value()
+
         multiplier = [int(f.get()) for f in self.multiplier_var_options]
 
         new_profile = Profile(cycles=cycles,
@@ -602,8 +603,9 @@ class ProfileTab(ttk.Frame):
         self.outputs = self.profile.outputs()
         self.inputs = self.profile.inputs()
 
-        self.build_multiplier_choices()
-        ### add tree view ############################################
+        if USE_MULTIPLIERS:
+            self.build_multiplier_choices()
+            ### add tree view ############################################
 
         self.build_profile_tree()
 
@@ -639,12 +641,12 @@ class ProfileTab(ttk.Frame):
                                                    sticky="e")
 
         self.n_cycles_entry_value = tk.IntVar(self, value=self.profile.cycles)
-        cycles_entry = tk.Entry(self,
+        self.cycles_entry = tk.Entry(self,
                                 bd=1,
                                 width=15,
                                 textvariable=self.n_cycles_entry_value)
 
-        cycles_entry.grid(column = 1, row = 1, padx = 5,pady = 5 ,sticky="w" )
+        self.cycles_entry.grid(column = 1, row = 1, padx = 5,pady = 5 ,sticky="w" )
 
         # cycles_entry.bind("<FocusOut>", self.focus_out_generate_info_boxes)
 

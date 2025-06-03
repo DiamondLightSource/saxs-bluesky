@@ -46,6 +46,7 @@ LVDSIN = BL_config.LVDSIN
 LVDSOUT = BL_config.LVDSOUT
 
 PULSE_CONNECTIONS = BL_config.PULSE_CONNECTIONS
+USE_MULTIPLIERS = BL_config.USE_MULTIPLIERS
 
 ############################################################################################
 
@@ -573,7 +574,7 @@ class PandaConfigBuilderGUI(tk.Tk):
 
         #option 3 - return bad request error when trying to run a plan
 
-        blueapi_config_path = Path(os.path.join(os.path.dirname(os.path.realpath(__file__)),f"{BL}_blueapi_config.yaml")) #noqa
+        blueapi_config_path = Path(os.path.join(os.path.dirname(os.path.realpath(__file__)),"blueapi_configs",f"{BL}_blueapi_config.yaml")) #noqa
         config_loader = ConfigLoader(ApplicationConfig)
         config_loader.use_values_from_yaml(blueapi_config_path)
         loaded_config = config_loader.load()
