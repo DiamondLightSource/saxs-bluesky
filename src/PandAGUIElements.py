@@ -7,7 +7,6 @@ Python Elements for NCD PandA config GUI
 
 """
 
-from pathlib import Path
 import os
 from importlib import import_module
 
@@ -98,9 +97,9 @@ class EditableTableview(ttk.Treeview):
 
 		elif (column in ["#8", "#9"]):
 
-			if (PULSEBLOCKASENTRYBOX == False):
+			if not PULSEBLOCKASENTRYBOX:
 				self.Popup = CheckButtonPopup(self, rowid, int(column[1:])-1, x=x,y=y, columns=self.kwargs["columns"])
-			if (PULSEBLOCKASENTRYBOX == True):
+			if PULSEBLOCKASENTRYBOX:
 				self.Popup = EntryPopup(self, rowid, int(column[1:])-1, text, entrytype=list)
 				self.Popup.place(x=x, y=y+pady, width=width, height=height, anchor='w')
 
@@ -141,7 +140,7 @@ class DropdownPopup(ttk.Combobox):
 
 		selection = ncdcore.str2bool(self.option_var.get())
 
-		if selection != None:
+		if selection is not None:
 			vals[self.column] = selection
 		else:
 			selection = self.option_var.get()
@@ -272,11 +271,11 @@ class EntryPopup(ttk.Entry):
 		vals = self.tv.item(rowid, 'values')
 		vals = list(vals)
 
-		if self.entrytype == int:
+		if isinstance(self.entrytype, int):
 			selection = round(float(self.get()))
-		elif self.entrytype == float:
+		elif isinstance(self.entrytype, float):
 			selection = float(self.get())
-		elif self.entrytype == list:
+		elif isinstance(self.entrytype, list):
 			selection = [str(int((f))) for f  in self.get().split()]
 			selection = ' '.join(selection)
 		else:
@@ -347,7 +346,7 @@ class ProfileTab(ttk.Frame):
 		
 		try:
 			row = self.profile_config_tree.selection()[0]
-		except:
+		except LookupError:
 			tk.messagebox.showinfo("Info","A row must be selected to insert it before")
 
 			return
@@ -412,13 +411,14 @@ class ProfileTab(ttk.Frame):
 
 
 	def generate_info_boxes(self):
+		
 		try:
 
 			self.total_frames_label.config(text=f"Total Frames: {self.profile.total_frames}")
 			self.total_time_per_cycle.config(text=f"Time/cycle: {self.profile.duration_per_cycle:.3f} s")
 			self.total_time_label.config(text=f"Total time: {self.profile.duration_per_cycle*self.profile.cycles:.3f} s")
 
-		except:
+		except Exception:
 
 			#### total frames
 			self.total_frames_label = ttk.Label(self, text=f"Total Frames: {self.profile.total_frames}")
@@ -481,9 +481,6 @@ class ProfileTab(ttk.Frame):
 
 	
 	def build_multiplier_choices(self):
-
-
-		pulse_column = 5
 
 		self.multiplier_var_options = []
 

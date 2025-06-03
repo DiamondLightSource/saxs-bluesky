@@ -1,7 +1,9 @@
-import os, copy, yaml
+import os
+import copy
+import yaml
+from datetime import datetime
 import numpy as np
 import matplotlib.pyplot as plt
-from datetime import datetime
 
 from ophyd_async.fastcs.panda import (
 	SeqTable,
@@ -410,11 +412,8 @@ class ProfileLoader():
 
 	def __post_init__(self):
 
-		try:
-			self.data_dir = os.path.join("/dls",self.instrument,"data",str(self.year),self.experiment)
-		except:
-			pass
-		
+		self.year = datetime.now().year
+		self.data_dir = os.path.join("/dls",self.instrument,"data",str(self.year),self.experiment)
 		self.n_profiles = len(self.profiles)
 
 	@staticmethod
@@ -436,12 +435,6 @@ class ProfileLoader():
 			instrument = config["instrument"]
 			experiment = config["experiment"]
 			detectors = config["detectors"]
-
-			if "year" not in config:
-				year = datetime.now().year
-			else:
-				year = config["year"]
-
 
 			profile_names = [f for f in config if f.startswith("profile")]
 			profiles = []
@@ -580,7 +573,7 @@ if __name__ == "__main__":
 	config_filepath = os.path.join(dir_path,"panda_config.yaml")
 
 
-	config = PandaTriggerConfig.read_from_yaml(config_filepath)
+	config = ProfileLoader.read_from_yaml(config_filepath)
 	config.save_to_yaml(os.path.join(dir_path,"panda_config_output.yaml"))
 	
 	

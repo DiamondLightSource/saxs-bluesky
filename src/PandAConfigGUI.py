@@ -8,7 +8,6 @@ Python dataclasses and GUI as a replacement for NCDDetectors
 """
 
 import os
-import yaml
 import matplotlib.pyplot as plt
 from pathlib import Path
 from importlib import import_module
@@ -22,10 +21,10 @@ from dodal.utils import get_beamline_name
 # from stomp import Connection
 # from blueapi.client.event_bus import EventBusClient
 # from bluesky_stomp.messaging import StompClient, BasicAuthentication
-from blueapi.client.client import BlueapiRestClient, BlueapiClient
-from blueapi.config import RestConfig, ConfigLoader, ApplicationConfig
+from blueapi.client.client import BlueapiClient#, BlueapiRestClient
+from blueapi.config import ConfigLoader, ApplicationConfig#, RestConfig
 
-from ProfileGroups import Profile, Group, ProfileLoader
+from ProfileGroups import ProfileLoader #Profile, Group
 
 # from ProfileGroups import Profile, Group, ProfileLoader
 
@@ -179,12 +178,12 @@ class PandaConfigBuilderGUI(tk.Tk):
 
 		try:
 			self.client.run_plan("setup_panda")
-		except:
+		except ConnectionError:
 			print("could not upload yaml to panda")
 
 		try:
 			self.client.run_plan("setup_panda")
-		except:
+		except ConnectionError:
 			print("could not modify panda seq table")
 
 
@@ -195,7 +194,7 @@ class PandaConfigBuilderGUI(tk.Tk):
 		else:
 			try:
 				os.system("subl "+ self.panda_config_yaml + " &")
-			except:
+			except FileNotFoundError:
 				os.system("gedit "+ self.panda_config_yaml + " &")
 
 
@@ -340,12 +339,12 @@ class PandaConfigBuilderGUI(tk.Tk):
 			Pulselabel.grid(column =0, row = 0, padx = 5,pady = 5 ,sticky="w" )
 
 			# if pulse == 0:
-			TTLLabel = ttk.Label(active_detectors_frame_n, text =f"TTL:")
+			TTLLabel = ttk.Label(active_detectors_frame_n, text ="TTL:")
 			TTLLabel.grid(column =0, row = 1, padx = 5,pady = 5 ,sticky="w" )
 
 			for n, det in enumerate(PULSE_CONNECTIONS[pulse+1]):
 
-				experiment_var = tk.StringVar(value=self.configuration.experiment)
+				# experiment_var = tk.StringVar(value=self.configuration.experiment)
 
 				if (det.lower() == "fs") or ("shutter" in det.lower()):
 					ad_entry = tk.Checkbutton(active_detectors_frame_n, bd =1, text=det, state='disabled')
@@ -359,17 +358,19 @@ class PandaConfigBuilderGUI(tk.Tk):
 
 		self.pulse_frame = ttk.Frame(self.window, borderwidth=5, relief='raised')
 		self.pulse_frame.pack(fill ="both",side='left',expand=True)
-		Outlabel = ttk.Label(self.pulse_frame, text =f"Enable Device")
+		Outlabel = ttk.Label(self.pulse_frame, text ="Enable Device")
 		Outlabel.pack(fill ="both",side='top',expand=True)
 
 
 	def __init__(self,panda_config_yaml=None):
 
-		if os.environ.get('USER') != "akz63626": #check if I am runing this
+		user = os.environ.get('USER')
+
+		if user not in  ["akz63626","rjcd"]: #check if I am runing this
 
 			try:
 				self.panda = return_connected_device(BL, "panda1")
-			except:
+			except Exception:
 				answer = tk.messagebox.askyesno("PandA not Connected", "PandA is not connected, if you continue things will not work. Continue?")
 				if answer:
 					pass
@@ -380,13 +381,13 @@ class PandaConfigBuilderGUI(tk.Tk):
 		self.panda_config_yaml = panda_config_yaml
 		self.default_config_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),"profile_yamls","default_panda_config.yaml")
 		
-		if self.panda_config_yaml == None:
+		if self.panda_config_yaml is None:
 			self.configuration = ProfileLoader.read_from_yaml(self.default_config_path)
 		else:
 			self.configuration = ProfileLoader.read_from_yaml(self.panda_config_yaml)
 
 		
-		if self.configuration.experiment == None:
+		if self.configuration.experiment is None:
 			user_input = tk.simpledialog.askstring(title="Experiment",
                                   prompt="Enter an experiment code:")
 			
