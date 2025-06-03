@@ -44,7 +44,7 @@ GitHub = "https://github.com/RJCD-Diamond/SAS_bluesky.git"
 
 [[project.authors]] # Further authors may be added by duplicating this section
 email = "Richard.Dixey@diamond.ac.uk"
-name = "Malinowski, Stanisław (DLSLtd,RAL,LSCI)"
+name = "Dixey, Richard (DLSLtd,RAL,LSCI)"
 # [[project.authors]]
 # email = "joseph.ware@diamond.ac.uk"
 # name = "Ware, Joseph (DLSLtd,RAL,LSCI)"
@@ -107,3 +107,6 @@ lint.select = [
     "I001", # isort
     "SLF",  # self - https://docs.astral.sh/ruff/settings/#lintflake8-self
 ]
+
+[tool.ruff.format]
+indent-style = "tab"
