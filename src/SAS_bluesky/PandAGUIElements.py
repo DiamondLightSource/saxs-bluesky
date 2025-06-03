@@ -9,6 +9,7 @@ Python Elements for NCD PandA config GUI
 
 import os #noqa
 from importlib import import_module
+from pathlib import Path
 
 import tkinter as tk
 from tkinter import ttk
@@ -20,8 +21,13 @@ from ophyd_async.fastcs.panda._block import PandaTimeUnits
 
 from dodal.utils import get_beamline_name
 
-from ProfileGroups import DEFAULT_GROUP, Group, Profile
-from utils.ncdcore import ncdcore
+from SAS_bluesky.ProfileGroups import DEFAULT_GROUP, Group, Profile
+from SAS_bluesky.utils.ncdcore import ncdcore
+
+
+SAS_bluesky_ROOT = Path(__file__).parent.parent.parent
+
+print(SAS_bluesky_ROOT)
 
 BL = get_beamline_name(os.environ['BEAMLINE'])
 BL_config = import_module(f"beamline_configs.{BL}_config")

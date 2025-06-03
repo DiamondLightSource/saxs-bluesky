@@ -21,7 +21,7 @@ from typing import Any
 from pydantic import BaseModel
 from pydantic_core import from_json
 from pydantic.dataclasses import dataclass
-from utils.ncdcore import ncdcore
+from SAS_bluesky.utils.ncdcore import ncdcore
 
 
 """

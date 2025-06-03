@@ -1,7 +1,3 @@
-from ProfileGroups import Group, Profile, ProfileLoader
+from ._version import __version__
 
-__all__ = [
-    "Group",
-    "Profile",
-    "ProfileLoader"]
-
+__all__ = ["__version__"]

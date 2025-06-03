@@ -37,7 +37,7 @@ dev = [
 ]
 
 [project.scripts]
-SAS-bluesky = "sas_bluesky.__main__:main"
+SAS-bluesky = "SAS_bluesky.__main__:main"
 
 [project.urls]
 GitHub = "https://github.com/RJCD-Diamond/SAS_bluesky.git"
@@ -50,7 +50,7 @@ name = "Dixey, Richard (DLSLtd,RAL,LSCI)"
 # name = "Ware, Joseph (DLSLtd,RAL,LSCI)"
 
 [tool.setuptools_scm]
-write_to = "src/sas_bluesky/_version.py"
+write_to = "src/SAS_bluesky/_version.py"
 
 [tool.mypy]
 ignore_missing_imports = true # Ignore missing stubs in imported modules
