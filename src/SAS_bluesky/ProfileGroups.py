@@ -1,5 +1,5 @@
 import os #noqa
-import copy
+# import copy
 import yaml
 from datetime import datetime
 import numpy as np
@@ -86,8 +86,10 @@ class Group(BaseModel):
 
         if not self.pause_trigger:
             trigger = SeqTrigger.IMMEDIATE
-
-        if self.pause_trigger:
+        elif self.pause_trigger == "FALSE":
+            trigger = SeqTrigger.IMMEDIATE
+            self.pause_trigger = "IMMEDIATE"
+        else:
             trigger = eval(f"SeqTrigger.{self.pause_trigger}")
 
         seq_row  = SeqTable.row(
@@ -116,7 +118,6 @@ class Group(BaseModel):
 
 class Profile(BaseModel):
 
-    profile_id: int = 0
     cycles: int = 1
     seq_trigger: str = "IMMEDIATE"
     groups: list[Group] = []
@@ -429,7 +430,7 @@ class ProfileLoader:
             profile_names = [f for f in config if f.startswith("profile")]
             profiles = []
 
-            for p,profile_name in enumerate(profile_names):
+            for profile_name in profile_names:
 
                 profile_cycles = config[profile_name]["cycles"]
                 profile_trigger = config[profile_name]["seq_trigger"]
@@ -452,8 +453,7 @@ class ProfileLoader:
 
                     group_list.append(n_Group)
 
-                n_profile = Profile(profile_id=p,
-                        cycles=profile_cycles,
+                n_profile = Profile(cycles=profile_cycles,
                         seq_trigger=profile_trigger,
                         groups=group_list,
                         multiplier=multiplier)
@@ -514,38 +514,32 @@ class ProfileLoader:
         # self.re_group_id_profiles()
         self.__post_init__()
 
-    def re_group_id_profiles(self):
+    # def re_group_id_profiles(self):
 
-        iter_prof = copy.deepcopy(self.profiles)
-        new_profiles = []
+    #     iter_prof = copy.deepcopy(self.profiles)
+    #     new_profiles = []
 
-        for n, profile in enumerate(iter_prof):
-            profile.profile_id = n
-            new_profiles.append(profile)
+    #     for n, profile in enumerate(iter_prof):
+    #         profile.profile_id = n
+    #         new_profiles.append(profile)
 
-        self.profiles = new_profiles
-
-
-# def savei22pandaconfig(output_file):
-
-#     # i22panda = panda1()
-#     # save_device(i22panda)
-
-#     _save_panda("i22", "panda1", output_file)
+    #     self.profiles = new_profiles
 
 
+DEFAULT_GROUP = Group(frames=1,
+                      wait_time=1,
+                      wait_units="S",
+                      run_time=1,
+                      run_units="S",
+                      pause_trigger="IMMEDIATE",
+                      wait_pulses=[0,0,0,0],
+                      run_pulses=[1,1,1,1])
 
-# def load_panda(config_yaml_path):
 
-#     config_yaml_path = config_yaml_path
-
-#     def _load(config_yaml_path):
-#         i22panda = panda1()
-#         yield from load_device(i22panda, str(config_yaml_path))
-
-#     RE = RunEngine({})
-#     RE(_load())
-
+DEFAULT_PROFILE = Profile(cycles=1,
+                          seq_trigger="IMMEDIATE",
+                          groups=[DEFAULT_GROUP],
+                          multiplier=[1, 1, 1, 1])
 
 
 if __name__ == "__main__":
@@ -556,7 +550,7 @@ if __name__ == "__main__":
                          wait_units="S",
                          run_time=1,
                          run_units="S",
-                         pause_trigger="False",
+                         pause_trigger="IMMEDIATE",
                          wait_pulses=[0,0,0,0],
                          run_pulses=[1,1,1,1]))
 
@@ -569,11 +563,12 @@ if __name__ == "__main__":
 
     print(new_profile)
 
-    quit()
 
     dir_path = os.path.dirname(os.path.realpath(__file__))
-    config_filepath = os.path.join(dir_path,"panda_config.yaml")
+    config_filepath = os.path.join(dir_path,"profile_yamls","panda_config.yaml")
 
 
     config = ProfileLoader.read_from_yaml(config_filepath)
-    config.save_to_yaml(os.path.join(dir_path,"panda_config_output.yaml"))
+    config.save_to_yaml(os.path.join(dir_path,"profile_yamls","panda_config_output.yaml"))
+
+

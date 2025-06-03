@@ -4,15 +4,12 @@ experiment: cm40643-2/bluesky
 instrument: i22
 detectors: [saxs, waxs]
 profile-0:
-  profile_id: 0
   cycles: 3
   seq_trigger: IMMEDIATE
   multiplier: [1, 2, 4, 8]
   total_frames: 12
   duration_per_cycle: 32.0
-  duration: 0
   group-0:
-    group_id: 0
     frames: 1
     wait_time: 3000
     wait_units: MS
@@ -25,7 +22,6 @@ profile-0:
     run_time_s: 3.0
     group_duration: 6.0
   group-1:
-    group_id: 1
     frames: 1
     wait_time: 1000
     wait_units: MS
@@ -38,7 +34,6 @@ profile-0:
     run_time_s: 1.0
     group_duration: 2.0
   group-2:
-    group_id: 2
     frames: 8
     wait_time: 1000
     wait_units: MS
@@ -51,7 +46,6 @@ profile-0:
     run_time_s: 1.0
     group_duration: 16.0
   group-3:
-    group_id: 3
     frames: 1
     wait_time: 1000
     wait_units: MS
@@ -64,7 +58,6 @@ profile-0:
     run_time_s: 3.0
     group_duration: 4.0
   group-4:
-    group_id: 4
     frames: 1
     wait_time: 3000
     wait_units: MS
@@ -77,15 +70,12 @@ profile-0:
     run_time_s: 1.0
     group_duration: 4.0
 profile-1:
-  profile_id: 1
   cycles: 1
   seq_trigger: IMMEDIATE
   multiplier: [1, 2, 4, 8]
   total_frames: 1
   duration_per_cycle: 2
-  duration: 0
   group-0:
-    group_id: 0
     frames: 1
     wait_time: 1
     wait_units: S
@@ -98,36 +88,42 @@ profile-1:
     run_time_s: 1
     group_duration: 2
 profile-2:
-  profile_id: 2
   cycles: 1
   seq_trigger: IMMEDIATE
-  multiplier: [1, 1, 1, 1]
-  total_frames: 100
-  duration_per_cycle: 100
-  duration: 0
+  multiplier: [1, 2, 4, 8]
+  total_frames: 2
+  duration_per_cycle: 4
   group-0:
-    group_id: 0
-    frames: 100
-    wait_time: 0
+    frames: 1
+    wait_time: 1
     wait_units: S
     run_time: 1
     run_units: S
     pause_trigger: IMMEDIATE
     wait_pulses: [0, 0, 0, 0]
     run_pulses: [1, 1, 1, 1]
-    wait_time_s: 0
+    wait_time_s: 1
     run_time_s: 1
-    group_duration: 100
+    group_duration: 2
+  group-1:
+    frames: 1
+    wait_time: 1
+    wait_units: S
+    run_time: 1
+    run_units: S
+    pause_trigger: IMMEDIATE
+    wait_pulses: [0, 0, 0, 0]
+    run_pulses: [1, 1, 1, 1]
+    wait_time_s: 1
+    run_time_s: 1
+    group_duration: 2
 profile-3:
-  profile_id: 3
   cycles: 1
-  seq_trigger: TTL1IN
-  multiplier: [1, 2, 4, 8]
+  seq_trigger: IMMEDIATE
+  multiplier: [1, 1, 1, 1]
   total_frames: 100
   duration_per_cycle: 100
-  duration: 0
   group-0:
-    group_id: 0
     frames: 100
     wait_time: 0
     wait_units: S
@@ -140,15 +136,30 @@ profile-3:
     run_time_s: 1
     group_duration: 100
 profile-4:
-  profile_id: 4
+  cycles: 1
+  seq_trigger: TTL1IN
+  multiplier: [1, 2, 4, 8]
+  total_frames: 100
+  duration_per_cycle: 100
+  group-0:
+    frames: 100
+    wait_time: 0
+    wait_units: S
+    run_time: 1
+    run_units: S
+    pause_trigger: IMMEDIATE
+    wait_pulses: [0, 0, 0, 0]
+    run_pulses: [1, 1, 1, 1]
+    wait_time_s: 0
+    run_time_s: 1
+    group_duration: 100
+profile-5:
   cycles: 1
   seq_trigger: IMMEDIATE
   multiplier: [1, 2, 4, 8]
   total_frames: 1005
   duration_per_cycle: 5.005
-  duration: 0
   group-0:
-    group_id: 0
     frames: 5
     wait_time: 0
     wait_units: MS
@@ -161,7 +172,6 @@ profile-4:
     run_time_s: 0.001
     group_duration: 0.005
   group-1:
-    group_id: 1
     frames: 500
     wait_time: 0
     wait_units: MS
@@ -174,7 +184,6 @@ profile-4:
     run_time_s: 0.005
     group_duration: 2.5
   group-2:
-    group_id: 2
     frames: 500
     wait_time: 0
     wait_units: MS

@@ -23,7 +23,7 @@ from dodal.utils import get_beamline_name
 # from bluesky_stomp.messaging import StompClient, BasicAuthentication
 from blueapi.client.client import BlueapiClient #, BlueapiRestClient
 from blueapi.config import ConfigLoader, ApplicationConfig
-from ProfileGroups import ProfileLoader
+from ProfileGroups import ProfileLoader, DEFAULT_PROFILE
 from PandAGUIElements import ProfileTab
 from stubs.PandAStubs import return_connected_device
 
@@ -67,11 +67,7 @@ class PandaConfigBuilderGUI(tk.Tk):
 
             self.notebook.forget(self.add_frame)
 
-            default_configuration = ProfileLoader.read_from_yaml(self.default_config_path) #noqa
-            # default_configuration.profiles[0].group_id = len(self.configuration.profiles) #noqa
-            profile = default_configuration.profiles[0]
-
-            self.configuration.append_profile(profile)
+            self.configuration.append_profile(DEFAULT_PROFILE)
 
             new_profile_tab = ProfileTab(self,
                                          self.notebook,
@@ -79,7 +75,7 @@ class PandaConfigBuilderGUI(tk.Tk):
                                          len(self.configuration.profiles)-1)
 
             self.notebook.add(new_profile_tab,
-                              text="Profile " + str(len(self.configuration.profiles)-1))
+                              text=f"Profile {len(self.configuration.profiles)-1}")
 
             self.add_frame = tk.Frame()
             self.notebook.add(self.add_frame, text="+")
@@ -583,8 +579,6 @@ class PandaConfigBuilderGUI(tk.Tk):
         loaded_config = config_loader.load()
         self.client = BlueapiClient.from_config(loaded_config)
 
-
-
         self.window.mainloop()
 
 
@@ -593,9 +587,7 @@ class PandaConfigBuilderGUI(tk.Tk):
 if __name__ == '__main__':
 
     #https://github.com/DiamondLightSource/blueapi/blob/main/src/blueapi/client/client.py <- use this to do stuff #noqa
-
     # blueapi -c i22_blueapi_config.yaml controller run count '{"detectors":["saxs"]}'
-
 
     dir_path = os.path.dirname(os.path.realpath(__file__))
     print(dir_path)

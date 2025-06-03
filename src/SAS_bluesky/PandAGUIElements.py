@@ -20,7 +20,7 @@ from ophyd_async.fastcs.panda._block import PandaTimeUnits
 
 from dodal.utils import get_beamline_name
 
-from ProfileGroups import Profile, Group
+from ProfileGroups import DEFAULT_GROUP, Group, Profile
 from utils.ncdcore import ncdcore
 
 
@@ -387,14 +387,14 @@ class ProfileTab(ttk.Frame):
 
         row_str = "0X"+(row.replace("I",''))
         row_int = (int(row_str,16))-1
-        self.profile.insert_group(id=row_int, Group=self.default_group)
+        self.profile.insert_group(id=row_int, Group=DEFAULT_GROUP)
         self.build_profile_tree()
         self.generate_info_boxes()
 
 
     def append_group_button_action(self):
 
-        self.profile.append_group(Group=self.default_group)
+        self.profile.append_group(Group=DEFAULT_GROUP)
         self.build_profile_tree()
         self.generate_info_boxes()
 
@@ -509,18 +509,14 @@ class ProfileTab(ttk.Frame):
         cycles = self.get_n_cycles_value()
         profile_trigger = self.get_start_value()
         multiplier = [int(f.get()) for f in self.multiplier_var_options]
-        out_trigger = "Dunno"
 
-        new_profile = Profile(profile_id=self.profile.profile_id,
-                        cycles=cycles,
+        new_profile = Profile(cycles=cycles,
                         seq_trigger=profile_trigger,
-                        out_trigger=out_trigger,
                         groups=group_list,
                         multiplier=multiplier)
 
         self.profile = new_profile
-        self.configuration.profiles[self.profile.profile_id] = new_profile
-
+        self.configuration.profiles[self.n_profile] = new_profile
 
 
     def print_profile_button_action(self):
@@ -583,23 +579,21 @@ class ProfileTab(ttk.Frame):
         self.notebook = notebook
         self.parent = parent
 
-
         self.configuration = configuration
         self.n_profile = n_profile
         self.profile = self.configuration.profiles[self.n_profile]
 
         self.seq_table = self.profile.seq_table()
 
-
         super().__init__(self.notebook,borderwidth=5, relief='raised')
 
-        self.notebook.add(self, text ='Profile '+str(self.profile.profile_id))
+        self.notebook.add(self, text ='Profile '+str(n_profile))
 
         self.columnconfigure(tuple(range(60)), weight=1)
         self.rowconfigure(tuple(range(30)), weight=1)
 
         ttk.Label(self,
-                  text='Profile '+str(self.profile.profile_id)).grid(column=0,
+                  text='Profile '+str(n_profile)).grid(column=0,
                                                                      row=0,
                                                                      padx=5,
                                                                      pady=5,
@@ -609,16 +603,6 @@ class ProfileTab(ttk.Frame):
         self.inputs = self.profile.inputs()
 
         self.build_multiplier_choices()
-
-        self.default_group  = Group(frames=1,
-                wait_time=1,
-                wait_units="MS",
-                run_time=1,
-                run_units="MS",
-                pause_trigger="IMMEDIATE",
-                wait_pulses=[1,0,0,0],
-                run_pulses=[1,0,0,0])
-
         ### add tree view ############################################
 
         self.build_profile_tree()
