@@ -238,14 +238,6 @@ class Profile(BaseModel):
 			self.analyse_profile()
 			
 	
-	# def load_profile_to_panda(self, panda):
-		
-	# 	table = self.seq_table()
-			
-	# 	yield from bps.abs_set(panda.seq[1].table, table, group="panda-config")
-
-
-
 	def build_veto_signal(self):
 
 		trigger_time = [0]

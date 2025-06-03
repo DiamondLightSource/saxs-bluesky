@@ -174,17 +174,13 @@ class PandaConfigBuilderGUI(tk.Tk):
 		index = self.notebook.index("current")
 
 		profile_to_upload = self.configuration.profiles[index]
-		self.seq_table = profile_to_upload.seq_table()
+		json_schema_profile = profile_to_upload.model_dump_json()
 
 		try:
-			self.client.run_plan("setup_panda")
+			self.client.run_plan(f"setup_panda {json_schema_profile}")
 		except ConnectionError:
-			print("could not upload yaml to panda")
+			print("Could not upload profile to panda")
 
-		try:
-			self.client.run_plan("setup_panda")
-		except ConnectionError:
-			print("could not modify panda seq table")
 
 
 	def open_textedit(self):
