@@ -1,3 +1,20 @@
-from ._version import __version__
+import os
+import importlib
 
-__all__ = ["__version__"]
+# Dynamically import all modules in the current package
+__all__ = []
+
+package_dir = os.path.dirname(__file__)
+for module_name in os.listdir(package_dir):
+
+
+    if module_name.endswith(".py") and module_name != "__init__.py":
+        module = module_name[:-3]  # Strip the .py extension
+
+        print(module)
+
+        imported_module = importlib.import_module(f".{module}", package=__name__)
+        __all__.append(module)
+
+
+print(__all__)

@@ -2,12 +2,12 @@ import os
 from enum import Enum
 from datetime import datetime
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, List
 import numpy as np
 from importlib import import_module
 
 from pydantic_core import from_json
-from pydantic import NonNegativeFloat, validate_call
+from pydantic import validate_call #,NonNegativeFloat,
 
 
 from bluesky.run_engine import RunEngine
@@ -21,22 +21,22 @@ from dodal.common.visit import RemoteDirectoryServiceClient, StaticVisitPathProv
 
 from ophyd_async.core import (
     DetectorTrigger,
-    StandardDetector,
     StandardFlyer,
     TriggerInfo,
 	wait_for_value,
-	AsyncStatus)
+	AsyncStatus, 
+    StandardDetector)
 
 
 from ophyd_async.fastcs.panda import (
     HDFPanda,
-    SeqTable,
     SeqTableInfo,
-    SeqTrigger,
-    StaticSeqTableTriggerLogic,
-    PandaPcompDirection,
-    PcompInfo,
-)
+    StaticSeqTableTriggerLogic)
+#     PandaPcompDirection,
+#     PcompInfo,
+#     SeqTrigger,
+#     SeqTable,
+# )
 
 from ophyd_async.plan_stubs import (ensure_connected,
                                     get_current_settings)
@@ -50,18 +50,16 @@ from dodal.common.beamlines.beamline_utils import (
     get_path_provider,
     set_path_provider)
 
-from ProfileGroups import (Profile, 
-                           Group, 
-                           ProfileLoader)
+from ProfileGroups import (Profile,  
+                           ProfileLoader) # Group
 
 from stubs.PandAStubs import (return_connected_device,
-								  return_module_name,
 								  make_beamline_devices,
                                   fly_and_collect_with_wait,
                                   load_settings_from_yaml,
-                                  upload_yaml_to_panda,
-                                  save_device_to_yaml)
+                                  upload_yaml_to_panda)
 								  
+# from stubs.PandAStubs import save_device_to_yaml, return_module_name
 
 
 BL = get_beamline_name(os.environ['BEAMLINE'])
@@ -128,7 +126,7 @@ def modify_panda_seq_table(panda: HDFPanda, profile: Profile, n_seq=1):
 
     seq_table = profile.seq_table()
     n_cycles = profile.cycles
-    time_unit = profile.best_time_unit
+    # time_unit = profile.best_time_unit
     
     group = "modify-seq"
     # yield from bps.stage(panda, group=group) ###maybe need this
@@ -321,8 +319,7 @@ def prepare_pulses(panda: HDFPanda):
     for pulse in range(1, PULSEBLOCKS + 1):
         yield from bps.prepare(panda.pulse[pulse], group=group)
 
-    pulse_data = yield from bps.rd(panda.seq[DEFAULT_SEQ])
-
+    # pulse_data = yield from bps.rd(panda.seq[DEFAULT_SEQ])
     yield from bps.wait(group=group, timeout=GENERAL_TIMEOUT)
 
 
@@ -348,8 +345,8 @@ def check_and_apply_panda_settings(panda: HDFPanda, panda_name: str) -> MsgGener
     yaml_settings = yield from load_settings_from_yaml(yaml_directory, yaml_file_name)
 
     if current_panda_settings.__dict__ != yaml_settings.__dict__:
-        print(f"Current Panda settings do not match the yaml settings, loading yaml settings to panda")
-        LOGGER.info(f"Current Panda settings do not match the yaml settings, loading yaml settings to panda")
+        print("Current Panda settings do not match the yaml settings, loading yaml settings to panda")
+        LOGGER.info("Current Panda settings do not match the yaml settings, loading yaml settings to panda")
 
         print(f"{yaml_file_name}.yaml has been uploaded to PandA")
         LOGGER.info(f"{yaml_file_name}.yaml has been uploaded to PandA")
@@ -369,6 +366,18 @@ def check_tetramm():
     except Exception as e:
         LOGGER.error(f"Tetramm not connected: {e}")
         raise
+
+def inject_all(active_detector_names: List[StandardDetector]):
+
+    """
+    
+    Injects all of the devices into the dodal common beamline devices, so that they can be used in the plans
+    
+    """
+
+    active_detectors = tuple([inject(dev) for dev in active_detector_names])
+
+    return active_detectors
 
 def multiple_pulse_blocks():
     
@@ -442,7 +451,13 @@ def configure_panda_triggering(beamline: Annotated[str, "Name of the beamline to
 
     ####################
     # v CHECK TO SEE IF THIS CAN BE PERFORMED IN A SMARTER WAY v
-    active_detectors = tuple([beamline_devices[det_name] for det_name in active_detector_names]) ###must be a tuple to be hashable and therefore work with bps.stage_all or whatever
+
+
+    try:
+        active_detectors = inject_all(active_detector_names)
+    except Exception as e:
+        LOGGER.error(f"Failed to inject active detectors: {e}")
+        active_detectors = tuple([beamline_devices[det_name] for det_name in active_detector_names]) ###must be a tuple to be hashable and therefore work with bps.stage_all or whatever
     ######################
 
     print("\n",active_detectors,"\n")
@@ -461,7 +476,7 @@ def configure_panda_triggering(beamline: Annotated[str, "Name of the beamline to
     # show_deadtime(detector_deadtime, max_deadtime)
 
     #load Panda setting to panda
-    if force_load == True:
+    if force_load is True:
         yield from check_and_apply_panda_settings(panda, panda_name)
 
     active_pulses = profile.active_out+1 #because python counts from 0, but panda counts from 1
