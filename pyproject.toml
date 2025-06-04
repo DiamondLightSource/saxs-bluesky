@@ -17,6 +17,8 @@ dependencies = [
     "dls-dodal @ git+https://github.com/DiamondLightSource/dodal.git",
     "ophyd_async>=0.9.0",
     "numpy",
+    "blueapi",
+	"matplotlib",
     "pydantic",
 ]
 license.file = "LICENSE" #Apache 2.0
