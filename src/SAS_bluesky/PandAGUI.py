@@ -23,7 +23,7 @@ from dodal.utils import get_beamline_name
 # from bluesky_stomp.messaging import StompClient, BasicAuthentication
 from blueapi.client.client import BlueapiClient #, BlueapiRestClient
 from blueapi.config import ConfigLoader, ApplicationConfig
-from SAS_bluesky.ProfileGroups import ProfileLoader, DEFAULT_PROFILE
+from SAS_bluesky.ProfileGroups import ProfileLoader
 from SAS_bluesky.PandAGUIElements import ProfileTab
 from SAS_bluesky.stubs.PandAStubs import return_connected_device
 
@@ -47,6 +47,8 @@ LVDSOUT = BL_config.LVDSOUT
 
 PULSE_CONNECTIONS = BL_config.PULSE_CONNECTIONS
 USE_MULTIPLIERS = BL_config.USE_MULTIPLIERS
+
+DEFAULT_PROFILE = BL_config.DEFAULT_PROFILE
 
 ############################################################################################
 

@@ -21,7 +21,7 @@ from ophyd_async.fastcs.panda._block import PandaTimeUnits
 
 from dodal.utils import get_beamline_name
 
-from SAS_bluesky.ProfileGroups import DEFAULT_GROUP, Group, Profile
+from SAS_bluesky.ProfileGroups import Group, Profile
 from SAS_bluesky.utils.ncdcore import ncdcore
 
 
@@ -40,6 +40,7 @@ PULSE_BLOCK_NAMES = BL_config.PULSE_BLOCK_NAMES
 
 TTLIN = BL_config.TTLIN
 TTLOUT = BL_config.TTLOUT
+DEFAULT_GROUP = BL_config.DEFAULT_GROUP
 
 
 class EditableTableview(ttk.Treeview):
