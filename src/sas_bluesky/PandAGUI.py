@@ -23,9 +23,9 @@ from dodal.utils import get_beamline_name
 # from bluesky_stomp.messaging import StompClient, BasicAuthentication
 from blueapi.client.client import BlueapiClient #, BlueapiRestClient
 from blueapi.config import ConfigLoader, ApplicationConfig
-from SAS_bluesky.ProfileGroups import ProfileLoader
-from SAS_bluesky.PandAGUIElements import ProfileTab
-from SAS_bluesky.stubs.PandAStubs import return_connected_device
+from sas_bluesky.ProfileGroups import ProfileLoader
+from sas_bluesky.PandAGUIElements import ProfileTab
+from sas_bluesky.stubs.PandAStubs import return_connected_device
 
 
 __version__ = '0.2'

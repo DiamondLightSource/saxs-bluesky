@@ -4,7 +4,7 @@ Configuration for b21 PandA beamline
 
 """
 
-from SAS_bluesky.ProfileGroups import Group, Profile #noqa
+from sas_bluesky.ProfileGroups import Group, Profile #noqa
 
 BL = "b21"
 

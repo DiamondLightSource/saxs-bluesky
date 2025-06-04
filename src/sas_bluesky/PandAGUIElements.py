@@ -21,8 +21,8 @@ from ophyd_async.fastcs.panda._block import PandaTimeUnits
 
 from dodal.utils import get_beamline_name
 
-from SAS_bluesky.ProfileGroups import Group, Profile
-from SAS_bluesky.utils.ncdcore import ncdcore
+from sas_bluesky.ProfileGroups import Group, Profile
+from sas_bluesky.utils.ncdcore import ncdcore
 
 
 SAS_bluesky_ROOT = Path(__file__).parent.parent.parent

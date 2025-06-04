@@ -50,10 +50,10 @@ from dodal.common.beamlines.beamline_utils import (
     get_path_provider,
     set_path_provider)
 
-from SAS_bluesky.ProfileGroups import (Profile,
+from sas_bluesky.ProfileGroups import (Profile,
                            ProfileLoader) # Group
 
-from SAS_bluesky.stubs.PandAStubs import (return_connected_device,
+from sas_bluesky.stubs.PandAStubs import (return_connected_device,
                                   make_beamline_devices,
                                   fly_and_collect_with_wait,
                                   load_settings_from_yaml,

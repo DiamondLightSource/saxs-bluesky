@@ -3,7 +3,7 @@
 Configuration for i22 PandA beamline
 
 """
-from SAS_bluesky.ProfileGroups import Group, Profile #nows
+from sas_bluesky.ProfileGroups import Group, Profile #nows
 
 
 BL = "i22"
