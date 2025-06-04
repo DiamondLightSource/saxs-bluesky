@@ -23,6 +23,7 @@ from dodal.utils import get_beamline_name
 
 from sas_bluesky.ProfileGroups import Group, Profile
 from sas_bluesky.utils.ncdcore import ncdcore
+from sas_bluesky.beamline_configs import b21_config, i22_config
 
 
 SAS_bluesky_ROOT = Path(__file__).parent.parent.parent
@@ -30,7 +31,8 @@ SAS_bluesky_ROOT = Path(__file__).parent.parent.parent
 print(SAS_bluesky_ROOT)
 
 BL = get_beamline_name(os.environ['BEAMLINE'])
-BL_config = import_module(f"SAS_bluesky.beamline_configs.{BL}_config")
+BL = get_beamline_name(os.environ['BEAMLINE'])
+BL_config = b21_config if "b21" == BL.lower() else i22_config
 
 PULSEBLOCKS = BL_config.PULSEBLOCKS
 USE_MULTIPLIERS = BL_config.USE_MULTIPLIERS

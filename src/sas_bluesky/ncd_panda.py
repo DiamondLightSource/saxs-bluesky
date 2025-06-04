@@ -58,12 +58,13 @@ from sas_bluesky.stubs.PandAStubs import (return_connected_device,
                                   fly_and_collect_with_wait,
                                   load_settings_from_yaml,
                                   upload_yaml_to_panda)
+from sas_bluesky.beamline_configs import b21_config, i22_config
 
 # from stubs.PandAStubs import save_device_to_yaml, return_module_name
 
 
 BL = get_beamline_name(os.environ['BEAMLINE'])
-BL_config = import_module(f"SAS_bluesky.beamline_configs.{BL}_config")
+BL_config = b21_config if "b21" == BL.lower() else i22_config
 
 DEADTIME_BUFFER = BL_config.DEADTIME_BUFFER
 DEFAULT_SEQ = BL_config.DEFAULT_SEQ
