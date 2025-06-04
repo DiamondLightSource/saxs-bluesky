@@ -7,27 +7,26 @@ Python dataclasses and GUI as a replacement for NCDDetectors
 
 """
 
-import os  # noqa
+import os
+import tkinter as tk
 from importlib import import_module
 from pathlib import Path
-import tkinter as tk
-from tkinter import ttk
 from tkinter import filedialog as fd
+from tkinter import ttk
 
 import matplotlib.pyplot as plt
-
-from dodal.utils import get_beamline_name
 
 # uncomment if needed in future
 # from stomp import Connection
 # from blueapi.client.event_bus import EventBusClient
 # from bluesky_stomp.messaging import StompClient, BasicAuthentication
 from blueapi.client.client import BlueapiClient  # , BlueapiRestClient
-from blueapi.config import ConfigLoader, ApplicationConfig
-from sas_bluesky.ProfileGroups import ProfileLoader
-from sas_bluesky.PandAGUIElements import ProfileTab
-from sas_bluesky.stubs.PandAStubs import return_connected_device
+from blueapi.config import ApplicationConfig, ConfigLoader
+from dodal.utils import get_beamline_name
 
+from sas_bluesky.PandAGUIElements import ProfileTab
+from sas_bluesky.ProfileGroups import ProfileLoader
+from sas_bluesky.stubs.PandAStubs import return_connected_device
 
 __version__ = "0.2"
 __author__ = "Richard Dixey"
@@ -83,7 +82,7 @@ class PandAGUI(tk.Tk):
             self.notebook.add(self.add_frame, text="+")
             self.window.bind("<<NotebookTabChanged>>", self.add_profile_tab)
 
-            for n, tab in enumerate(self.notebook.tabs()[0:-1]):  # noqa
+            for n, tab in enumerate(self.notebook.tabs()[0:-1]):
                 self.notebook.tab(n, text="Profile " + str(n))
 
             self.delete_profile_button = ttk.Button(
@@ -116,7 +115,7 @@ class PandAGUI(tk.Tk):
 
         tab_names = self.notebook.tabs()
 
-        for n, tab in enumerate(self.notebook.tabs()[0:-1]):  # noqa
+        for n, tab in enumerate(self.notebook.tabs()[0:-1]):
             self.notebook.tab(n, text="Profile " + str(n))
             proftab_object = self.notebook.nametowidget(tab_names[n])
             ttk.Label(proftab_object, text="Profile " + str(n)).grid(
@@ -139,7 +138,7 @@ class PandAGUI(tk.Tk):
 
         answer = tk.messagebox.askyesno(
             "Close/Open New", "Finished editing this profile? Continue?"
-        )  # noqa
+        )
 
         if answer:
             self.window.destroy()
@@ -248,7 +247,7 @@ class PandAGUI(tk.Tk):
 
         experiment = "cm40643-3"
 
-        command = f"run_panda_triggering(experiment={experiment},profile={json_schema_profile}))"  # noqa
+        command = f"run_panda_triggering(experiment={experiment},profile={json_schema_profile}))"
 
         print(self.client.run_task(command))
 
@@ -275,7 +274,7 @@ class PandAGUI(tk.Tk):
         self.resume_plans_button = ttk.Button(
             self.run_frame, text="Resume Plan", command=self.resume_plans
         ).grid(
-            column=2,  # noqa
+            column=2,
             row=9,
             padx=5,
             pady=5,
@@ -407,7 +406,7 @@ class PandAGUI(tk.Tk):
                 answer = tk.messagebox.askyesno(
                     "PandA not Connected",
                     "PandA is not connected, if you continue things will not work. Continue?",
-                )  # noqa
+                )
                 if answer:
                     pass
                 else:
@@ -418,7 +417,7 @@ class PandAGUI(tk.Tk):
             os.path.dirname(os.path.realpath(__file__)),
             "profile_yamls",
             "default_panda_config.yaml",
-        )  # noqa
+        )
 
         if self.panda_config_yaml is None:
             self.configuration = ProfileLoader.read_from_yaml(self.default_config_path)
@@ -486,18 +485,18 @@ class PandAGUI(tk.Tk):
 
         # option 1 - but doesn't work
 
-        # self.config = RestConfig(host=f"{BL}-blueapi.diamond.ac.uk", port=443, protocol="https") #noqa
+        # self.config = RestConfig(host=f"{BL}-blueapi.diamond.ac.uk", port=443, protocol="https")
         # self.rest_client = BlueapiRestClient(self.config)
 
         # self.stomp_connection = Connection([(f"{BL}-rabbitmq-daq.diamond.ac.uk",443)])
         # self.stomp_connection.connect(BL, BL[::-1], wait=True)
         # self.authentication = BasicAuthentication(username=BL, password=BL[::-1])
-        # self.event_bus = EventBusClient(StompClient(conn=self.stomp_connection, authentication=self.authentication)) #noqa
+        # self.event_bus = EventBusClient(StompClient(conn=self.stomp_connection, authentication=self.authentication))
         # self.client = BlueapiClient(rest=self.rest_client, events=self.events_bus)
 
         # option 2 - but doesn't work with tasks creation/running plans etc
 
-        # self.config = RestConfig(host=f"{BL}-blueapi.diamond.ac.uk", port=443, protocol="https") #noqa
+        # self.config = RestConfig(host=f"{BL}-blueapi.diamond.ac.uk", port=443, protocol="https")
         # self.rest_client = BlueapiRestClient(self.config)
         # self.client = BlueapiClient(rest=self.rest_client, events=self.events_bus)
 
@@ -509,7 +508,7 @@ class PandAGUI(tk.Tk):
                 "blueapi_configs",
                 f"{BL}_blueapi_config.yaml",
             )
-        )  # noqa
+        )
         config_loader = ConfigLoader(ApplicationConfig)
         config_loader.use_values_from_yaml(blueapi_config_path)
         loaded_config = config_loader.load()
@@ -519,7 +518,7 @@ class PandAGUI(tk.Tk):
 
 
 if __name__ == "__main__":
-    # https://github.com/DiamondLightSource/blueapi/blob/main/src/blueapi/client/client.py <- use this to do stuff #noqa
+    # https://github.com/DiamondLightSource/blueapi/blob/main/src/blueapi/client/client.py <- use this to do stuff
     # blueapi -c i22_blueapi_config.yaml controller run count '{"detectors":["saxs"]}'
 
     dir_path = os.path.dirname(os.path.realpath(__file__))

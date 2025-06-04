@@ -1,27 +1,24 @@
-import os  # noqa
-
-# import copy
-import yaml
+import os
 from datetime import datetime
-import numpy as np
-import matplotlib.pyplot as plt
 
-from ophyd_async.fastcs.panda import SeqTable, SeqTrigger
-
-from ophyd_async.core import in_micros  # DetectorTrigger, TriggerInfo, wait_for_value,
 # from ophyd_async.plan_stubs import store_settings
-
 # import bluesky.plan_stubs as bps
 # from bluesky import RunEngine
 # from dodal.beamlines.i22 import panda1
-
 from typing import Any
 
-from pydantic import BaseModel
-from pydantic_core import from_json
-from pydantic.dataclasses import dataclass
-from sas_bluesky.utils.ncdcore import ncdcore
+import matplotlib.pyplot as plt
+import numpy as np
 
+# import copy
+import yaml
+from ophyd_async.core import in_micros  # DetectorTrigger, TriggerInfo, wait_for_value,
+from ophyd_async.fastcs.panda import SeqTable, SeqTrigger
+from pydantic import BaseModel
+from pydantic.dataclasses import dataclass
+from pydantic_core import from_json
+
+from sas_bluesky.utils.ncdcore import ncdcore
 
 """
 
@@ -199,7 +196,7 @@ class Profile(BaseModel):
         self.n_groups = len(self.groups)
         self.veto_trigger_time, self.veto_signal, self.active_out = (
             self.build_veto_signal()
-        )  # noqa
+        )
 
         close_list = [
             np.abs(
@@ -212,7 +209,7 @@ class Profile(BaseModel):
                 )
             )
             for i in time_units.keys()
-        ]  # noqa
+        ]
         self.best_time_unit = list(time_units)[np.argmin(close_list)]
 
     def append_group(self, Group, analyse_profile=True):
@@ -253,7 +250,7 @@ class Profile(BaseModel):
             group = self.groups[g]
             veto_active = np.sum(profile_run_matrix[g, :])
 
-            for f in range(group.frames):  # noqa
+            for f in range(group.frames):
                 ###wait phase
 
                 current_time += group.wait_time * ncdcore.to_seconds(group.wait_units)
@@ -294,7 +291,7 @@ class Profile(BaseModel):
             usr_wait_active = group.wait_pulses[usr]
             usr_active = usr_run_active + usr_wait_active
 
-            for f in range(group.frames):  # noqa
+            for f in range(group.frames):
                 ###wait phase
 
                 current_time += group.wait_time * ncdcore.to_seconds(group.wait_units)
@@ -326,7 +323,7 @@ class Profile(BaseModel):
     def plot_triggering(self, blocking=True):
         self.veto_trigger_time, self.veto_signal, self.active_out = (
             self.build_veto_signal()
-        )  # noqa
+        )
 
         print("plotting in:", self.best_time_unit)
 
@@ -335,7 +332,7 @@ class Profile(BaseModel):
             1,
             sharex=True,
             figsize=(10, len(self.active_out) * 4),
-        )  # noqa
+        )
 
         if len(self.active_out) > 0:
             axes[0].step(
@@ -427,7 +424,7 @@ class ProfileLoader:
                     key: config[profile_name][key]
                     for key in config[profile_name].keys()
                     if key.startswith("group")
-                }  # noqa
+                }
                 group_list = []
 
                 for group_name in groups.keys():

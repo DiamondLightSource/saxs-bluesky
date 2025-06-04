@@ -4,7 +4,7 @@ Configuration for b21 PandA beamline
 
 """
 
-from sas_bluesky.ProfileGroups import Group, Profile  # noqa
+from sas_bluesky.ProfileGroups import Group, Profile
 
 BL = "b21"
 
@@ -53,9 +53,9 @@ PULSE_CONNECTIONS = {
 
 ### ncd plan parameters
 
-DEADTIME_BUFFER = 20e-6  # Buffer added to deadtime to handle minor discrepencies between detector and panda clocks #noqa
+DEADTIME_BUFFER = 20e-6  # Buffer added to deadtime to handle minor discrepencies between detector and panda clocks
 DEFAULT_SEQ = (
-    2  # default sequencer is this one, b21 currently uses seq 1 for somthing else #noqa
+    2  # default sequencer is this one, b21 currently uses seq 1 for somthing else
 )
 GENERAL_TIMEOUT = 30  # seconds before each wait times out
 

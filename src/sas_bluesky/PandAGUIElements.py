@@ -7,23 +7,20 @@ Python Elements for NCD PandA config GUI
 
 """
 
-import os  # noqa
-from pathlib import Path
-
+import os
 import tkinter as tk
+from pathlib import Path
 from tkinter import ttk
 
+from dodal.utils import get_beamline_name
 from ophyd_async.fastcs.panda import (
     SeqTrigger,
 )
 from ophyd_async.fastcs.panda._block import PandaTimeUnits
 
-from dodal.utils import get_beamline_name
-
+from sas_bluesky.beamline_configs import b21_config, i22_config
 from sas_bluesky.ProfileGroups import Group, Profile
 from sas_bluesky.utils.ncdcore import ncdcore
-from sas_bluesky.beamline_configs import b21_config, i22_config
-
 
 SAS_bluesky_ROOT = Path(__file__).parent.parent.parent
 
@@ -77,7 +74,7 @@ class EditableTableview(ttk.Treeview):
         # handle exception when header is double click
         if not rowid:
             return
-        # row 1 is the group name and should just be group-n and increments for each new one #noqa
+        # row 1 is the group name and should just be group-n and increments for each new one
         elif column == "#1":
             return
 
@@ -186,7 +183,7 @@ class CheckButtonPopup(ttk.Checkbutton):
         # THIS WAS TK.TK AND IT WAS CAUSING SO MANY ISSUES,
         # USE TOPLEVEL WHEN OPENING NEW TEMP WINDOW.
         # IT WAS CUASING THE CHECKBUTTON TO ASSIGN TO SOMETHING ELSE.
-        # SEE https://stackoverflow.com/questions/55208876/tkinter-set-and-get-not-working-in-a-window-inside-a-window #noqa
+        # SEE https://stackoverflow.com/questions/55208876/tkinter-set-and-get-not-working-in-a-window-inside-a-window
 
         self.root.minsize(w, h)
         self.root.title(f"{columns[column]} - Group: {self.row_num}")
@@ -210,7 +207,7 @@ class CheckButtonPopup(ttk.Checkbutton):
 
         # set the dimensions of the screen
         # and where it is placed
-        self.root.geometry("%dx%d+%d+%d" % (w, h, x - 60, y))  # noqa
+        self.root.geometry("%dx%d+%d+%d" % (w, h, x - 60, y))
         self.save_pulse_button = ttk.Button(
             self.root, text="Ok", command=self.on_return
         ).grid(column=PULSEBLOCKS, row=0, padx=5, pady=5, columnspan=1, sticky="e")
@@ -438,38 +435,38 @@ class ProfileTab(ttk.Frame):
         try:
             self.total_frames_label.config(
                 text=f"Total Frames: {self.profile.total_frames}"
-            )  # noqa
+            )
             self.total_time_per_cycle.config(
                 text=f"Time/cycle: {self.profile.duration_per_cycle:.3f} s"
-            )  # noqa
+            )
             self.total_time_label.config(
                 text=f"Total time: {self.profile.duration_per_cycle * self.profile.cycles:.3f} s"
-            )  # noqa
+            )
 
         except Exception:
             #### total frames
             self.total_frames_label = ttk.Label(
                 self, text=f"Total Frames: {self.profile.total_frames}"
-            )  # noqa
-            self.total_frames_label.grid(column=8, row=1, padx=5, pady=5, sticky="e")  # noqa
+            )
+            self.total_frames_label.grid(column=8, row=1, padx=5, pady=5, sticky="e")
 
             self.total_time_per_cycle = ttk.Label(
                 self, text=f"Time/cycle: {self.profile.duration_per_cycle:.3f} s"
-            )  # noqa
-            self.total_time_per_cycle.grid(column=8, row=2, padx=5, pady=5, sticky="e")  # noqa
+            )
+            self.total_time_per_cycle.grid(column=8, row=2, padx=5, pady=5, sticky="e")
 
             ### total time
 
             self.total_time_label = ttk.Label(
                 self,
                 text=f"Total time: {self.profile.duration_per_cycle * self.profile.cycles:.3f} s",
-            )  # noqa
-            self.total_time_label.grid(column=8, row=3, padx=5, pady=5, sticky="e")  # noqa
+            )
+            self.total_time_label.grid(column=8, row=3, padx=5, pady=5, sticky="e")
 
     def edit_config_for_profile(self):
         group_list = []
 
-        for group_id, group_rowid in enumerate(self.profile_config_tree.get_children()):  # noqa
+        for group_id, group_rowid in enumerate(self.profile_config_tree.get_children()):
             group = self.profile_config_tree.item(group_rowid)["values"]
 
             wait_pulses = [int(f) for f in list(group[7].replace(" ", ""))]
