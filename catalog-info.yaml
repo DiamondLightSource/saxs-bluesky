@@ -1,0 +1,10 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: sas-bluesky
+  title: sas-bluesky
+  description: Bluesky plans, plan stubs and utilities for Small Angle Scattering beamline at DLS
+spec:
+  type: library
+  lifecycle: experimental
+  owner: 
