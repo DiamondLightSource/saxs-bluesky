@@ -1,22 +1,25 @@
 import os
 from pathlib import Path
-from sas_bluesky.ProfileGroups import Profile, Group, ProfileLoader
+
+from sas_bluesky.ProfileGroups import Profile, ProfileLoader
 
 SAS_bluesky_ROOT = Path(__file__)
 
-yaml_dir = os.path.join(SAS_bluesky_ROOT.parent.parent,"src","SAS_bluesky","profile_yamls")
+yaml_dir = os.path.join(
+    SAS_bluesky_ROOT.parent.parent, "src", "SAS_bluesky", "profile_yamls"
+)
 
 print(yaml_dir)
 
 
 def test_profile_loader():
-
-    config_filepath = os.path.join(yaml_dir,"panda_config.yaml")
+    config_filepath = os.path.join(yaml_dir, "panda_config.yaml")
     config = ProfileLoader.read_from_yaml(config_filepath)
 
     print(config)
 
     assert isinstance(config.profiles[0], Profile)
+
 
 # def profile_loader_save():
 
@@ -45,6 +48,5 @@ def test_profile_loader():
 
 
 if __name__ == "__main__":
-
     # Run the test function
     test_profile_loader()
