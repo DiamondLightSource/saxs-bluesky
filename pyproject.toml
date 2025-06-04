@@ -12,7 +12,14 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
 ]
 description = "Bluesky plans, plan stubs and utilities for Small Angle Scattering beamline at DLS"
-dependencies = [] # Add project dependencies here, e.g. ["click", "numpy"]
+dependencies = [
+    "dls-dodal",
+    "ophyd_async>=0.9.0",
+    "numpy",
+    "blueapi",
+	"matplotlib",
+    "pydantic",
+] # Add project dependencies here, e.g. ["click", "numpy"]
 dynamic = ["version"]
 license.file = "LICENSE"
 readme = "README.md"
