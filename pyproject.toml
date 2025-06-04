@@ -14,7 +14,7 @@ classifiers = [
 ]
 description = "Plans and behaviours specific to the Small Angle Scattering beamlines (i22/b21/p38) at DiamondLightSource."
 dependencies = [
-    "dls-dodal @ git+https://github.com/DiamondLightSource/dodal.git>=1.47",
+    "dls-dodal @ git+https://github.com/DiamondLightSource/dodal.git",
     "ophyd_async>=0.9.0",
     "numpy",
     "pydantic",
