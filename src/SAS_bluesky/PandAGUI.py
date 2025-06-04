@@ -34,7 +34,7 @@ __author__ = 'Richard Dixey'
 ############################################################################################
 
 BL = get_beamline_name(os.environ['BEAMLINE'])
-BL_config = import_module(f"beamline_configs.{BL}_config")
+BL_config = import_module(f"SAS_bluesky.beamline_configs.{BL}_config")
 
 THEME_NAME = BL_config.THEME_NAME
 PULSEBLOCKS = BL_config.PULSEBLOCKS
@@ -153,7 +153,7 @@ class PandAGUI(tk.Tk):
 
         if answer:
             self.window.destroy()
-            PandaConfigBuilderGUI(panda_config_yaml)
+            PandAGUI(panda_config_yaml)
         else:
             return
 
@@ -591,7 +591,6 @@ if __name__ == '__main__':
     # blueapi -c i22_blueapi_config.yaml controller run count '{"detectors":["saxs"]}'
 
     dir_path = os.path.dirname(os.path.realpath(__file__))
-    print(dir_path)
     config_filepath = os.path.join(dir_path,"profile_yamls","panda_config.yaml")
     PandAGUI(config_filepath)
 

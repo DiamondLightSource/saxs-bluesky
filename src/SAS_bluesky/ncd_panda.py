@@ -50,10 +50,10 @@ from dodal.common.beamlines.beamline_utils import (
     get_path_provider,
     set_path_provider)
 
-from ProfileGroups import (Profile,
+from SAS_bluesky.ProfileGroups import (Profile,
                            ProfileLoader) # Group
 
-from stubs.PandAStubs import (return_connected_device,
+from SAS_bluesky.stubs.PandAStubs import (return_connected_device,
                                   make_beamline_devices,
                                   fly_and_collect_with_wait,
                                   load_settings_from_yaml,
@@ -63,7 +63,7 @@ from stubs.PandAStubs import (return_connected_device,
 
 
 BL = get_beamline_name(os.environ['BEAMLINE'])
-BL_config = import_module(f"beamline_configs.{BL}_config")
+BL_config = import_module(f"SAS_bluesky.beamline_configs.{BL}_config")
 
 DEADTIME_BUFFER = BL_config.DEADTIME_BUFFER
 DEFAULT_SEQ = BL_config.DEFAULT_SEQ
