@@ -8,11 +8,10 @@ Python dataclasses and GUI as a replacement for NCDDetectors
 """
 
 import os
-import tkinter as tk
+import tkinter
 from importlib import import_module
 from pathlib import Path
-from tkinter import filedialog as fd
-from tkinter import ttk
+from tkinter import filedialog, messagebox, simpledialog, ttk
 
 import matplotlib.pyplot as plt
 
@@ -53,7 +52,7 @@ DEFAULT_PROFILE = BL_config.DEFAULT_PROFILE
 ############################################################################################
 
 
-class PandAGUI(tk.Tk):
+class PandAGUI(tkinter.Tk):
     def theme(self, theme_name):
         style = ttk.Style(self.window)
         print("All themes:", style.theme_names())
@@ -78,7 +77,7 @@ class PandAGUI(tk.Tk):
                 new_profile_tab, text=f"Profile {len(self.configuration.profiles) - 1}"
             )
 
-            self.add_frame = tk.Frame()
+            self.add_frame = tkinter.Frame()
             self.notebook.add(self.add_frame, text="+")
             self.window.bind("<<NotebookTabChanged>>", self.add_profile_tab)
 
@@ -95,7 +94,7 @@ class PandAGUI(tk.Tk):
             self.notebook.select(self.notebook.tabs()[-2])
 
     def delete_profile_tab(self):
-        answer = tk.messagebox.askyesno(
+        answer = messagebox.askyesno(
             "Close Profile", "Delete this profile? Are you sure?"
         )
 
@@ -111,7 +110,7 @@ class PandAGUI(tk.Tk):
             self.configuration.delete_profile(index_to_del)
             self.notebook.forget(self.notebook.tabs()[index_to_del])
         elif answer and (self.configuration.n_profiles == 1):
-            tk.messagebox.showinfo("Info", "Must have atleast one profile")
+            messagebox.showinfo("Info", "Must have atleast one profile")
 
         tab_names = self.notebook.tabs()
 
@@ -134,9 +133,9 @@ class PandAGUI(tk.Tk):
         self.configuration.experiment = self.experiment_var.get()
 
     def load_config(self):
-        panda_config_yaml = fd.askopenfilename()
+        panda_config_yaml = filedialog.askopenfilename()
 
-        answer = tk.messagebox.askyesno(
+        answer = messagebox.askyesno(
             "Close/Open New", "Finished editing this profile? Continue?"
         )
 
@@ -147,7 +146,7 @@ class PandAGUI(tk.Tk):
             return
 
     def save_config(self):
-        panda_config_yaml = fd.asksaveasfile(
+        panda_config_yaml = filedialog.asksaveasfile(
             mode="w", defaultextension=".yaml", filetypes=[("yaml", ".yaml")]
         )
 
@@ -330,7 +329,7 @@ class PandAGUI(tk.Tk):
         self.Opentextbutton.pack(fill="both", expand=True, side="left")
 
     def build_add_frame(self):
-        self.add_frame = tk.Frame()
+        self.add_frame = tkinter.Frame()
         self.notebook.add(self.add_frame, text="+")
         self.window.bind("<<NotebookTabChanged>>", self.add_profile_tab)
 
@@ -343,7 +342,7 @@ class PandAGUI(tk.Tk):
             fill="both", expand=True, side="bottom", anchor="w"
         )
 
-        self.experiment_var = tk.StringVar(value=self.configuration.experiment)
+        self.experiment_var = tkinter.StringVar(value=self.configuration.experiment)
 
         ttk.Label(
             self.experiment_settings_frame,
@@ -354,7 +353,7 @@ class PandAGUI(tk.Tk):
             column=0, row=1, padx=5, pady=5, sticky="w"
         )
 
-        tk.Entry(
+        tkinter.Entry(
             self.experiment_settings_frame, bd=1, textvariable=self.experiment_var
         ).grid(column=1, row=1, padx=5, pady=5, sticky="w")
 
@@ -381,15 +380,17 @@ class PandAGUI(tk.Tk):
             TTLLabel.grid(column=0, row=1, padx=5, pady=5, sticky="w")
 
             for n, det in enumerate(PULSE_CONNECTIONS[pulse + 1]):
-                # experiment_var = tk.StringVar(value=self.configuration.experiment)
+                # experiment_var=tkinter.StringVar(value=self.configuration.experiment)
 
                 if (det.lower() == "fs") or ("shutter" in det.lower()):
-                    ad_entry = tk.Checkbutton(
+                    ad_entry = tkinter.Checkbutton(
                         active_detectors_frame_n, bd=1, text=det, state="disabled"
                     )
                     ad_entry.select()
                 else:
-                    ad_entry = tk.Checkbutton(active_detectors_frame_n, bd=1, text=det)
+                    ad_entry = tkinter.Checkbutton(
+                        active_detectors_frame_n, bd=1, text=det
+                    )
 
                 ad_entry.grid(column=n + 1, row=1, padx=5, pady=5, sticky="w")
 
@@ -406,10 +407,10 @@ class PandAGUI(tk.Tk):
             try:
                 self.panda = return_connected_device(BL, "panda1")
             except Exception:
-                answer = tk.messagebox.askyesno(
-                    "PandA not Connected",
-                    (
-                        "PandA is not connected, if you continue things will not work.",
+                answer = (
+                    messagebox.askyesno(
+                        "PandA not Connected",
+                        "PandA is not connected, if you continue things will not work."
                         " Continue?",
                     ),
                 )
@@ -431,7 +432,7 @@ class PandAGUI(tk.Tk):
             self.configuration = ProfileLoader.read_from_yaml(self.panda_config_yaml)
 
         if self.configuration.experiment is None:
-            user_input = tk.simpledialog.askstring(
+            user_input = simpledialog.askstring(
                 title="Experiment", prompt="Enter an experiment code:"
             )
 
@@ -439,13 +440,13 @@ class PandAGUI(tk.Tk):
 
         self.profiles = self.configuration.profiles
 
-        self.window = tk.Tk()
+        self.window = tkinter.Tk()
         self.window.resizable(1, 1)
         self.window.minsize(600, 200)
         self.theme("alt")
 
-        menubar = tk.Menu(self.window)
-        filemenu = tk.Menu(menubar, tearoff=0)
+        menubar = tkinter.Menu(self.window)
+        filemenu = tkinter.Menu(menubar, tearoff=0)
         filemenu.add_command(label="New", command=self.window.quit)
         filemenu.add_command(label="Open", command=self.window.quit)
         filemenu.add_command(label="Save", command=self.window.quit)
@@ -453,7 +454,7 @@ class PandAGUI(tk.Tk):
         filemenu.add_command(label="Exit", command=self.window.quit)
         menubar.add_cascade(label="File", menu=filemenu)
 
-        helpmenu = tk.Menu(menubar, tearoff=0)
+        helpmenu = tkinter.Menu(menubar, tearoff=0)
         helpmenu.add_command(label="Help Index", command=self.window.quit)
         helpmenu.add_command(label="About...", command=self.window.quit)
         menubar.add_cascade(label="Help", menu=helpmenu)
