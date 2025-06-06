@@ -441,7 +441,7 @@ class PandAGUI(tkinter.Tk):
         self.profiles = self.configuration.profiles
 
         self.window = tkinter.Tk()
-        self.window.resizable(1, 1)
+        self.window.wm_resizable(True, True)
         self.window.minsize(600, 200)
         self.theme("alt")
 
