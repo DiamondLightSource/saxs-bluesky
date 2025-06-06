@@ -1,6 +1,7 @@
 import bluesky.plan_stubs as bps
 import matplotlib.pyplot as plt
 import numpy as np
+from bluesky import RunEngine
 from bluesky.protocols import Movable
 from dodal.common.beamlines.beamline_utils import set_beamline as set_utils_beamline
 from dodal.log import set_beamline as set_log_beamline
@@ -102,7 +103,7 @@ def center_sample(
         plt.plot(peak_indices, step_array[peak_indices], "x")
         plt.vlines(
             x=peak_indices,
-            ymin=x[peak_indices] - properties["prominences"],
+            ymin=x[peak_indices] - properties["prominences"],  # noqa: F821
             ymax=step_array[peak_indices],
             color="C1",
         )
