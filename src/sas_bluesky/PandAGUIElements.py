@@ -466,7 +466,7 @@ class ProfileTab(ttk.Frame):
     def edit_config_for_profile(self):
         group_list = []
 
-        for group_id, group_rowid in enumerate(self.profile_config_tree.get_children()):
+        for _group_id, group_rowid in enumerate(self.profile_config_tree.get_children()):
             group = self.profile_config_tree.item(group_rowid)["values"]
 
             wait_pulses = [int(f) for f in list(group[7].replace(" ", ""))]

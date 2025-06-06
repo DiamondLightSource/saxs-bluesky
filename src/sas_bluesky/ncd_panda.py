@@ -458,7 +458,7 @@ def configure_panda_triggering(
     ],
     active_detector_names: Annotated[
         list, "List of str of the detector names, eg. saxs, waxs, i0, it"
-    ] = ["saxs", "waxs"],
+    ] = None,
     run_immediately: bool = True,
     panda_name="panda1",
     force_load=True,
@@ -473,6 +473,8 @@ def configure_panda_triggering(
 
     """
 
+    if active_detector_names is None:
+        active_detector_names = ["saxs", "waxs"]
     if isinstance(profile, str):
         # convert from json to Profile object
         profile = Profile.model_validate(from_json(profile, allow_partial=True))

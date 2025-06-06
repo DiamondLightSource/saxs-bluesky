@@ -82,7 +82,7 @@ class PandAGUI(tk.Tk):
             self.notebook.add(self.add_frame, text="+")
             self.window.bind("<<NotebookTabChanged>>", self.add_profile_tab)
 
-            for n, tab in enumerate(self.notebook.tabs()[0:-1]):
+            for n, _tab in enumerate(self.notebook.tabs()[0:-1]):
                 self.notebook.tab(n, text="Profile " + str(n))
 
             self.delete_profile_button = ttk.Button(
@@ -115,7 +115,7 @@ class PandAGUI(tk.Tk):
 
         tab_names = self.notebook.tabs()
 
-        for n, tab in enumerate(self.notebook.tabs()[0:-1]):
+        for n, _tab in enumerate(self.notebook.tabs()[0:-1]):
             self.notebook.tab(n, text="Profile " + str(n))
             proftab_object = self.notebook.nametowidget(tab_names[n])
             ttk.Label(proftab_object, text="Profile " + str(n)).grid(

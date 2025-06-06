@@ -51,7 +51,7 @@ PULSE_CONNECTIONS = {
 }
 
 
-### ncd plan parameters
+# ncd plan parameters
 
 DEADTIME_BUFFER = 20e-6  # Buffer added to deadtime to handle minor discrepencies between detector and panda clocks
 DEFAULT_SEQ = (

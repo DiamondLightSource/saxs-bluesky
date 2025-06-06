@@ -72,7 +72,6 @@ def center_sample(
     # create an array of steps for counts to be performed on
     step_array = np.linspace(start, stop, n_steps)
 
-    detector = "nothing"
 
     # do the steps, take measurements
     for step in step_array:

@@ -250,7 +250,7 @@ class Profile(BaseModel):
             group = self.groups[g]
             veto_active = np.sum(profile_run_matrix[g, :])
 
-            for f in range(group.frames):
+            for _f in range(group.frames):
                 ###wait phase
 
                 current_time += group.wait_time * ncdcore.to_seconds(group.wait_units)
@@ -291,7 +291,7 @@ class Profile(BaseModel):
             usr_wait_active = group.wait_pulses[usr]
             usr_active = usr_run_active + usr_wait_active
 
-            for f in range(group.frames):
+            for _f in range(group.frames):
                 ###wait phase
 
                 current_time += group.wait_time * ncdcore.to_seconds(group.wait_units)
