@@ -376,10 +376,16 @@ def check_and_apply_panda_settings(panda: HDFPanda, panda_name: str) -> MsgGener
 
     if current_panda_settings.__dict__ != yaml_settings.__dict__:
         print(
-            "Current Panda settings do not match the yaml settings, loading yaml settings to panda"
+            (
+                "Current Panda settings do not match the yaml settings, ",
+                "loading yaml settings to panda",
+            )
         )
         LOGGER.info(
-            "Current Panda settings do not match the yaml settings, loading yaml settings to panda"
+            (
+                "Current Panda settings do not match the yaml settings, ",
+                "loading yaml settings to panda",
+            )
         )
 
         print(f"{yaml_file_name}.yaml has been uploaded to PandA")
@@ -454,7 +460,10 @@ def configure_panda_triggering(
     ],
     profile: Annotated[
         Profile | str,
-        "Profile or json of a Profile containing the infomation required to setup the panda, triggers, times etc",
+        (
+            "Profile or json of a Profile containing the infomation required to setup ",
+            "the panda, triggers, times etc",
+        ),
     ],
     active_detector_names: Annotated[
         list, "List of str of the detector names, eg. saxs, waxs, i0, it"
@@ -511,7 +520,7 @@ def configure_panda_triggering(
         active_detectors = inject_all(active_detector_names)
     except Exception as e:
         LOGGER.error(f"Failed to inject active detectors: {e}")
-        ###must be a tuple to be hashable and therefore work with bps.stage_all or whatever
+        # must be a tuple to be hashable and therefore work with bps.stage_all
         active_detectors = tuple(
             [beamline_devices[det_name] for det_name in active_detector_names]
         )
@@ -544,7 +553,8 @@ def configure_panda_triggering(
     # because python counts from 0, but panda counts from 1
     active_pulses = profile.active_out + 1
     n_cycles = profile.cycles
-    # seq table should be grabbed from the panda and used instead, in order to decouple run from setup panda
+    # seq table should be grabbed from the panda and used instead,
+    # in order to decouple run from setup panda
     seq_table = profile.seq_table()
     n_triggers = [
         group.frames for group in profile.groups
@@ -571,7 +581,8 @@ def configure_panda_triggering(
     flyer = StandardFlyer(trigger_logic)
 
     # ####stage the detectors, the flyer, the panda
-    # setup triggering on panda - changes the sequence table - wait otherwise risking _context missing error
+    # setup triggering on panda - changes the sequence table
+    # - wait otherwise risking _context missing error
     yield from bps.prepare(flyer, table_info, wait=True)
 
     ###change the sequence table
@@ -629,16 +640,39 @@ if __name__ == "__main__":
 
     # tetramm.py
     # async def prepare(self, trigger_info: TriggerInfo):
-    #     self.maximum_readings_per_frame = self.maximum_readings_per_frame*sum(trigger_info.number_of_events)
+    #     self.maximum_readings_per_frame = self.maximum_readings_per_frame * sum(
+    #         trigger_info.number_of_events
+    #     )
 
     # still getting the experiment number jumping by two
     # neeed to sort out pulses on panda
     # split setup and run
 
-    ###if TETRAMMS ARE NOT WORKING TRY TfgAcquisition() in gda to reset all malcolm stuff to defaults
+    ###if TETRAMMS ARE NOT WORKING TRY TfgAcquisition() in gda to reset all malcolm
+    #### stuff to defaults
 
     ###################################
-    # Profile(id=0, cycles=1, in_trigger='IMMEDIATE', out_trigger='TTLOUT1', groups=[Group(id=0, frames=1, wait_time=100, wait_units='ms', run_time=100, run_units='ms', wait_pause=False, run_pause=False, wait_pulses=[1, 0, 0, 0, 0, 0, 0, 0], run_pulses=[0, 0, 0, 0, 0, 0, 0, 0])], multiplier=[1, 2, 4, 8, 16])
+    # Profile(
+    #     id=0,
+    #     cycles=1,
+    #     in_trigger="IMMEDIATE",
+    #     out_trigger="TTLOUT1",
+    #     groups=[
+    #         Group(
+    #             id=0,
+    #             frames=1,
+    #             wait_time=100,
+    #             wait_units="ms",
+    #             run_time=100,
+    #             run_units="ms",
+    #             wait_pause=False,
+    #             run_pause=False,
+    #             wait_pulses=[1, 0, 0, 0, 0, 0, 0, 0],
+    #             run_pulses=[0, 0, 0, 0, 0, 0, 0, 0],
+    #         )
+    #     ],
+    #     multiplier=[1, 2, 4, 8, 16],
+    # )
 
     default_config_path = os.path.join(
         os.path.dirname(os.path.realpath(__file__)),
@@ -647,7 +681,15 @@ if __name__ == "__main__":
     )
     configuration = ProfileLoader.read_from_yaml(default_config_path)
     profile = configuration.profiles[1]
-    # RE(setup_panda("i22", "cm40643-3/bluesky", profile, active_detector_names=["saxs", "waxs", "i0", "it"], force_load=False)) )
+    # RE(
+    #     setup_panda(
+    #         "i22",
+    #         "cm40643-3/bluesky",
+    #         profile,
+    #         active_detector_names=["saxs", "waxs", "i0", "it"],
+    #         force_load=False,
+    #     )
+    # )
 
     # for i in range(20):
 
@@ -662,11 +704,28 @@ if __name__ == "__main__":
     )
 
     # profile = configuration.profiles[2]
-    # RE(setup_panda("i22"None, "cm40643-3/bluesky", profile, active_detector_names=["saxs", "i0"], force_load=False)) )
+    # RE(
+    #     setup_panda(
+    #         "i22",
+    #         None,
+    #         "cm40643-3/bluesky",
+    #         profile,
+    #         active_detector_names=["saxs", "i0"],
+    #         force_load=False,
+    #     )
+    # )
 
     # RE(panda_triggers_detectors("i22", active_detector_names=["saxs", "i0"]))
 
     # dev_name = "panda1"
     # connected_dev = return_connected_device('i22',dev_name)
     # print(f"{connected_dev=}")
-    # RE(save_device_to_yaml(yaml_directory= os.path.join(os.path.dirname(os.path.realpath(__file__)),"ophyd_panda_yamls"), yaml_file_name=f"{dev_name}_pv_without_pulse", device=connected_dev)) )
+    # RE(
+    #     save_device_to_yaml(
+    #         yaml_directory=os.path.join(
+    #             os.path.dirname(os.path.realpath(__file__)), "ophyd_panda_yamls"
+    #         ),
+    #         yaml_file_name=f"{dev_name}_pv_without_pulse",
+    #         device=connected_dev,
+    #     )
+    # )

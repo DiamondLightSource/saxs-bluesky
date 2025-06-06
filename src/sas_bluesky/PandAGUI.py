@@ -247,7 +247,10 @@ class PandAGUI(tk.Tk):
 
         experiment = "cm40643-3"
 
-        command = f"run_panda_triggering(experiment={experiment},profile={json_schema_profile}))"
+        command = (
+            f"run_panda_triggering(experiment={experiment}"
+            ",profile={json_schema_profile}))"
+        )
 
         print(self.client.run_task(command))
 
@@ -405,7 +408,10 @@ class PandAGUI(tk.Tk):
             except Exception:
                 answer = tk.messagebox.askyesno(
                     "PandA not Connected",
-                    "PandA is not connected, if you continue things will not work. Continue?",
+                    (
+                        "PandA is not connected, if you continue things will not work.",
+                        " Continue?",
+                    ),
                 )
                 if answer:
                     pass
@@ -485,19 +491,28 @@ class PandAGUI(tk.Tk):
 
         # option 1 - but doesn't work
 
-        # self.config = RestConfig(host=f"{BL}-blueapi.diamond.ac.uk", port=443, protocol="https")
+        # self.config = RestConfig(
+        #     host=f"{BL}-blueapi.diamond.ac.uk", port=443, protocol="https"
+        # )
         # self.rest_client = BlueapiRestClient(self.config)
 
         # self.stomp_connection = Connection([(f"{BL}-rabbitmq-daq.diamond.ac.uk",443)])
         # self.stomp_connection.connect(BL, BL[::-1], wait=True)
         # self.authentication = BasicAuthentication(username=BL, password=BL[::-1])
-        # self.event_bus = EventBusClient(StompClient(conn=self.stomp_connection, authentication=self.authentication))
+        # self.event_bus = EventBusClient(
+        #     StompClient(
+        #         conn=self.stomp_connection,
+        #         authentication=self.authentication,
+        #     )
+        # )
         # self.client = BlueapiClient(rest=self.rest_client, events=self.events_bus)
 
         # option 2 - but doesn't work with tasks creation/running plans etc
 
-        # self.config = RestConfig(host=f"{BL}-blueapi.diamond.ac.uk", port=443, protocol="https")
-        # self.rest_client = BlueapiRestClient(self.config)
+        # self.config = RestConfig(
+        #     host=f"{BL}-blueapi.diamond.ac.uk", port=443, protocol="https"
+        # )
+        # # self.rest_client = BlueapiRestClient(self.config)
         # self.client = BlueapiClient(rest=self.rest_client, events=self.events_bus)
 
         # option 3 - return bad request error when trying to run a plan
@@ -518,7 +533,8 @@ class PandAGUI(tk.Tk):
 
 
 if __name__ == "__main__":
-    # https://github.com/DiamondLightSource/blueapi/blob/main/src/blueapi/client/client.py <- use this to do stuff
+    # Use the following url
+    # https://github.com/DiamondLightSource/blueapi/blob/main/src/blueapi/client/client.py
     # blueapi -c i22_blueapi_config.yaml controller run count '{"detectors":["saxs"]}'
 
     dir_path = os.path.dirname(os.path.realpath(__file__))

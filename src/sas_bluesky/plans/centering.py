@@ -65,7 +65,6 @@ def center_sample(
     # create an array of steps for counts to be performed on
     step_array = np.linspace(start, stop, n_steps)
 
-
     # do the steps, take measurements
     for step in step_array:
         yield from bps.mv(I22_base_top.motors[axis], step)

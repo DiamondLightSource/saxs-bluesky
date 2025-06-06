@@ -35,7 +35,8 @@ def return_connected_device(beamline: str, device_name: str):
 
 def return_module_name(beamline: str) -> str:
     """
-    Takes the name of a beamline, and returns the name of the Dodal module where all the devices for that module are stored
+    Takes the name of a beamline, and returns the name of the Dodal module where all
+    the devices for that module are stored
     """
 
     module_name = module_name_for_beamline(beamline)
@@ -44,7 +45,8 @@ def return_module_name(beamline: str) -> str:
 
 def make_beamline_devices(beamline: str) -> list:
     """
-    Takes the name of a beamline and async creates all the devices for a beamline, whether they are connected or not.
+    Takes the name of a beamline and async creates all the devices for a beamline,
+    whether they are connected or not.
     """
 
     module = return_module_name(beamline)
@@ -58,7 +60,7 @@ def fly_and_collect_with_wait(
     flyer: StandardFlyer[SeqTableInfo] | StandardFlyer[PcompInfo],
     detectors: list[StandardDetector],
 ):
-    """Kickoff, complete and collect with a flyer and multiple detectors and wait breifly.
+    """Kickoff, complete and collect with a flyer and multiple detectors and wait.
 
     This stub takes a flyer and one or more detectors that have been prepared. It
     declares a stream for the detectors, then kicks off the detectors and the flyer.
@@ -108,7 +110,8 @@ def upload_yaml_to_panda(
 ) -> MsgGenerator:
     """
 
-    Takes a folder of the directory where the yaml is saved, the name of the yaml file and the panda we want
+    Takes a folder of the directory where the yaml is saved, the name of the yaml file
+    and the panda we want
 
     to apply the settings to, and uploaded the ophyd async settings pv yaml to the panda
 
@@ -124,7 +127,8 @@ def save_device_to_yaml(
 ) -> MsgGenerator:
     """
 
-    Takes a folder of the directory where the yaml will be saved, the name of the yaml file and the panda we want
+    Takes a folder of the directory where the yaml will be saved,
+    the name of the yaml file and the panda we want
 
     then saves the ophyd async pv yaml to the given path
 

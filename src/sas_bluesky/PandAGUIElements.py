@@ -74,7 +74,8 @@ class EditableTableview(ttk.Treeview):
         # handle exception when header is double click
         if not rowid:
             return
-        # row 1 is the group name and should just be group-n and increments for each new one
+        # row 1 is the group name and should just be group-n and increments
+        # for each new one
         elif column == "#1":
             return
 
@@ -440,7 +441,8 @@ class ProfileTab(ttk.Frame):
                 text=f"Time/cycle: {self.profile.duration_per_cycle:.3f} s"
             )
             self.total_time_label.config(
-                text=f"Total time: {self.profile.duration_per_cycle * self.profile.cycles:.3f} s"
+                text=f"Total time: "
+                f"{self.profile.duration_per_cycle * self.profile.cycles:.3f} s"
             )
 
         except Exception:
@@ -459,14 +461,17 @@ class ProfileTab(ttk.Frame):
 
             self.total_time_label = ttk.Label(
                 self,
-                text=f"Total time: {self.profile.duration_per_cycle * self.profile.cycles:.3f} s",
+                text=f"Total time: "
+                f"{self.profile.duration_per_cycle * self.profile.cycles:.3f} s",
             )
             self.total_time_label.grid(column=8, row=3, padx=5, pady=5, sticky="e")
 
     def edit_config_for_profile(self):
         group_list = []
 
-        for _group_id, group_rowid in enumerate(self.profile_config_tree.get_children()):
+        for _group_id, group_rowid in enumerate(
+            self.profile_config_tree.get_children()
+        ):
             group = self.profile_config_tree.item(group_rowid)["values"]
 
             wait_pulses = [int(f) for f in list(group[7].replace(" ", ""))]
