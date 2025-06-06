@@ -173,12 +173,12 @@ class PandAGUI(tkinter.Tk):
 
     def open_textedit(self):
         if os.path.exists("/dls_sw/apps/atom/1.42.0/atom"):
-            os.system("/dls_sw/apps/atom/1.42.0/atom " + self.panda_config_yaml + " &")
+            os.system(f"/dls_sw/apps/atom/1.42.0/atom {self.panda_config_yaml} &")
         else:
             try:
-                os.system("subl " + self.panda_config_yaml + " &")
+                os.system(f"subl {self.panda_config_yaml} &")
             except FileNotFoundError:
-                os.system("gedit " + self.panda_config_yaml + " &")
+                os.system(f"gedit {self.panda_config_yaml} &")
 
     def show_wiring_config(self):
         fig, ax = plt.subplots(1, 1, figsize=(16, 8))
