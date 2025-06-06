@@ -266,7 +266,7 @@ def return_deadtime(detectors: list, exposure=1) -> np.ndarray:
     """
 
     deadtime = (
-        np.array([det._controller.get_deadtime(exposure) for det in detectors])
+        np.array([det._controller.get_deadtime(exposure) for det in detectors])  # noqa: SLF001
         + DEADTIME_BUFFER
     )
     return deadtime
