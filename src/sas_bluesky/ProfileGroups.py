@@ -64,9 +64,8 @@ class Group(BaseModel):
     run_time: int
     run_units: str
     pause_trigger: str
-    wait_pulses: list[int]  # 0 or 1 only
-    run_pulses: list[int]  # 0 or 1 only
-
+    wait_pulses: list[bool]
+    run_pulses: list[bool]
     # created by model_post_init
     wait_time_s: float
     run_time_s: float
