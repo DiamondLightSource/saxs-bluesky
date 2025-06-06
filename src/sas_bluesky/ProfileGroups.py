@@ -68,9 +68,9 @@ class Group(BaseModel):
     run_pulses: list[int]  # 0 or 1 only
 
     # created by model_post_init
-    wait_time_s: float = None
-    run_time_s: float = None
-    group_duration: float = None
+    wait_time_s: float
+    run_time_s: float
+    group_duration: float
 
     def model_post_init(self, __context: Any) -> None:
         self.run_units = self.run_units.upper()
