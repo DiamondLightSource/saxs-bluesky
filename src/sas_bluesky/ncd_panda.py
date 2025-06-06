@@ -259,7 +259,7 @@ def stage_and_prepare_detectors(
     yield from bps.wait(group=group, timeout=GENERAL_TIMEOUT)
 
 
-def return_deadtime(detectors: list, exposure=1) -> np.ndarray:
+def return_deadtime(detectors: list, exposure: float = 1.0) -> np.ndarray:
     """
     Given a list of connected detector devices, and an exposure time,
     it returns an array of the deadtime for each detector
