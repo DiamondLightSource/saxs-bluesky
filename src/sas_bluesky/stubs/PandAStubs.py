@@ -4,7 +4,7 @@ from dodal.beamlines import module_name_for_beamline
 from dodal.devices.areadetector.plugins.CAM import ColorMode
 from dodal.devices.oav.oav_detector import OAV
 from dodal.devices.oav.oav_parameters import OAVParameters
-from dodal.utils import make_all_devices, make_device
+from dodal.utils import AnyDevice, make_all_devices, make_device
 from ophyd_async.core import StandardDetector, StandardFlyer, YamlSettingsProvider
 from ophyd_async.fastcs.panda import HDFPanda, PcompInfo, SeqTableInfo
 from ophyd_async.plan_stubs import (
@@ -43,14 +43,14 @@ def return_module_name(beamline: str) -> str:
     return f"dodal.beamlines.{module_name}"
 
 
-def make_beamline_devices(beamline: str) -> list:
+def make_beamline_devices(beamline: str) -> dict[str, AnyDevice]:
     """
     Takes the name of a beamline and async creates all the devices for a beamline,
     whether they are connected or not.
     """
 
     module = return_module_name(beamline)
-    beamline_devices = make_all_devices(module)[0]
+    beamline_devices, _ = make_all_devices(module)
 
     return beamline_devices
 
