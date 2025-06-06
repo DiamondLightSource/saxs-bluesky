@@ -208,7 +208,7 @@ class CheckButtonPopup(ttk.Checkbutton):
 
         # set the dimensions of the screen
         # and where it is placed
-        self.root.geometry("%dx%d+%d+%d" % (w, h, x - 60, y))
+        self.root.geometry(f"{w}x{h}+{x - 60}+{y}")
         self.save_pulse_button = ttk.Button(
             self.root, text="Ok", command=self.on_return
         ).grid(column=PULSEBLOCKS, row=0, padx=5, pady=5, columnspan=1, sticky="e")
