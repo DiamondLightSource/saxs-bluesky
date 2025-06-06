@@ -1,13 +1,9 @@
-import bluesky.plan_stubs as bps
-import matplotlib.pyplot as plt
-import numpy as np
 from bluesky import RunEngine
 from dodal.common.beamlines.beamline_utils import set_beamline as set_utils_beamline
 from dodal.log import set_beamline as set_log_beamline
 from dodal.utils import BeamlinePrefix, get_beamline_name
 from ophyd_async.core import StandardReadable
 from ophyd_async.epics.motor import Motor
-from scipy import signal
 
 
 class base_top(StandardReadable):
@@ -56,66 +52,65 @@ def center_sample(
     current_pos = I22_base_top.get_current_pos(axis)
 
     print(current_pos)
-    quit()
 
-    # setup
-    if current_pos != start:
-        yield from bps.mv(I22_base_top.motors[axis], start)
+    # # setup
+    # if current_pos != start:
+    #     yield from bps.mv(I22_base_top.motors[axis], start)
 
-    # create an array of steps for counts to be performed on
-    step_array = np.linspace(start, stop, n_steps)
+    # # create an array of steps for counts to be performed on
+    # step_array = np.linspace(start, stop, n_steps)
 
-    # do the steps, take measurements
-    for step in step_array:
-        yield from bps.mv(I22_base_top.motors[axis], step)
+    # # do the steps, take measurements
+    # for step in step_array:
+    #     yield from bps.mv(I22_base_top.motors[axis], step)
 
-    intensities = "something"
+    # intensities = "something"
 
-    # find the position where there is maximum intensity using a peak fit
-    # must be a 1d array containing the summed intensity of each frame
-    peak_indices, properties = signal.find_peaks(intensities)
+    # # find the position where there is maximum intensity using a peak fit
+    # # must be a 1d array containing the summed intensity of each frame
+    # peak_indices, properties = signal.find_peaks(intensities)
 
-    if len(peak_indices) == 0:
-        print("No peaks in range, going to max intensity")
-        maximum_peak_index = np.argmax(intensities)
-        max_peak_position = step_array[maximum_peak_index]
-        final_position = max_peak_position
+    # if len(peak_indices) == 0:
+    #     print("No peaks in range, going to max intensity")
+    #     maximum_peak_index = np.argmax(intensities)
+    #     max_peak_position = step_array[maximum_peak_index]
+    #     final_position = max_peak_position
 
-    elif len(peak_indices) == 1:
-        maximum_peak_index = peak_indices[0]
-        max_peak_position = step_array[maximum_peak_index]
-        final_position = max_peak_position
+    # elif len(peak_indices) == 1:
+    #     maximum_peak_index = peak_indices[0]
+    #     max_peak_position = step_array[maximum_peak_index]
+    #     final_position = max_peak_position
 
-    elif len(peak_indices) > 1:
-        maximum_peak_index = np.argmax(
-            properties["prominences"]
-        )  # find the BIGGEST peak
-        max_peak_position = step_array[maximum_peak_index]
-        final_position = max_peak_position
+    # elif len(peak_indices) > 1:
+    #     maximum_peak_index = np.argmax(
+    #         properties["prominences"]
+    #     )  # find the BIGGEST peak
+    #     max_peak_position = step_array[maximum_peak_index]
+    #     final_position = max_peak_position
 
-    if plot:
-        # plot a nice graph for the user to check their results
-        plt.plot(step_array, intensities)
-        plt.plot(peak_indices, step_array[peak_indices], "x")
-        plt.vlines(
-            x=peak_indices,
-            ymin=x[peak_indices] - properties["prominences"],
-            ymax=step_array[peak_indices],
-            color="C1",
-        )
-        plt.hlines(
-            y=properties["width_heights"],
-            xmin=properties["left_ips"],
-            xmax=properties["right_ips"],
-            color="C1",
-        )
-        plt.show()
+    # if plot:
+    #     # plot a nice graph for the user to check their results
+    #     plt.plot(step_array, intensities)
+    #     plt.plot(peak_indices, step_array[peak_indices], "x")
+    #     plt.vlines(
+    #         x=peak_indices,
+    #         ymin=x[peak_indices] - properties["prominences"],
+    #         ymax=step_array[peak_indices],
+    #         color="C1",
+    #     )
+    #     plt.hlines(
+    #         y=properties["width_heights"],
+    #         xmin=properties["left_ips"],
+    #         xmax=properties["right_ips"],
+    #         color="C1",
+    #     )
+    #     plt.show()
 
-    # move the motor to the final position which should be the
-    # 'sample centre' position based on the maximum
-    # intensity measured if there was any peak
+    # # move the motor to the final position which should be the
+    # # 'sample centre' position based on the maximum
+    # # intensity measured if there was any peak
 
-    yield from bps.mv(I22_base_top.motors[axis], final_position)
+    # yield from bps.mv(I22_base_top.motors[axis], final_position)
 
 
 if __name__ == "__main__":
