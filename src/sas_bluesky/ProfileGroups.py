@@ -129,19 +129,6 @@ class Profile(BaseModel):
         if len(self.groups) > 0:
             self.analyse_profile()
 
-    # def re_group_id_groups(self):
-
-    #     iter_group = copy.deepcopy(self.groups)
-    #     new_groups = []
-
-    #     for n, group in enumerate(iter_group):
-    #         group.group_id = n
-    #         new_groups.append(group)
-
-    #     self.groups = new_groups
-
-    #     [f.recalc_times() for f in self.groups]
-
     def analyse_profile(self):
         self.calc_total_frames()
         self.calc_duration_per_cycle()
