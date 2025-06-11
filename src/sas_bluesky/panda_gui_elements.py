@@ -64,7 +64,11 @@ class EditableTableview(ttk.Treeview):
         column = self.identify_column(event.x)
 
         # get column position info
-        x, y, width, height = self.bbox(rowid, column)
+        bbox = self.bbox(rowid, column)
+        if isinstance(bbox, str):
+            raise ValueError("Bounding box invalid")
+        else:
+            x, y, width, height = bbox
 
         # y-axis offset
         pady = height // 2
