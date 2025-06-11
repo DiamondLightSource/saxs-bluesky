@@ -8,7 +8,7 @@ Python Elements for NCD PandA config GUI
 """
 
 import os
-import tkinter as tk
+import tkinter
 from pathlib import Path
 from tkinter import ttk
 
@@ -128,7 +128,7 @@ class DropdownPopup(ttk.Combobox):
     def __init__(self, parent, rowid, column, text, options, **kw):
         ttk.Style().configure("pad.TEntry", padding="1 1 1 1")
 
-        self.option_var = tk.StringVar()
+        self.option_var = tkinter.StringVar()
         self.tv = parent
         self.rowid = rowid
         self.column = column
@@ -180,7 +180,7 @@ class CheckButtonPopup(ttk.Checkbutton):
         w = 420  # width for the Tk root
         h = 50  # height for the Tk root
 
-        self.root = tk.Toplevel()  ##HOLY MOLY
+        self.root = tkinter.Toplevel()  ##HOLY MOLY
         # THIS WAS TK.TK AND IT WAS CAUSING SO MANY ISSUES,
         # USE TOPLEVEL WHEN OPENING NEW TEMP WINDOW.
         # IT WAS CUASING THE CHECKBUTTON TO ASSIGN TO SOMETHING ELSE.
@@ -219,11 +219,11 @@ class CheckButtonPopup(ttk.Checkbutton):
     def create_checkbuttons(self):
         for pulse in range(PULSEBLOCKS):
             value = ncdcore.str2bool(str(self.pulse_vals[pulse]))
-            var = tk.IntVar(value=int(value))
+            var = tkinter.IntVar(value=int(value))
 
             self.option_var[pulse] = var
 
-            CB = tk.Checkbutton(
+            CB = tkinter.Checkbutton(
                 self.root,
                 text=f"Pulse: {pulse}",
                 variable=self.option_var[pulse],
@@ -339,7 +339,7 @@ class ProfileTab(ttk.Frame):
         rows = self.profile_config_tree.selection()
 
         if len(rows) == 0:
-            tk.messagebox.showinfo("Info", "Select a group to delete")
+            tkinter.messagebox.showinfo("Info", "Select a group to delete")
 
         for row in rows[::-1]:
             print(row)
@@ -355,7 +355,9 @@ class ProfileTab(ttk.Frame):
         try:
             row = self.profile_config_tree.selection()[0]
         except LookupError:
-            tk.messagebox.showinfo("Info", "A row must be selected to insert it before")
+            tkinter.messagebox.showinfo(
+                "Info", "A row must be selected to insert it before"
+            )
 
             return
 
@@ -529,8 +531,8 @@ class ProfileTab(ttk.Frame):
                 column=col_pos, row=0, padx=5, pady=5, sticky="nsw"
             )
 
-            self.multiplier_var = tk.StringVar(value=self.profile.multiplier[i])
-            tk.Entry(self, bd=1, width=10, textvariable=self.multiplier_var).grid(
+            self.multiplier_var = tkinter.StringVar(value=self.profile.multiplier[i])
+            tkinter.Entry(self, bd=1, width=10, textvariable=self.multiplier_var).grid(
                 column=col_pos, row=0, padx=5, pady=5, sticky="nes"
             )
 
@@ -585,7 +587,7 @@ class ProfileTab(ttk.Frame):
             column=0, row=0, padx=5, pady=5, sticky="e"
         )
 
-        self.clicked_start_trigger = tk.StringVar()
+        self.clicked_start_trigger = tkinter.StringVar()
         ttk.OptionMenu(
             self,
             self.clicked_start_trigger,
@@ -599,8 +601,8 @@ class ProfileTab(ttk.Frame):
             column=0, row=1, padx=5, pady=5, sticky="e"
         )
 
-        self.n_cycles_entry_value = tk.IntVar(self, value=self.profile.cycles)
-        self.cycles_entry = tk.Entry(
+        self.n_cycles_entry_value = tkinter.IntVar(self, value=self.profile.cycles)
+        self.cycles_entry = tkinter.Entry(
             self, bd=1, width=15, textvariable=self.n_cycles_entry_value
         )
 
