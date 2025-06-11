@@ -23,8 +23,8 @@ from blueapi.client.client import BlueapiClient  # , BlueapiRestClient
 from blueapi.config import ApplicationConfig, ConfigLoader
 from dodal.utils import get_beamline_name
 
-from sas_bluesky.PandAGUIElements import ProfileTab
-from sas_bluesky.ProfileGroups import ProfileLoader
+from sas_bluesky.panda_gui_elements import ProfileTab
+from sas_bluesky.profile_groups import ProfileLoader
 from sas_bluesky.stubs.PandAStubs import return_connected_device
 
 __version__ = "0.2"

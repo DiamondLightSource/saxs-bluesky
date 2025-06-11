@@ -37,7 +37,7 @@ from pydantic import validate_call  # ,NonNegativeFloat,
 from pydantic_core import from_json
 
 from sas_bluesky.beamline_configs import b21_config, i22_config
-from sas_bluesky.ProfileGroups import Profile, ProfileLoader  # Group
+from sas_bluesky.profile_groups import Profile, ProfileLoader  # Group
 from sas_bluesky.stubs.PandAStubs import (
     fly_and_collect_with_wait,
     load_settings_from_yaml,

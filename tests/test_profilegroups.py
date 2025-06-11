@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from sas_bluesky.ProfileGroups import Profile, ProfileLoader
+from sas_bluesky.profile_groups import Profile, ProfileLoader
 
 SAS_bluesky_ROOT = Path(__file__)
 
