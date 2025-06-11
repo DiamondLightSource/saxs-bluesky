@@ -154,18 +154,20 @@ class PandAGUI(tkinter.Tk):
             self.commit_config()
             self.configuration.save_to_yaml(panda_config_yaml.name)
 
+    # TODO: https://github.com/DiamondLightSource/sas-bluesky/issues/11
     def configure_panda(self):
-        self.commit_config()
+        pass
+        # self.commit_config()
 
-        index = self.notebook.index("current")
+        # index = self.notebook.index("current")
 
-        profile_to_upload = self.configuration.profiles[index]
-        json_schema_profile = profile_to_upload.model_dump_json()
+        # profile_to_upload = self.configuration.profiles[index]
+        # json_schema_profile = profile_to_upload.model_dump_json()
 
-        try:
-            self.client.run_plan(f"setup_panda {json_schema_profile}")
-        except ConnectionError:
-            print("Could not upload profile to panda")
+        # try:
+        #     self.client.run_plan(f"setup_panda {json_schema_profile}")
+        # except ConnectionError:
+        #     print("Could not upload profile to panda")
 
     def open_textedit(self):
         if os.path.exists("/dls_sw/apps/atom/1.42.0/atom"):
@@ -233,21 +235,23 @@ class PandAGUI(tkinter.Tk):
     def resume_plans(self):
         self.client.resume()
 
+    # TODO: https://github.com/DiamondLightSource/sas-bluesky/issues/11
     def run_plan(self):
-        current_profile = self.notebook.index("current")
+        pass
+        # current_profile = self.notebook.index("current")
 
-        profile = self.configuration.profiles[current_profile]
-        json_schema_profile = profile.model_dump_json()
-        print(json_schema_profile)
+        # profile = self.configuration.profiles[current_profile]
+        # json_schema_profile = profile.model_dump_json()
+        # print(json_schema_profile)
 
-        experiment = "cm40643-3"
+        # experiment = "cm40643-3"
 
-        command = (
-            f"run_panda_triggering(experiment={experiment}"
-            ",profile={json_schema_profile}))"
-        )
+        # command = (
+        #     f"run_panda_triggering(experiment={experiment}"
+        #     ",profile={json_schema_profile}))"
+        # )
 
-        print(self.client.run_task(command))
+        # print(self.client.run_task(command))
 
     def build_exp_run_frame(self):
         self.run_frame = ttk.Frame(self.window, borderwidth=5, relief="raised")
