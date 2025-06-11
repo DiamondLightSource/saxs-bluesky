@@ -154,10 +154,6 @@ class PandAGUI(tkinter.Tk):
             self.commit_config()
             self.configuration.save_to_yaml(panda_config_yaml.name)
 
-    def show_start_value(self):
-        self.selected_start_trigger = self.clicked_start_trigger.get()
-        print(self.selected_start_trigger)
-
     def configure_panda(self):
         self.commit_config()
 
