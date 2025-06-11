@@ -7,7 +7,6 @@ from datetime import datetime
 # from dodal.beamlines.i22 import panda1
 from typing import Any
 
-import matplotlib.pyplot as plt
 import numpy as np
 
 # import copy
@@ -179,40 +178,6 @@ class Profile(BaseModel):
         # self.re_group_id_groups()
         if analyse_profile:
             self.analyse_profile()
-
-    def plot_triggering(self, blocking=True):
-        self.veto_trigger_time, self.veto_signal, self.active_out = (
-            self.build_veto_signal()
-        )
-
-        print("plotting in:", self.best_time_unit)
-
-        figure, axes = plt.subplots(
-            len(self.active_out) + 1,
-            1,
-            sharex=True,
-            figsize=(10, len(self.active_out) * 4),
-        )
-
-        if len(self.active_out) > 0:
-            axes[0].step(
-                self.veto_trigger_time / time_units[self.best_time_unit],
-                self.veto_signal,
-            )
-            axes[0].set_ylabel("Veto Signal")
-
-            for u in range(len(self.active_out)):
-                usr_trigger_time, usr_signal = self.build_usr_signal(u)
-                axes[u + 1].step(
-                    usr_trigger_time / time_units[self.best_time_unit], usr_signal
-                )
-                axes[u + 1].set_ylabel(f"Usr{u} Signal")
-
-            plt.xlabel(f"Time ({self.best_time_unit})")
-            plt.show(block=blocking)
-
-        else:
-            print("None active in this profile")
 
     def seq_table(self):
         table = SeqTable()
