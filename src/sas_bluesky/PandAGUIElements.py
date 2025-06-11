@@ -19,7 +19,7 @@ from ophyd_async.fastcs.panda import (
 from ophyd_async.fastcs.panda._block import PandaTimeUnits
 
 from sas_bluesky.beamline_configs import b21_config, i22_config
-from sas_bluesky.ProfileGroups import Group, Profile
+from sas_bluesky.profile_groups import Group, Profile
 from sas_bluesky.utils.ncdcore import ncdcore
 
 SAS_bluesky_ROOT = Path(__file__).parent.parent.parent
