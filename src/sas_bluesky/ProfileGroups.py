@@ -323,34 +323,7 @@ class ProfileLoader:
 
     def append_profile(self, Profile):
         self.profiles.append(Profile)
-        # self.re_group_id_profiles()
         self.__post_init__()
-
-    # def re_group_id_profiles(self):
-
-    #     iter_prof = copy.deepcopy(self.profiles)
-    #     new_profiles = []
-
-    #     for n, profile in enumerate(iter_prof):
-    #         profile.profile_id = n
-    #         new_profiles.append(profile)
-
-    #     self.profiles = new_profiles
-
-
-# DEFAULT_GROUP = Group(frames=1,
-#                       wait_time=1,
-#                       wait_units="S",
-#                       run_time=1,
-#                       run_units="S",
-#                       pause_trigger="IMMEDIATE",
-#                       wait_pulses=[0,0,0,0],
-#                       run_pulses=[1,1,1,1])
-
-# DEFAULT_PROFILE = Profile(cycles=1,
-#                           seq_trigger="IMMEDIATE",
-#                           groups=[DEFAULT_GROUP],
-#                           multiplier=[1, 1, 1, 1])
 
 
 if __name__ == "__main__":
