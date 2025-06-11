@@ -173,44 +173,6 @@ class Profile(BaseModel):
 
         return active_out
 
-    def analyse_profile_legacy(self):
-        self.wait_matrix = []
-        self.run_matrix = []
-        self.duration = 0
-        self.duration_per_cycle = 0
-        self.total_frames = 0
-
-        for n_group in self.groups:
-            self.duration_per_cycle += n_group.group_duration
-            self.total_frames += n_group.frames
-
-            self.wait_matrix.append(n_group.wait_pulses)
-            self.run_matrix.append(n_group.run_pulses)
-
-        self.duration = self.duration_per_cycle * self.cycles
-
-        self.wait_matrix = np.asarray(self.wait_matrix)
-        self.run_matrix = np.asarray(self.run_matrix)
-
-        self.n_groups = len(self.groups)
-        self.veto_trigger_time, self.veto_signal, self.active_out = (
-            self.build_veto_signal()
-        )
-
-        close_list = [
-            np.abs(
-                1
-                - np.log10(
-                    np.amin(
-                        np.asarray(self.veto_trigger_time[self.veto_trigger_time != 0])
-                        / time_units[i]
-                    )
-                )
-            )
-            for i in time_units.keys()
-        ]
-        self.best_time_unit = list(time_units)[np.argmin(close_list)]
-
     def append_group(self, Group, analyse_profile=True):
         self.groups.append(Group)
         # self.re_group_id_groups()
