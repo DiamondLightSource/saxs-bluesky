@@ -180,50 +180,6 @@ class Profile(BaseModel):
         if analyse_profile:
             self.analyse_profile()
 
-    def build_veto_signal(self):
-        trigger_time = [0]
-        veto_signal = [0]  # starts low and ends low
-        current_time = 0
-
-        profile_wait_matrix = self.wait_matrix
-        profile_run_matrix = self.run_matrix
-
-        active_matrix = profile_wait_matrix + profile_run_matrix
-        active_out = np.where((np.sum(active_matrix, axis=0)) != 0)[0]
-
-        # active_wait_matrix = profile_wait_matrix[:,active_out]
-        # active_run_matrix = profile_run_matrix[:,active_out]
-
-        for g in range(self.n_groups):
-            group = self.groups[g]
-            veto_active = np.sum(profile_run_matrix[g, :])
-
-            for _f in range(group.frames):
-                ###wait phase
-
-                current_time += group.wait_time * ncdcore.to_seconds(group.wait_units)
-                trigger_time.append(current_time)
-                veto_signal.append(0)
-
-                # run phase
-
-                current_time += group.run_time * ncdcore.to_seconds(group.run_units)
-                trigger_time.append(current_time)
-
-                if veto_active != 0:
-                    veto_signal.append(1)
-                else:
-                    veto_signal.append(0)
-
-        trigger_time.append(current_time + (current_time) / 10)
-        veto_signal.append(0)  # starts low and ends low
-
-        self.trigger_time = np.asarray(trigger_time)
-        self.veto_signal = np.asarray(veto_signal)
-        self.active_out = active_out
-
-        return np.asarray(trigger_time), np.asarray(veto_signal), active_out
-
     def build_usr_signal(self, usr):
         trigger_time = [-1 * time_units[self.best_time_unit]]
         usr_signal = [0]  # starts low and ends low
