@@ -180,50 +180,6 @@ class Profile(BaseModel):
         if analyse_profile:
             self.analyse_profile()
 
-    def build_usr_signal(self, usr):
-        trigger_time = [-1 * time_units[self.best_time_unit]]
-        usr_signal = [0]  # starts low and ends low
-
-        trigger_time.append(0)
-        usr_signal.append(0)  # starts low and ends low
-        current_time = 0
-
-        for g in range(self.n_groups):
-            group = self.groups[g]
-
-            usr_run_active = group.run_pulses[usr]
-            usr_wait_active = group.wait_pulses[usr]
-            usr_active = usr_run_active + usr_wait_active
-
-            for _f in range(group.frames):
-                ###wait phase
-
-                current_time += group.wait_time * ncdcore.to_seconds(group.wait_units)
-                trigger_time.append(current_time)
-
-                if usr_active != 0:
-                    usr_signal.append(1)
-                else:
-                    usr_signal.append(0)
-
-                # run phase
-
-                current_time += group.run_time * ncdcore.to_seconds(group.run_units)
-                trigger_time.append(current_time)
-
-                if usr_run_active != 0:
-                    usr_signal.append(1)
-                else:
-                    usr_signal.append(0)
-
-        trigger_time.append(current_time + (current_time) / 10)
-        usr_signal.append(0)  # starts low and ends low
-
-        self.trigger_time = np.asarray(trigger_time)
-        self.usr_signal = np.asarray(usr_signal)
-
-        return np.asarray(trigger_time), np.asarray(usr_signal)
-
     def plot_triggering(self, blocking=True):
         self.veto_trigger_time, self.veto_signal, self.active_out = (
             self.build_veto_signal()
