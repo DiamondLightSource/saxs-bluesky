@@ -7,7 +7,6 @@ from datetime import datetime
 # from dodal.beamlines.i22 import panda1
 from typing import Any
 
-import matplotlib.pyplot as plt
 import numpy as np
 
 # import copy
@@ -129,19 +128,6 @@ class Profile(BaseModel):
         if len(self.groups) > 0:
             self.analyse_profile()
 
-    # def re_group_id_groups(self):
-
-    #     iter_group = copy.deepcopy(self.groups)
-    #     new_groups = []
-
-    #     for n, group in enumerate(iter_group):
-    #         group.group_id = n
-    #         new_groups.append(group)
-
-    #     self.groups = new_groups
-
-    #     [f.recalc_times() for f in self.groups]
-
     def analyse_profile(self):
         self.calc_total_frames()
         self.calc_duration_per_cycle()
@@ -173,44 +159,6 @@ class Profile(BaseModel):
 
         return active_out
 
-    def analyse_profile_legacy(self):
-        self.wait_matrix = []
-        self.run_matrix = []
-        self.duration = 0
-        self.duration_per_cycle = 0
-        self.total_frames = 0
-
-        for n_group in self.groups:
-            self.duration_per_cycle += n_group.group_duration
-            self.total_frames += n_group.frames
-
-            self.wait_matrix.append(n_group.wait_pulses)
-            self.run_matrix.append(n_group.run_pulses)
-
-        self.duration = self.duration_per_cycle * self.cycles
-
-        self.wait_matrix = np.asarray(self.wait_matrix)
-        self.run_matrix = np.asarray(self.run_matrix)
-
-        self.n_groups = len(self.groups)
-        self.veto_trigger_time, self.veto_signal, self.active_out = (
-            self.build_veto_signal()
-        )
-
-        close_list = [
-            np.abs(
-                1
-                - np.log10(
-                    np.amin(
-                        np.asarray(self.veto_trigger_time[self.veto_trigger_time != 0])
-                        / time_units[i]
-                    )
-                )
-            )
-            for i in time_units.keys()
-        ]
-        self.best_time_unit = list(time_units)[np.argmin(close_list)]
-
     def append_group(self, Group, analyse_profile=True):
         self.groups.append(Group)
         # self.re_group_id_groups()
@@ -230,128 +178,6 @@ class Profile(BaseModel):
         # self.re_group_id_groups()
         if analyse_profile:
             self.analyse_profile()
-
-    def build_veto_signal(self):
-        trigger_time = [0]
-        veto_signal = [0]  # starts low and ends low
-        current_time = 0
-
-        profile_wait_matrix = self.wait_matrix
-        profile_run_matrix = self.run_matrix
-
-        active_matrix = profile_wait_matrix + profile_run_matrix
-        active_out = np.where((np.sum(active_matrix, axis=0)) != 0)[0]
-
-        # active_wait_matrix = profile_wait_matrix[:,active_out]
-        # active_run_matrix = profile_run_matrix[:,active_out]
-
-        for g in range(self.n_groups):
-            group = self.groups[g]
-            veto_active = np.sum(profile_run_matrix[g, :])
-
-            for _f in range(group.frames):
-                ###wait phase
-
-                current_time += group.wait_time * ncdcore.to_seconds(group.wait_units)
-                trigger_time.append(current_time)
-                veto_signal.append(0)
-
-                # run phase
-
-                current_time += group.run_time * ncdcore.to_seconds(group.run_units)
-                trigger_time.append(current_time)
-
-                if veto_active != 0:
-                    veto_signal.append(1)
-                else:
-                    veto_signal.append(0)
-
-        trigger_time.append(current_time + (current_time) / 10)
-        veto_signal.append(0)  # starts low and ends low
-
-        self.trigger_time = np.asarray(trigger_time)
-        self.veto_signal = np.asarray(veto_signal)
-        self.active_out = active_out
-
-        return np.asarray(trigger_time), np.asarray(veto_signal), active_out
-
-    def build_usr_signal(self, usr):
-        trigger_time = [-1 * time_units[self.best_time_unit]]
-        usr_signal = [0]  # starts low and ends low
-
-        trigger_time.append(0)
-        usr_signal.append(0)  # starts low and ends low
-        current_time = 0
-
-        for g in range(self.n_groups):
-            group = self.groups[g]
-
-            usr_run_active = group.run_pulses[usr]
-            usr_wait_active = group.wait_pulses[usr]
-            usr_active = usr_run_active + usr_wait_active
-
-            for _f in range(group.frames):
-                ###wait phase
-
-                current_time += group.wait_time * ncdcore.to_seconds(group.wait_units)
-                trigger_time.append(current_time)
-
-                if usr_active != 0:
-                    usr_signal.append(1)
-                else:
-                    usr_signal.append(0)
-
-                # run phase
-
-                current_time += group.run_time * ncdcore.to_seconds(group.run_units)
-                trigger_time.append(current_time)
-
-                if usr_run_active != 0:
-                    usr_signal.append(1)
-                else:
-                    usr_signal.append(0)
-
-        trigger_time.append(current_time + (current_time) / 10)
-        usr_signal.append(0)  # starts low and ends low
-
-        self.trigger_time = np.asarray(trigger_time)
-        self.usr_signal = np.asarray(usr_signal)
-
-        return np.asarray(trigger_time), np.asarray(usr_signal)
-
-    def plot_triggering(self, blocking=True):
-        self.veto_trigger_time, self.veto_signal, self.active_out = (
-            self.build_veto_signal()
-        )
-
-        print("plotting in:", self.best_time_unit)
-
-        figure, axes = plt.subplots(
-            len(self.active_out) + 1,
-            1,
-            sharex=True,
-            figsize=(10, len(self.active_out) * 4),
-        )
-
-        if len(self.active_out) > 0:
-            axes[0].step(
-                self.veto_trigger_time / time_units[self.best_time_unit],
-                self.veto_signal,
-            )
-            axes[0].set_ylabel("Veto Signal")
-
-            for u in range(len(self.active_out)):
-                usr_trigger_time, usr_signal = self.build_usr_signal(u)
-                axes[u + 1].step(
-                    usr_trigger_time / time_units[self.best_time_unit], usr_signal
-                )
-                axes[u + 1].set_ylabel(f"Usr{u} Signal")
-
-            plt.xlabel(f"Time ({self.best_time_unit})")
-            plt.show(block=blocking)
-
-        else:
-            print("None active in this profile")
 
     def seq_table(self):
         table = SeqTable()
@@ -497,34 +323,7 @@ class ProfileLoader:
 
     def append_profile(self, Profile):
         self.profiles.append(Profile)
-        # self.re_group_id_profiles()
         self.__post_init__()
-
-    # def re_group_id_profiles(self):
-
-    #     iter_prof = copy.deepcopy(self.profiles)
-    #     new_profiles = []
-
-    #     for n, profile in enumerate(iter_prof):
-    #         profile.profile_id = n
-    #         new_profiles.append(profile)
-
-    #     self.profiles = new_profiles
-
-
-# DEFAULT_GROUP = Group(frames=1,
-#                       wait_time=1,
-#                       wait_units="S",
-#                       run_time=1,
-#                       run_units="S",
-#                       pause_trigger="IMMEDIATE",
-#                       wait_pulses=[0,0,0,0],
-#                       run_pulses=[1,1,1,1])
-
-# DEFAULT_PROFILE = Profile(cycles=1,
-#                           seq_trigger="IMMEDIATE",
-#                           groups=[DEFAULT_GROUP],
-#                           multiplier=[1, 1, 1, 1])
 
 
 if __name__ == "__main__":
