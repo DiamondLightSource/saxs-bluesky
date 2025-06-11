@@ -10,7 +10,7 @@ Python Elements for NCD PandA config GUI
 import os
 import tkinter
 from pathlib import Path
-from tkinter import ttk
+from tkinter import messagebox, ttk
 
 from dodal.utils import get_beamline_name
 from ophyd_async.fastcs.panda import (
@@ -339,7 +339,7 @@ class ProfileTab(ttk.Frame):
         rows = self.profile_config_tree.selection()
 
         if len(rows) == 0:
-            tkinter.messagebox.showinfo("Info", "Select a group to delete")
+            messagebox.showinfo("Info", "Select a group to delete")
 
         for row in rows[::-1]:
             print(row)
@@ -355,9 +355,7 @@ class ProfileTab(ttk.Frame):
         try:
             row = self.profile_config_tree.selection()[0]
         except LookupError:
-            tkinter.messagebox.showinfo(
-                "Info", "A row must be selected to insert it before"
-            )
+            messagebox.showinfo("Info", "A row must be selected to insert it before")
 
             return
 
