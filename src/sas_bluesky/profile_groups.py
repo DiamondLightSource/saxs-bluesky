@@ -179,12 +179,14 @@ class Profile(BaseModel):
         if analyse_profile:
             self.analyse_profile()
 
-    def seq_table(self):
-        table = SeqTable()
+    def seq_table(self) -> SeqTable:
+        seq_tables = (group.seq_row() for group in self.groups)
 
-        [table := table + group.seq_row() for group in self.groups]
+        seq = seq_tables.__next__()
+        for table in seq_tables:
+            seq = seq + table
 
-        return table
+        return seq
 
     @staticmethod
     def inputs():
