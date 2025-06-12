@@ -379,8 +379,6 @@ class ProfileTab(ttk.Frame):
         COLUMN_NAMES = [f.replace("_", " ").title() for f in COLUMN_NAMES]
         COLUMN_NAMES.insert(0, "Group ID")  # Add Group ID as the first column
 
-        # print(self.profile.groups[0].__dict__.keys())
-
         if not hasattr(self, "profile_config_tree"):
             self.profile_config_tree = EditableTableview(
                 self, columns=COLUMN_NAMES, show="headings"
