@@ -63,8 +63,8 @@ class Group(BaseModel):
     run_time: int
     run_units: str
     pause_trigger: str
-    wait_pulses: list[bool]
-    run_pulses: list[bool]
+    wait_pulses: list[int]
+    run_pulses: list[int]
     # created by model_post_init
     wait_time_s: float = 0.0
     run_time_s: float = 0.0
@@ -97,17 +97,17 @@ class Group(BaseModel):
             trigger=trigger,
             position=0,
             time1=in_micros(self.wait_time_s),
-            outa1=self.wait_pulses[0],
-            outb1=self.wait_pulses[1],
-            outc1=self.wait_pulses[2],
-            outd1=self.wait_pulses[3],
+            outa1=bool(self.wait_pulses[0]),
+            outb1=bool(self.wait_pulses[1]),
+            outc1=bool(self.wait_pulses[2]),
+            outd1=bool(self.wait_pulses[3]),
             # oute1 = self.wait_pulses[4],
             # outf1 = self.wait_pulses[5],
             time2=in_micros(self.run_time_s),
-            outa2=self.run_pulses[0],
-            outb2=self.run_pulses[1],
-            outc2=self.run_pulses[2],
-            outd2=self.run_pulses[3],
+            outa2=bool(self.run_pulses[0]),
+            outb2=bool(self.run_pulses[1]),
+            outc2=bool(self.run_pulses[2]),
+            outd2=bool(self.run_pulses[3]),
             # oute2 = self.run_pulses[4],
             # outf2 = self.run_pulses[5],
         )
