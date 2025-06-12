@@ -81,7 +81,7 @@ class Group(BaseModel):
         self.run_time_s = self.run_time * ncdcore.to_seconds(self.run_units)
         self.group_duration = (self.wait_time_s + self.run_time_s) * self.frames
 
-    def seq_row(self):
+    def seq_row(self) -> SeqTable:
         self.recalc_times()
 
         if not self.pause_trigger:
@@ -92,7 +92,7 @@ class Group(BaseModel):
         else:
             trigger = eval(f"SeqTrigger.{self.pause_trigger}")
 
-        seq_row = SeqTable.row(
+        seq_table = SeqTable.row(
             repeats=self.frames,
             trigger=trigger,
             position=0,
@@ -112,7 +112,7 @@ class Group(BaseModel):
             # outf2 = self.run_pulses[5],
         )
 
-        return seq_row
+        return seq_table
 
 
 class Profile(BaseModel):
