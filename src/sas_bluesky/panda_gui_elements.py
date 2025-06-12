@@ -111,9 +111,7 @@ class EditableTableview(ttk.Treeview):
                     columns=self.kwargs["columns"],
                 )
             if PULSEBLOCKASENTRYBOX:
-                self.Popup = EntryPopup(
-                    self, rowid, int(column[1:]) - 1, text, entrytype=list
-                )
+                self.Popup = EntryPopup(self, rowid, int(column[1:]) - 1, text)
                 self.Popup.place(
                     x=x, y=y + pady, width=width, height=height, anchor="w"
                 )
