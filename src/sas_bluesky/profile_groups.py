@@ -225,14 +225,10 @@ class ProfileLoader:
         with open(config_filepath, "rb") as file:
             print("Using config:", config_filepath)
 
-            if config_filepath.endswith(".yaml") or config_filepath.endswith(".yml"):
-                try:
-                    config = yaml.full_load(file)
-                except TypeError:
-                    print("Must be a yaml file")
-
             if not os.path.exists(config_filepath):
                 raise FileNotFoundError(f"Cannot find file: {config_filepath}")
+
+            config = yaml.full_load(file)
 
             instrument = config["instrument"]
             experiment = config["experiment"]
@@ -277,9 +273,7 @@ class ProfileLoader:
 
                 profiles.append(n_profile)
 
-            self = ProfileLoader(profiles, instrument, experiment, detectors)
-
-            return self
+            return ProfileLoader(profiles, instrument, experiment, detectors)
 
     def to_dict(self) -> dict:
         exp_dict = {
