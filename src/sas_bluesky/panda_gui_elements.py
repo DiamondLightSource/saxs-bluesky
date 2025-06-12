@@ -330,9 +330,6 @@ class ProfileTab(ttk.Frame):
     def get_n_cycles_value(self):
         return int(self.n_cycles_entry_value.get())
 
-    def get_inhibit_value(self):
-        return bool(self.external_inhibit.get())
-
     def delete_last_groups_button_action(self):
         row_int = len(self.profile.groups) - 1
         self.profile.delete_group(id=row_int)
