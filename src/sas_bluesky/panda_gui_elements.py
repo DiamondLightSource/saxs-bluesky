@@ -538,7 +538,6 @@ class ProfileTab(ttk.Frame):
     def commit_and_plot(self):
         # self.edit_config_for_profile()
         self.parent.commit_config()
-        self.profile.plot_triggering()
 
     # def focus_out_generate_info_boxes(event):
     #     self.generate_info_boxes()
