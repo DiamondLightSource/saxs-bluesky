@@ -223,7 +223,10 @@ class CheckButtonPopup(ttk.Checkbutton):
     def create_checkbuttons(self):
         for pulse in range(PULSEBLOCKS):
             value = ncdcore.str2bool(str(self.pulse_vals[pulse]))
-            var = tkinter.IntVar(value=int(value))
+            if value is None:
+                raise ValueError("Pulse value is None")
+            else:
+                var = tkinter.IntVar(value=int(value))
 
             self.option_var[pulse] = var
 
