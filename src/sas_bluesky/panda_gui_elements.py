@@ -239,7 +239,6 @@ class CheckButtonPopup(ttk.Checkbutton):
                 offvalue=0,
             )
 
-            CB.var = self.option_var[pulse]
             CB.grid(column=pulse, row=0, padx=5, pady=5, columnspan=1)
 
             self.option_var[pulse].set(1)
