@@ -528,7 +528,9 @@ class ProfileTab(ttk.Frame):
                 column=col_pos, row=0, padx=5, pady=5, sticky="nsw"
             )
 
-            self.multiplier_var = tkinter.StringVar(value=self.profile.multiplier[i])
+            self.multiplier_var = tkinter.StringVar(
+                value=str(self.profile.multiplier[i])
+            )
             tkinter.Entry(self, bd=1, width=10, textvariable=self.multiplier_var).grid(
                 column=col_pos, row=0, padx=5, pady=5, sticky="nes"
             )
