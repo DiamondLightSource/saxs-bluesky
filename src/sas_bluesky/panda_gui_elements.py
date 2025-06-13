@@ -514,6 +514,7 @@ class ProfileTab(ttk.Frame):
         for i in self.profile.groups:
             print(i)
 
+    # TODO: https://github.com/DiamondLightSource/sas-bluesky/issues/23
     def build_multiplier_choices(self):
         self.multiplier_var_options = []
 
