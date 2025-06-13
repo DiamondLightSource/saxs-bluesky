@@ -10,7 +10,6 @@ Python dataclasses and GUI as a replacement for NCDDetectors
 import os
 import tkinter
 from importlib import import_module
-from pathlib import Path
 from tkinter import filedialog, messagebox, simpledialog, ttk
 
 import matplotlib.pyplot as plt
@@ -19,8 +18,6 @@ import matplotlib.pyplot as plt
 # from stomp import Connection
 # from blueapi.client.event_bus import EventBusClient
 # from bluesky_stomp.messaging import StompClient, BasicAuthentication
-from blueapi.client.client import BlueapiClient  # , BlueapiRestClient
-from blueapi.config import ApplicationConfig, ConfigLoader
 from dodal.utils import get_beamline_name
 
 from sas_bluesky.panda_gui_elements import ProfileTab
@@ -171,18 +168,18 @@ class PandAGUI(tkinter.Tk):
 
         # option 3 - return bad request error when trying to run a plan
 
-        blueapi_config_path = Path(
-            os.path.join(
-                os.path.dirname(os.path.realpath(__file__)),
-                "blueapi_configs",
-                f"{BL}_blueapi_config.yaml",
-            )
-        )
-        # Removed until the blueapi integration works
-        # config_loader = ConfigLoader(ApplicationConfig)
-        # config_loader.use_values_from_yaml(blueapi_config_path)
-        # loaded_config = config_loader.load()
-        # self.client = BlueapiClient.from_config(loaded_config)
+        # TODO: https://github.com/DiamondLightSource/sas-bluesky/issues/22
+        ## blueapi_config_path = Path(
+        ##     os.path.join(
+        ##         os.path.dirname(os.path.realpath(__file__)),
+        ##         "blueapi_configs",
+        ##         f"{BL}_blueapi_config.yaml",
+        ##     )
+        ## )
+        ## config_loader = ConfigLoader(ApplicationConfig)
+        ## config_loader.use_values_from_yaml(blueapi_config_path)
+        ## loaded_config = config_loader.load()
+        ## self.client = BlueapiClient.from_config(loaded_config)
 
         self.window.mainloop()
 
@@ -347,26 +344,36 @@ class PandAGUI(tkinter.Tk):
         ax.set_xticklabels(labels, rotation=90)
         plt.show()
 
+    # TODO: https://github.com/DiamondLightSource/sas-bluesky/issues/22
     def get_plans(self):
-        plans = self.client.get_plans().plans
+        pass
+        # plans = self.client.get_plans().plans
 
-        for plan in plans:
-            print(plan, "\n\n")
+        # for plan in plans:
+        #     print(plan, "\n\n")
 
+    # TODO: https://github.com/DiamondLightSource/sas-bluesky/issues/22
     def get_devices(self):
-        devices = self.client.get_devices().devices
+        pass
+        # devices = self.client.get_devices().devices
 
-        for dev in devices:
-            print(dev, "\n\n")
+        # for dev in devices:
+        #     print(dev, "\n\n")
 
+    # TODO: https://github.com/DiamondLightSource/sas-bluesky/issues/22
     def stop_plans(self):
-        self.client.stop()
+        pass
+        # self.client.stop()
 
+    # TODO: https://github.com/DiamondLightSource/sas-bluesky/issues/22
     def pause_plans(self):
-        self.client.pause()
+        pass
+        # self.client.pause()
 
+    # TODO: https://github.com/DiamondLightSource/sas-bluesky/issues/22
     def resume_plans(self):
-        self.client.resume()
+        pass
+        # self.client.resume()
 
     # TODO: https://github.com/DiamondLightSource/sas-bluesky/issues/11
     def run_plan(self):
