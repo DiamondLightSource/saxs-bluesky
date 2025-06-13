@@ -6,7 +6,7 @@ from sas_bluesky.profile_groups import Profile, ProfileLoader
 SAS_bluesky_ROOT = Path(__file__)
 
 yaml_dir = os.path.join(
-    SAS_bluesky_ROOT.parent.parent, "src", "SAS_bluesky", "profile_yamls"
+    SAS_bluesky_ROOT.parent.parent, "src", "sas_bluesky", "profile_yamls"
 )
 
 print(yaml_dir)

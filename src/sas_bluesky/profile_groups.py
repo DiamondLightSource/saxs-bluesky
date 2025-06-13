@@ -63,12 +63,12 @@ class Group(BaseModel):
     run_time: int
     run_units: str
     pause_trigger: str
-    wait_pulses: list[bool]
-    run_pulses: list[bool]
+    wait_pulses: list[int]
+    run_pulses: list[int]
     # created by model_post_init
-    wait_time_s: float
-    run_time_s: float
-    group_duration: float
+    wait_time_s: float = 0.0
+    run_time_s: float = 0.0
+    group_duration: float = 0.0
 
     def model_post_init(self, __context: Any) -> None:
         self.run_units = self.run_units.upper()
@@ -81,7 +81,7 @@ class Group(BaseModel):
         self.run_time_s = self.run_time * ncdcore.to_seconds(self.run_units)
         self.group_duration = (self.wait_time_s + self.run_time_s) * self.frames
 
-    def seq_row(self):
+    def seq_row(self) -> SeqTable:
         self.recalc_times()
 
         if not self.pause_trigger:
@@ -92,27 +92,27 @@ class Group(BaseModel):
         else:
             trigger = eval(f"SeqTrigger.{self.pause_trigger}")
 
-        seq_row = SeqTable.row(
+        seq_table = SeqTable.row(
             repeats=self.frames,
             trigger=trigger,
             position=0,
             time1=in_micros(self.wait_time_s),
-            outa1=self.wait_pulses[0],
-            outb1=self.wait_pulses[1],
-            outc1=self.wait_pulses[2],
-            outd1=self.wait_pulses[3],
+            outa1=bool(self.wait_pulses[0]),
+            outb1=bool(self.wait_pulses[1]),
+            outc1=bool(self.wait_pulses[2]),
+            outd1=bool(self.wait_pulses[3]),
             # oute1 = self.wait_pulses[4],
             # outf1 = self.wait_pulses[5],
             time2=in_micros(self.run_time_s),
-            outa2=self.run_pulses[0],
-            outb2=self.run_pulses[1],
-            outc2=self.run_pulses[2],
-            outd2=self.run_pulses[3],
+            outa2=bool(self.run_pulses[0]),
+            outb2=bool(self.run_pulses[1]),
+            outc2=bool(self.run_pulses[2]),
+            outd2=bool(self.run_pulses[3]),
             # oute2 = self.run_pulses[4],
             # outf2 = self.run_pulses[5],
         )
 
-        return seq_row
+        return seq_table
 
 
 class Profile(BaseModel):
@@ -179,12 +179,14 @@ class Profile(BaseModel):
         if analyse_profile:
             self.analyse_profile()
 
-    def seq_table(self):
-        table = SeqTable()
+    def seq_table(self) -> SeqTable:
+        seq_tables = (group.seq_row() for group in self.groups)
 
-        [table := table + group.seq_row() for group in self.groups]
+        seq = seq_tables.__next__()
+        for table in seq_tables:
+            seq = seq + table
 
-        return table
+        return seq
 
     @staticmethod
     def inputs():
@@ -225,14 +227,10 @@ class ProfileLoader:
         with open(config_filepath, "rb") as file:
             print("Using config:", config_filepath)
 
-            if config_filepath.endswith(".yaml") or config_filepath.endswith(".yml"):
-                try:
-                    config = yaml.full_load(file)
-                except TypeError:
-                    print("Must be a yaml file")
-
             if not os.path.exists(config_filepath):
                 raise FileNotFoundError(f"Cannot find file: {config_filepath}")
+
+            config = yaml.full_load(file)
 
             instrument = config["instrument"]
             experiment = config["experiment"]
@@ -277,9 +275,7 @@ class ProfileLoader:
 
                 profiles.append(n_profile)
 
-            self = ProfileLoader(profiles, instrument, experiment, detectors)
-
-            return self
+            return ProfileLoader(profiles, instrument, experiment, detectors)
 
     def to_dict(self) -> dict:
         exp_dict = {
