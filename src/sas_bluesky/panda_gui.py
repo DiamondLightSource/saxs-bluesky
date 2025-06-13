@@ -33,7 +33,7 @@ __author__ = "Richard Dixey"
 ############################################################################################
 
 BL = get_beamline_name(os.environ["BEAMLINE"])
-BL_config = import_module(f"SAS_bluesky.beamline_configs.{BL}_config")
+BL_config = import_module(f"sas_bluesky.beamline_configs.{BL}_config")
 
 THEME_NAME = BL_config.THEME_NAME
 PULSEBLOCKS = BL_config.PULSEBLOCKS
@@ -178,10 +178,11 @@ class PandAGUI(tkinter.Tk):
                 f"{BL}_blueapi_config.yaml",
             )
         )
-        config_loader = ConfigLoader(ApplicationConfig)
-        config_loader.use_values_from_yaml(blueapi_config_path)
-        loaded_config = config_loader.load()
-        self.client = BlueapiClient.from_config(loaded_config)
+        # Removed until the blueapi integration works
+        # config_loader = ConfigLoader(ApplicationConfig)
+        # config_loader.use_values_from_yaml(blueapi_config_path)
+        # loaded_config = config_loader.load()
+        # self.client = BlueapiClient.from_config(loaded_config)
 
         self.window.mainloop()
 
