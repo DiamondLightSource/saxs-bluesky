@@ -10,7 +10,6 @@ Python dataclasses and GUI as a replacement for NCDDetectors
 import os
 import tkinter
 from importlib import import_module
-from pathlib import Path
 from tkinter import filedialog, messagebox, simpledialog, ttk
 
 import matplotlib.pyplot as plt
@@ -19,8 +18,6 @@ import matplotlib.pyplot as plt
 # from stomp import Connection
 # from blueapi.client.event_bus import EventBusClient
 # from bluesky_stomp.messaging import StompClient, BasicAuthentication
-from blueapi.client.client import BlueapiClient  # , BlueapiRestClient
-from blueapi.config import ApplicationConfig, ConfigLoader
 from dodal.utils import get_beamline_name
 
 from sas_bluesky.panda_gui_elements import ProfileTab
@@ -33,7 +30,7 @@ __author__ = "Richard Dixey"
 ############################################################################################
 
 BL = get_beamline_name(os.environ["BEAMLINE"])
-BL_config = import_module(f"SAS_bluesky.beamline_configs.{BL}_config")
+BL_config = import_module(f"sas_bluesky.beamline_configs.{BL}_config")
 
 THEME_NAME = BL_config.THEME_NAME
 PULSEBLOCKS = BL_config.PULSEBLOCKS
@@ -53,6 +50,139 @@ DEFAULT_PROFILE = BL_config.DEFAULT_PROFILE
 
 
 class PandAGUI(tkinter.Tk):
+    def __init__(self, panda_config_yaml=None):
+        user = os.environ.get("USER")
+
+        if user not in ["akz63626", "rjcd"]:  # check if I am runing this
+            try:
+                self.panda = return_connected_device(BL, "panda1")
+            except Exception:
+                answer = (
+                    messagebox.askyesno(
+                        "PandA not Connected",
+                        "PandA is not connected, if you continue things will not work."
+                        " Continue?",
+                    ),
+                )
+                if answer:
+                    pass
+                else:
+                    quit()
+
+        self.panda_config_yaml = panda_config_yaml
+        self.default_config_path = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)),
+            "profile_yamls",
+            "default_panda_config.yaml",
+        )
+
+        if self.panda_config_yaml is None:
+            self.configuration = ProfileLoader.read_from_yaml(self.default_config_path)
+        else:
+            self.configuration = ProfileLoader.read_from_yaml(self.panda_config_yaml)
+
+        if self.configuration.experiment is None:
+            user_input = simpledialog.askstring(
+                title="Experiment", prompt="Enter an experiment code:"
+            )
+
+            self.configuration.experiment = user_input
+
+        self.profiles = self.configuration.profiles
+
+        self.window = tkinter.Tk()
+        self.window.wm_resizable(True, True)
+        self.window.minsize(600, 200)
+        self.theme("alt")
+
+        menubar = tkinter.Menu(self.window)
+        filemenu = tkinter.Menu(menubar, tearoff=0)
+        filemenu.add_command(label="New", command=self.window.quit)
+        filemenu.add_command(label="Open", command=self.window.quit)
+        filemenu.add_command(label="Save", command=self.window.quit)
+        filemenu.add_separator()
+        filemenu.add_command(label="Exit", command=self.window.quit)
+        menubar.add_cascade(label="File", menu=filemenu)
+
+        helpmenu = tkinter.Menu(menubar, tearoff=0)
+        helpmenu.add_command(label="Help Index", command=self.window.quit)
+        helpmenu.add_command(label="About...", command=self.window.quit)
+        menubar.add_cascade(label="Help", menu=helpmenu)
+
+        self.window.config(menu=menubar)
+
+        self.build_exp_run_frame()
+
+        self.window.title("PandA Config")
+        self.notebook = ttk.Notebook(self.window)
+        self.notebook.pack(fill="both", side="top", expand=True)
+
+        for i in range(self.configuration.n_profiles):
+            ProfileTab(self, self.notebook, self.configuration, i)
+            tab_names = self.notebook.tabs()
+            proftab_object = self.notebook.nametowidget(tab_names[i])
+            self.delete_profile_button = ttk.Button(
+                proftab_object, text="Delete Profile", command=self.delete_profile_tab
+            )
+
+            self.delete_profile_button.grid(
+                column=7, row=10, padx=5, pady=5, columnspan=1, sticky="news"
+            )
+
+        ########################################################
+        self.build_exp_info_frame()
+        ######## #settings and buttons that apply to all profiles
+        self.build_global_settings_frame()
+
+        self.build_pulse_frame()
+        self.build_active_detectors_frame()
+
+        self.build_add_frame()
+        #################################################################
+
+        # option 1 - but doesn't work
+
+        # self.config = RestConfig(
+        #     host=f"{BL}-blueapi.diamond.ac.uk", port=443, protocol="https"
+        # )
+        # self.rest_client = BlueapiRestClient(self.config)
+
+        # self.stomp_connection = Connection([(f"{BL}-rabbitmq-daq.diamond.ac.uk",443)])
+        # self.stomp_connection.connect(BL, BL[::-1], wait=True)
+        # self.authentication = BasicAuthentication(username=BL, password=BL[::-1])
+        # self.event_bus = EventBusClient(
+        #     StompClient(
+        #         conn=self.stomp_connection,
+        #         authentication=self.authentication,
+        #     )
+        # )
+        # self.client = BlueapiClient(rest=self.rest_client, events=self.events_bus)
+
+        # option 2 - but doesn't work with tasks creation/running plans etc
+
+        # self.config = RestConfig(
+        #     host=f"{BL}-blueapi.diamond.ac.uk", port=443, protocol="https"
+        # )
+        # # self.rest_client = BlueapiRestClient(self.config)
+        # self.client = BlueapiClient(rest=self.rest_client, events=self.events_bus)
+
+        # option 3 - return bad request error when trying to run a plan
+
+        # TODO: https://github.com/DiamondLightSource/sas-bluesky/issues/22
+        ## blueapi_config_path = Path(
+        ##     os.path.join(
+        ##         os.path.dirname(os.path.realpath(__file__)),
+        ##         "blueapi_configs",
+        ##         f"{BL}_blueapi_config.yaml",
+        ##     )
+        ## )
+        ## config_loader = ConfigLoader(ApplicationConfig)
+        ## config_loader.use_values_from_yaml(blueapi_config_path)
+        ## loaded_config = config_loader.load()
+        ## self.client = BlueapiClient.from_config(loaded_config)
+
+        self.window.mainloop()
+
     def theme(self, theme_name):
         style = ttk.Style(self.window)
         print("All themes:", style.theme_names())
@@ -214,26 +344,36 @@ class PandAGUI(tkinter.Tk):
         ax.set_xticklabels(labels, rotation=90)
         plt.show()
 
+    # TODO: https://github.com/DiamondLightSource/sas-bluesky/issues/22
     def get_plans(self):
-        plans = self.client.get_plans().plans
+        pass
+        # plans = self.client.get_plans().plans
 
-        for plan in plans:
-            print(plan, "\n\n")
+        # for plan in plans:
+        #     print(plan, "\n\n")
 
+    # TODO: https://github.com/DiamondLightSource/sas-bluesky/issues/22
     def get_devices(self):
-        devices = self.client.get_devices().devices
+        pass
+        # devices = self.client.get_devices().devices
 
-        for dev in devices:
-            print(dev, "\n\n")
+        # for dev in devices:
+        #     print(dev, "\n\n")
 
+    # TODO: https://github.com/DiamondLightSource/sas-bluesky/issues/22
     def stop_plans(self):
-        self.client.stop()
+        pass
+        # self.client.stop()
 
+    # TODO: https://github.com/DiamondLightSource/sas-bluesky/issues/22
     def pause_plans(self):
-        self.client.pause()
+        pass
+        # self.client.pause()
 
+    # TODO: https://github.com/DiamondLightSource/sas-bluesky/issues/22
     def resume_plans(self):
-        self.client.resume()
+        pass
+        # self.client.resume()
 
     # TODO: https://github.com/DiamondLightSource/sas-bluesky/issues/11
     def run_plan(self):
@@ -399,138 +539,6 @@ class PandAGUI(tkinter.Tk):
         self.pulse_frame.pack(fill="both", side="left", expand=True)
         Outlabel = ttk.Label(self.pulse_frame, text="Enable Device")
         Outlabel.pack(fill="both", side="top", expand=True)
-
-    def __init__(self, panda_config_yaml=None):
-        user = os.environ.get("USER")
-
-        if user not in ["akz63626", "rjcd"]:  # check if I am runing this
-            try:
-                self.panda = return_connected_device(BL, "panda1")
-            except Exception:
-                answer = (
-                    messagebox.askyesno(
-                        "PandA not Connected",
-                        "PandA is not connected, if you continue things will not work."
-                        " Continue?",
-                    ),
-                )
-                if answer:
-                    pass
-                else:
-                    quit()
-
-        self.panda_config_yaml = panda_config_yaml
-        self.default_config_path = os.path.join(
-            os.path.dirname(os.path.realpath(__file__)),
-            "profile_yamls",
-            "default_panda_config.yaml",
-        )
-
-        if self.panda_config_yaml is None:
-            self.configuration = ProfileLoader.read_from_yaml(self.default_config_path)
-        else:
-            self.configuration = ProfileLoader.read_from_yaml(self.panda_config_yaml)
-
-        if self.configuration.experiment is None:
-            user_input = simpledialog.askstring(
-                title="Experiment", prompt="Enter an experiment code:"
-            )
-
-            self.configuration.experiment = user_input
-
-        self.profiles = self.configuration.profiles
-
-        self.window = tkinter.Tk()
-        self.window.wm_resizable(True, True)
-        self.window.minsize(600, 200)
-        self.theme("alt")
-
-        menubar = tkinter.Menu(self.window)
-        filemenu = tkinter.Menu(menubar, tearoff=0)
-        filemenu.add_command(label="New", command=self.window.quit)
-        filemenu.add_command(label="Open", command=self.window.quit)
-        filemenu.add_command(label="Save", command=self.window.quit)
-        filemenu.add_separator()
-        filemenu.add_command(label="Exit", command=self.window.quit)
-        menubar.add_cascade(label="File", menu=filemenu)
-
-        helpmenu = tkinter.Menu(menubar, tearoff=0)
-        helpmenu.add_command(label="Help Index", command=self.window.quit)
-        helpmenu.add_command(label="About...", command=self.window.quit)
-        menubar.add_cascade(label="Help", menu=helpmenu)
-
-        self.window.config(menu=menubar)
-
-        self.build_exp_run_frame()
-
-        self.window.title("PandA Config")
-        self.notebook = ttk.Notebook(self.window)
-        self.notebook.pack(fill="both", side="top", expand=True)
-
-        for i in range(self.configuration.n_profiles):
-            ProfileTab(self, self.notebook, self.configuration, i)
-            tab_names = self.notebook.tabs()
-            proftab_object = self.notebook.nametowidget(tab_names[i])
-            self.delete_profile_button = ttk.Button(
-                proftab_object, text="Delete Profile", command=self.delete_profile_tab
-            )
-
-            self.delete_profile_button.grid(
-                column=7, row=10, padx=5, pady=5, columnspan=1, sticky="news"
-            )
-
-        ########################################################
-        self.build_exp_info_frame()
-        ######## #settings and buttons that apply to all profiles
-        self.build_global_settings_frame()
-
-        self.build_pulse_frame()
-        self.build_active_detectors_frame()
-
-        self.build_add_frame()
-        #################################################################
-
-        # option 1 - but doesn't work
-
-        # self.config = RestConfig(
-        #     host=f"{BL}-blueapi.diamond.ac.uk", port=443, protocol="https"
-        # )
-        # self.rest_client = BlueapiRestClient(self.config)
-
-        # self.stomp_connection = Connection([(f"{BL}-rabbitmq-daq.diamond.ac.uk",443)])
-        # self.stomp_connection.connect(BL, BL[::-1], wait=True)
-        # self.authentication = BasicAuthentication(username=BL, password=BL[::-1])
-        # self.event_bus = EventBusClient(
-        #     StompClient(
-        #         conn=self.stomp_connection,
-        #         authentication=self.authentication,
-        #     )
-        # )
-        # self.client = BlueapiClient(rest=self.rest_client, events=self.events_bus)
-
-        # option 2 - but doesn't work with tasks creation/running plans etc
-
-        # self.config = RestConfig(
-        #     host=f"{BL}-blueapi.diamond.ac.uk", port=443, protocol="https"
-        # )
-        # # self.rest_client = BlueapiRestClient(self.config)
-        # self.client = BlueapiClient(rest=self.rest_client, events=self.events_bus)
-
-        # option 3 - return bad request error when trying to run a plan
-
-        blueapi_config_path = Path(
-            os.path.join(
-                os.path.dirname(os.path.realpath(__file__)),
-                "blueapi_configs",
-                f"{BL}_blueapi_config.yaml",
-            )
-        )
-        config_loader = ConfigLoader(ApplicationConfig)
-        config_loader.use_values_from_yaml(blueapi_config_path)
-        loaded_config = config_loader.load()
-        self.client = BlueapiClient.from_config(loaded_config)
-
-        self.window.mainloop()
 
 
 if __name__ == "__main__":

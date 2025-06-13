@@ -8,9 +8,9 @@ Python Elements for NCD PandA config GUI
 """
 
 import os
-import tkinter as tk
+import tkinter
 from pathlib import Path
-from tkinter import ttk
+from tkinter import messagebox, ttk
 
 from dodal.utils import get_beamline_name
 from ophyd_async.fastcs.panda import (
@@ -64,7 +64,11 @@ class EditableTableview(ttk.Treeview):
         column = self.identify_column(event.x)
 
         # get column position info
-        x, y, width, height = self.bbox(rowid, column)
+        bbox = self.bbox(rowid, column)
+        if isinstance(bbox, str):
+            raise ValueError("Bounding box invalid")
+        else:
+            x, y, width, height = bbox
 
         # y-axis offset
         pady = height // 2
@@ -107,9 +111,7 @@ class EditableTableview(ttk.Treeview):
                     columns=self.kwargs["columns"],
                 )
             if PULSEBLOCKASENTRYBOX:
-                self.Popup = EntryPopup(
-                    self, rowid, int(column[1:]) - 1, text, entrytype=list
-                )
+                self.Popup = EntryPopup(self, rowid, int(column[1:]) - 1, text)
                 self.Popup.place(
                     x=x, y=y + pady, width=width, height=height, anchor="w"
                 )
@@ -128,7 +130,7 @@ class DropdownPopup(ttk.Combobox):
     def __init__(self, parent, rowid, column, text, options, **kw):
         ttk.Style().configure("pad.TEntry", padding="1 1 1 1")
 
-        self.option_var = tk.StringVar()
+        self.option_var = tkinter.StringVar()
         self.tv = parent
         self.rowid = rowid
         self.column = column
@@ -171,16 +173,16 @@ class DropdownPopup(ttk.Combobox):
 
 class CheckButtonPopup(ttk.Checkbutton):
     def __init__(self, parent, rowid, column, x, y, columns, **kw):
-        self.parent = parent
-        self.rowid = rowid
-        self.column = column
+        self.parent: EditableTableview = parent
+        self.rowid: int = rowid
+        self.column: int = column
 
         self.row_num = int(rowid[-2::], 16) - 1
 
         w = 420  # width for the Tk root
         h = 50  # height for the Tk root
 
-        self.root = tk.Toplevel()  ##HOLY MOLY
+        self.root = tkinter.Toplevel()  ##HOLY MOLY
         # THIS WAS TK.TK AND IT WAS CAUSING SO MANY ISSUES,
         # USE TOPLEVEL WHEN OPENING NEW TEMP WINDOW.
         # IT WAS CUASING THE CHECKBUTTON TO ASSIGN TO SOMETHING ELSE.
@@ -190,8 +192,8 @@ class CheckButtonPopup(ttk.Checkbutton):
         self.root.title(f"{columns[column]} - Group: {self.row_num}")
 
         vals = self.parent.item(self.rowid, "values")
-        self.vals = list(vals)
-        self.pulse_vals = self.vals[self.column].split()
+        self.vals: list[str] = list(vals)
+        self.pulse_vals: list[str] = self.vals[self.column].split()
 
         self.option_var = {}
         self.checkbuttons = {}
@@ -208,7 +210,7 @@ class CheckButtonPopup(ttk.Checkbutton):
 
         # set the dimensions of the screen
         # and where it is placed
-        self.root.geometry(f"{w}x{h}+{x - 60}+{y}")
+        self.root.geometry("%dx%d+%d+%d" % (w, h, x - 60, y))  # NOQA: UP031 The geometry call needs it specified in this way
         self.save_pulse_button = ttk.Button(
             self.root, text="Ok", command=self.on_return
         ).grid(column=PULSEBLOCKS, row=0, padx=5, pady=5, columnspan=1, sticky="e")
@@ -219,11 +221,14 @@ class CheckButtonPopup(ttk.Checkbutton):
     def create_checkbuttons(self):
         for pulse in range(PULSEBLOCKS):
             value = ncdcore.str2bool(str(self.pulse_vals[pulse]))
-            var = tk.IntVar(value=int(value))
+            if value is None:
+                raise ValueError("Pulse value is None")
+            else:
+                var = tkinter.IntVar(value=int(value))
 
             self.option_var[pulse] = var
 
-            CB = tk.Checkbutton(
+            CB = tkinter.Checkbutton(
                 self.root,
                 text=f"Pulse: {pulse}",
                 variable=self.option_var[pulse],
@@ -232,7 +237,6 @@ class CheckButtonPopup(ttk.Checkbutton):
                 offvalue=0,
             )
 
-            CB.var = self.option_var[pulse]
             CB.grid(column=pulse, row=0, padx=5, pady=5, columnspan=1)
 
             self.option_var[pulse].set(1)
@@ -259,9 +263,9 @@ class CheckButtonPopup(ttk.Checkbutton):
             val = str(self.option_var[pulse].get())
             self.pulse_vals[pulse] = val
 
-        self.pulse_vals = " ".join(self.pulse_vals)
+        pulse_vals = " ".join(self.pulse_vals)
 
-        self.vals[self.column] = self.pulse_vals
+        self.vals[self.column] = pulse_vals
 
         self.parent.item(self.rowid, values=self.vals)
         self.root.destroy()
@@ -326,9 +330,6 @@ class ProfileTab(ttk.Frame):
     def get_n_cycles_value(self):
         return int(self.n_cycles_entry_value.get())
 
-    def get_inhibit_value(self):
-        return bool(self.external_inhibit.get())
-
     def delete_last_groups_button_action(self):
         row_int = len(self.profile.groups) - 1
         self.profile.delete_group(id=row_int)
@@ -339,7 +340,7 @@ class ProfileTab(ttk.Frame):
         rows = self.profile_config_tree.selection()
 
         if len(rows) == 0:
-            tk.messagebox.showinfo("Info", "Select a group to delete")
+            messagebox.showinfo("Info", "Select a group to delete")
 
         for row in rows[::-1]:
             print(row)
@@ -355,7 +356,7 @@ class ProfileTab(ttk.Frame):
         try:
             row = self.profile_config_tree.selection()[0]
         except LookupError:
-            tk.messagebox.showinfo("Info", "A row must be selected to insert it before")
+            messagebox.showinfo("Info", "A row must be selected to insert it before")
 
             return
 
@@ -374,8 +375,6 @@ class ProfileTab(ttk.Frame):
         COLUMN_NAMES = list(self.profile.groups[0].__dict__.keys())[0:8]
         COLUMN_NAMES = [f.replace("_", " ").title() for f in COLUMN_NAMES]
         COLUMN_NAMES.insert(0, "Group ID")  # Add Group ID as the first column
-
-        # print(self.profile.groups[0].__dict__.keys())
 
         if not hasattr(self, "profile_config_tree"):
             self.profile_config_tree = EditableTableview(
@@ -515,6 +514,7 @@ class ProfileTab(ttk.Frame):
         for i in self.profile.groups:
             print(i)
 
+    # TODO: https://github.com/DiamondLightSource/sas-bluesky/issues/23
     def build_multiplier_choices(self):
         self.multiplier_var_options = []
 
@@ -529,8 +529,10 @@ class ProfileTab(ttk.Frame):
                 column=col_pos, row=0, padx=5, pady=5, sticky="nsw"
             )
 
-            self.multiplier_var = tk.StringVar(value=self.profile.multiplier[i])
-            tk.Entry(self, bd=1, width=10, textvariable=self.multiplier_var).grid(
+            self.multiplier_var = tkinter.StringVar(
+                value=str(self.profile.multiplier[i])
+            )
+            tkinter.Entry(self, bd=1, width=10, textvariable=self.multiplier_var).grid(
                 column=col_pos, row=0, padx=5, pady=5, sticky="nes"
             )
 
@@ -539,7 +541,6 @@ class ProfileTab(ttk.Frame):
     def commit_and_plot(self):
         # self.edit_config_for_profile()
         self.parent.commit_config()
-        self.profile.plot_triggering()
 
     # def focus_out_generate_info_boxes(event):
     #     self.generate_info_boxes()
@@ -585,7 +586,7 @@ class ProfileTab(ttk.Frame):
             column=0, row=0, padx=5, pady=5, sticky="e"
         )
 
-        self.clicked_start_trigger = tk.StringVar()
+        self.clicked_start_trigger = tkinter.StringVar()
         ttk.OptionMenu(
             self,
             self.clicked_start_trigger,
@@ -599,8 +600,8 @@ class ProfileTab(ttk.Frame):
             column=0, row=1, padx=5, pady=5, sticky="e"
         )
 
-        self.n_cycles_entry_value = tk.IntVar(self, value=self.profile.cycles)
-        self.cycles_entry = tk.Entry(
+        self.n_cycles_entry_value = tkinter.IntVar(self, value=self.profile.cycles)
+        self.cycles_entry = tkinter.Entry(
             self, bd=1, width=15, textvariable=self.n_cycles_entry_value
         )
 
