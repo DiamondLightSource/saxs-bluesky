@@ -173,9 +173,9 @@ class DropdownPopup(ttk.Combobox):
 
 class CheckButtonPopup(ttk.Checkbutton):
     def __init__(self, parent, rowid, column, x, y, columns, **kw):
-        self.parent = parent
-        self.rowid = rowid
-        self.column = column
+        self.parent: EditableTableview = parent
+        self.rowid: int = rowid
+        self.column: int = column
 
         self.row_num = int(rowid[-2::], 16) - 1
 
@@ -192,8 +192,8 @@ class CheckButtonPopup(ttk.Checkbutton):
         self.root.title(f"{columns[column]} - Group: {self.row_num}")
 
         vals = self.parent.item(self.rowid, "values")
-        self.vals = list(vals)
-        self.pulse_vals = self.vals[self.column].split()
+        self.vals: list[str] = list(vals)
+        self.pulse_vals: list[str] = self.vals[self.column].split()
 
         self.option_var = {}
         self.checkbuttons = {}
@@ -263,9 +263,9 @@ class CheckButtonPopup(ttk.Checkbutton):
             val = str(self.option_var[pulse].get())
             self.pulse_vals[pulse] = val
 
-        self.pulse_vals = " ".join(self.pulse_vals)
+        pulse_vals = " ".join(self.pulse_vals)
 
-        self.vals[self.column] = self.pulse_vals
+        self.vals[self.column] = pulse_vals
 
         self.parent.item(self.rowid, values=self.vals)
         self.root.destroy()
