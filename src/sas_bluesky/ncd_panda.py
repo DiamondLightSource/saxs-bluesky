@@ -7,7 +7,6 @@ from typing import Annotated
 import bluesky.plan_stubs as bps
 import bluesky.preprocessors as bpp
 import numpy as np
-from bluesky.protocols import Stageable
 from bluesky.run_engine import RunEngine
 from bluesky.utils import MsgGenerator
 from dodal.common import inject
@@ -169,7 +168,7 @@ def disarm_panda_pulses(
 
 
 def stage_and_prepare_detectors(
-    detectors: list[Stageable],
+    detectors: list[StandardDetector],
     flyer: StandardFlyer,
     trigger_info: TriggerInfo,
     group="det_atm",
