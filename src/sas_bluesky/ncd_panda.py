@@ -311,7 +311,7 @@ def check_tetramm():
         raise
 
 
-def inject_all(active_detector_names: list[StandardDetector]):
+def inject_all(active_detector_names: list[str]) -> list[StandardDetector]:
     """
 
     Injects all of the devices into the dodal common beamline devices,
@@ -319,7 +319,7 @@ def inject_all(active_detector_names: list[StandardDetector]):
 
     """
 
-    active_detectors = tuple([inject(dev) for dev in active_detector_names])
+    active_detectors = [inject(dev) for dev in active_detector_names]
 
     return active_detectors
 
