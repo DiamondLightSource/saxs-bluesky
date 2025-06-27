@@ -9,16 +9,13 @@ import bluesky.preprocessors as bpp
 import numpy as np
 from bluesky.run_engine import RunEngine
 from bluesky.utils import MsgGenerator
-
-# from dodal.beamlines.i22 import saxs, waxs, i0, it, TetrammDetector, panda1
-# from dodal.plan_stubs.data_session import attach_data_session_metadata_decorator
 from dodal.common import inject
-from dodal.common.beamlines.beamline_utils import get_path_provider, set_path_provider
+from dodal.common.beamlines.beamline_utils import set_path_provider
 from dodal.common.visit import RemoteDirectoryServiceClient, StaticVisitPathProvider
 from dodal.log import LOGGER
+from dodal.plan_stubs.data_session import attach_data_session_metadata_decorator
 from dodal.utils import get_beamline_name
 from ophyd_async.core import (
-    AsyncStatus,
     DetectorTrigger,
     StandardDetector,
     StandardFlyer,
@@ -26,22 +23,15 @@ from ophyd_async.core import (
     wait_for_value,
 )
 from ophyd_async.fastcs.panda import HDFPanda, SeqTableInfo, StaticSeqTableTriggerLogic
-
-#     PandaPcompDirection,
-#     PcompInfo,
-#     SeqTrigger,
-#     SeqTable,
-# )
 from ophyd_async.plan_stubs import ensure_connected, get_current_settings
 from pydantic import validate_call  # ,NonNegativeFloat,
-from pydantic_core import from_json
 
 from sas_bluesky.beamline_configs import b21_config, i22_config
+from sas_bluesky.plans.utils import DEFAULT_PANDA, FAST_DETECTORS
 from sas_bluesky.profile_groups import Profile, ProfileLoader  # Group
 from sas_bluesky.stubs.PandAStubs import (
     fly_and_collect_with_wait,
     load_settings_from_yaml,
-    make_beamline_devices,
     return_connected_device,
     upload_yaml_to_panda,
 )
@@ -84,18 +74,17 @@ def set_experiment_directory(beamline: str, visit_path: Path):
 
     print("should not require this to also be set in i22.py")
 
-    set_path_provider(
-        StaticVisitPathProvider(
-            beamline,
-            Path(visit_path),
-            client=RemoteDirectoryServiceClient(f"http://{beamline}-control:8088/api"),
-        )
+    path_provider = StaticVisitPathProvider(
+        beamline,
+        Path(visit_path),
+        client=RemoteDirectoryServiceClient(f"http://{beamline}-control:8088/api"),
     )
+    set_path_provider(path_provider)
 
     suffix = datetime.now().strftime("_%Y%m%d%H%M%S")
 
     async def set_panda_dir():
-        await get_path_provider().update(directory=visit_path, suffix=suffix)
+        await path_provider.update(directory=visit_path, suffix=suffix)
 
     yield from bps.wait_for([set_panda_dir])
 
@@ -124,32 +113,7 @@ def modify_panda_seq_table(panda: HDFPanda, profile: Profile, n_seq=1):
     yield from bps.wait(group=group, timeout=GENERAL_TIMEOUT)
 
 
-def set_pulses(
-    panda: HDFPanda,
-    n_pulse: int,
-    pulse_step: int,
-    frequency_multiplier: int,
-    step_units="ms",
-    width_unit="ms",
-):
-    group = "modify-pulse"
-    # yield from bps.abs_set(panda.pulse[int(n_pulse)].trig_edge, "Rising", group=group)
-    yield from bps.abs_set(panda.pulse[int(n_pulse)].delay, 0, group=group)
-    yield from bps.abs_set(panda.pulse[int(n_pulse)].width, 1, group=group)
-    yield from bps.abs_set(
-        panda.pulse[int(n_pulse)].width_units, width_unit, group=group
-    )
-    yield from bps.abs_set(
-        panda.pulse[int(n_pulse)].pulses, frequency_multiplier, group=group
-    )
-    yield from bps.abs_set(panda.pulse[int(n_pulse)].step, pulse_step, group=group)
-    yield from bps.abs_set(
-        panda.pulse[int(n_pulse)].step_units, step_units, group=group
-    )
-    yield from bps.wait(group=group, timeout=GENERAL_TIMEOUT)
-
-
-def arm_panda_pulses(panda: HDFPanda, pulses: list | None, n_seq=1, group="arm_panda"):
+def arm_panda_pulses(panda: HDFPanda, pulses: list[int], n_seq=1, group="arm_panda"):
     """
 
     Takes a HDFPanda and a list of integers corresponding
@@ -162,21 +126,18 @@ def arm_panda_pulses(panda: HDFPanda, pulses: list | None, n_seq=1, group="arm_p
 
     """
 
-    if isinstance(pulses, int):
-        pulses = list(range(PULSEBLOCKS) + 1)
-
-    # yield from wait_until_complete(panda.seq[n_seq].enable, PANDA.Enable.value)
-
     for n_pulse in pulses:
         yield from bps.abs_set(
-            panda.pulse[int(n_pulse)].enable, PANDA.Enable.value, group=group
-        )  # type: ignore
+            panda.pulse[int(n_pulse)].enable,  # type: ignore
+            PANDA.Enable.value,
+            group=group,
+        )
 
     yield from bps.wait(group=group, timeout=GENERAL_TIMEOUT)
 
 
 def disarm_panda_pulses(
-    panda: HDFPanda, pulses: list | None, n_seq=1, group="disarm_panda"
+    panda: HDFPanda, pulses: list[int], n_seq=1, group="disarm_panda"
 ):
     """
 
@@ -190,59 +151,21 @@ def disarm_panda_pulses(
 
     """
 
-    if isinstance(pulses, int):
-        pulses = list(range(PULSEBLOCKS) + 1)
-
     for n_pulse in pulses:
         yield from bps.abs_set(
-            panda.pulse[n_pulse].enable, PANDA.Disable.value, group=group
+            panda.pulse[n_pulse].enable,  # type: ignore
+            PANDA.Disable.value,
+            group=group,
         )
 
     yield from bps.wait(group=group, timeout=GENERAL_TIMEOUT)
 
 
-def start_sequencer(panda: HDFPanda, n_seq: int = 1, group="start"):
-    """
-
-    Takes an HDFPanda, the number of the sequencer block
-
-    and sets the sequencer block to enable, waits for it to complete and then if
-
-    conintuous is not True
-
-    it will wait for the sequnce to finish and disable the sequencer
-
-    """
-
-    yield from bps.abs_set(panda.seq[n_seq].enable, PANDA.Enable.value, group=group)  # type: ignore
-    yield from bps.wait(group=group, timeout=GENERAL_TIMEOUT)
-
-    # even though the signal might be sent it may not actually have happened yet
-    # so so until it's true before continuing
-    yield from wait_until_complete(panda.seq[DEFAULT_SEQ].active, True)
-
-
-def disable_sequencer(
-    panda: HDFPanda, n_seq: int = 1, wait: bool = False, group="stop"
-):
-    """
-
-    Disables the HDFPanda sequencer block.
-
-    Takes an HDF panda and the number fo the sequencer block
-
-    """
-
-    if wait:
-        # wait for this value to be true
-        yield from wait_until_complete(panda.seq[n_seq].active, False)
-
-    yield from bps.abs_set(panda.seq[n_seq].enable, PANDA.Disable.value, group=group)
-    yield from bps.wait(group=group, timeout=GENERAL_TIMEOUT)
-
-
 def stage_and_prepare_detectors(
-    detectors: list, flyer: StandardFlyer, trigger_info: TriggerInfo, group="det_atm"
+    detectors: list[StandardDetector],
+    flyer: StandardFlyer,
+    trigger_info: TriggerInfo,
+    group="det_atm",
 ):
     """
 
@@ -259,7 +182,9 @@ def stage_and_prepare_detectors(
     yield from bps.wait(group=group, timeout=GENERAL_TIMEOUT)
 
 
-def return_deadtime(detectors: list, exposure: float = 1.0) -> np.ndarray:
+def return_deadtime(
+    detectors: list[StandardDetector], exposure: float = 1.0
+) -> np.ndarray:
     """
     Given a list of connected detector devices, and an exposure time,
     it returns an array of the deadtime for each detector
@@ -291,22 +216,6 @@ def set_panda_output(
     yield from bps.wait(group=group, timeout=GENERAL_TIMEOUT)
 
 
-@AsyncStatus.wrap
-async def update_path():
-    path_provider = get_path_provider()
-    await path_provider.update()
-
-    return path_provider
-
-
-@AsyncStatus.wrap
-async def return_run_number():
-    path_provider = get_path_provider()
-    run = await path_provider.data_session()
-
-    return run
-
-
 def generate_repeated_trigger_info(
     profile: Profile,
     max_deadtime: float,
@@ -321,31 +230,15 @@ def generate_repeated_trigger_info(
 
     for multiplier in profile.multiplier:
         trigger_info = TriggerInfo(
-            number_of_triggers=n_triggers * n_cycles,
+            number_of_events=n_triggers * n_cycles,
             trigger=trigger,
             deadtime=max_deadtime,
             livetime=profile.duration,
-            multiplier=multiplier,
-            frame_timeout=None,
+            exposures_per_event=multiplier,
+            exposure_timeout=None,
         )
 
         repeated_trigger_info.append(trigger_info)
-
-
-def prepare_pulses(panda: HDFPanda):
-    """
-
-    Takes a panda and prepares the pulses,
-    this is the last thing to do before starting the run
-
-    """
-
-    group = "panda_pulses"
-    for pulse in range(1, PULSEBLOCKS + 1):
-        yield from bps.prepare(panda.pulse[pulse], group=group)
-
-    # pulse_data = yield from bps.rd(panda.seq[DEFAULT_SEQ])
-    yield from bps.wait(group=group, timeout=GENERAL_TIMEOUT)
 
 
 def check_and_apply_panda_settings(panda: HDFPanda, panda_name: str) -> MsgGenerator:
@@ -410,7 +303,7 @@ def check_tetramm():
         raise
 
 
-def inject_all(active_detector_names: list[StandardDetector]):
+def inject_all(active_detector_names: list[str]) -> list[StandardDetector]:
     """
 
     Injects all of the devices into the dodal common beamline devices,
@@ -418,7 +311,7 @@ def inject_all(active_detector_names: list[StandardDetector]):
 
     """
 
-    active_detectors = tuple([inject(dev) for dev in active_detector_names])
+    active_detectors = [inject(dev) for dev in active_detector_names]
 
     return active_detectors
 
@@ -449,8 +342,6 @@ def show_deadtime(detector_deadtime, active_detector_names):
         LOGGER.info(f"deadtime for {dn} is {dt}")
 
 
-# only enable if can't update the path provider, otherwise updates twice
-# @attach_data_session_metadata_decorator()
 @validate_call(config={"arbitrary_types_allowed": True})
 def configure_panda_triggering(
     beamline: Annotated[str, "Name of the beamline to run the scan on eg. i22 or b21."],
@@ -459,17 +350,18 @@ def configure_panda_triggering(
         "Experiment name eg. cm12345. This will go into /dls/data/beamline/experiment",
     ],
     profile: Annotated[
-        Profile | str,
+        Profile,
         (
             "Profile or json of a Profile containing the infomation required to setup ",
             "the panda, triggers, times etc",
         ),
     ],
-    active_detector_names: Annotated[
-        list, "List of str of the detector names, eg. saxs, waxs, i0, it"
-    ] = None,
+    detectors: Annotated[
+        set[StandardDetector],
+        "List of str of the detector names, eg. saxs, waxs, i0, it",
+    ] = FAST_DETECTORS,
     run_immediately: bool = True,
-    panda_name="panda1",
+    panda: HDFPanda = DEFAULT_PANDA,
     force_load=True,
 ) -> MsgGenerator[None]:
     """
@@ -481,19 +373,6 @@ def configure_panda_triggering(
     settings and then may or may not run the flyscanning
 
     """
-
-    if active_detector_names is None:
-        active_detector_names = ["saxs", "waxs"]
-    if isinstance(profile, str):
-        # convert from json to Profile object
-        profile = Profile.model_validate(from_json(profile, allow_partial=True))
-    elif isinstance(profile, Profile):
-        pass
-    else:
-        raise TypeError(
-            "Profile must be a Profile object or a json string of a Profile object"
-        )
-
     visit_path = os.path.join(
         f"/dls/{beamline}/data", str(datetime.now().year), experiment
     )
@@ -501,11 +380,7 @@ def configure_panda_triggering(
     LOGGER.info(f"Data will be saved in {visit_path}")
     print(f"Data will be saved in {visit_path}")
 
-    yield from set_experiment_directory(beamline, visit_path)
-
-    # could this be done faster with make_devices instead of make_all_devices?
-    beamline_devices = make_beamline_devices(beamline)
-    panda = beamline_devices[panda_name]
+    yield from set_experiment_directory(beamline, Path(visit_path))
 
     try:
         yield from ensure_connected(panda)  # ensure the panda is connected
@@ -513,34 +388,19 @@ def configure_panda_triggering(
         LOGGER.error(f"Failed to connect to PandA: {e}")
         raise
 
-    ####################
-    # v CHECK TO SEE IF THIS CAN BE PERFORMED IN A SMARTER WAY v
+    print("\n", detectors, "\n")
+    LOGGER.info("\n", detectors, "\n")
 
-    try:
-        active_detectors = inject_all(active_detector_names)
-    except Exception as e:
-        LOGGER.error(f"Failed to inject active detectors: {e}")
-        # must be a tuple to be hashable and therefore work with bps.stage_all
-        active_detectors = tuple(
-            [beamline_devices[det_name] for det_name in active_detector_names]
-        )
-    ######################
-
-    print("\n", active_detectors, "\n")
-    LOGGER.info("\n", active_detectors, "\n")
-
-    for device, device_name in zip(
-        active_detectors, active_detector_names, strict=True
-    ):
+    for device in detectors:
         try:
             yield from ensure_connected(device)
-            print(f"{device_name} is connected")
+            print(f"{device.name} is connected")
         except Exception as e:
             LOGGER.error(f"{device} not connected: {e}")
             raise
 
     detector_deadtime = return_deadtime(
-        detectors=active_detectors, exposure=profile.duration
+        detectors=list(detectors), exposure=profile.duration
     )
 
     max_deadtime = max(detector_deadtime)
@@ -548,10 +408,12 @@ def configure_panda_triggering(
 
     # load Panda setting to panda
     if force_load is True:
-        yield from check_and_apply_panda_settings(panda, panda_name)
+        yield from check_and_apply_panda_settings(panda, panda.name)
 
     # because python counts from 0, but panda counts from 1
-    active_pulses = profile.active_out + 1
+    p = profile.active_out + 1
+    active_pulses: list[int] = p.tolist()
+
     n_cycles = profile.cycles
     # seq table should be grabbed from the panda and used instead,
     # in order to decouple run from setup panda
@@ -572,7 +434,7 @@ def configure_panda_triggering(
         deadtime=max_deadtime,
         livetime=np.amax(profile.duration_per_cycle),
         exposures_per_event=1,
-        frame_timeout=duration,
+        exposure_timeout=duration,
     )
 
     ############################################################
@@ -587,16 +449,17 @@ def configure_panda_triggering(
 
     ###change the sequence table
     # this is the last thing setting up the panda
-    yield from stage_and_prepare_detectors(active_detectors, flyer, trigger_info)
+    yield from stage_and_prepare_detectors(list(detectors), flyer, trigger_info)
 
     if run_immediately:
-        yield from run_panda_triggering(panda, active_detectors, active_pulses)
+        yield from run_panda_triggering(panda, detectors, active_pulses)
 
 
+@attach_data_session_metadata_decorator
 @bpp.run_decorator()  #    # open/close run
 @validate_call(config={"arbitrary_types_allowed": True})
 def run_panda_triggering(
-    panda: HDFPanda, active_detectors, active_pulses, group="run"
+    panda: HDFPanda, active_detectors, active_pulses: list[int], group="run"
 ) -> MsgGenerator[None]:
     """
 
@@ -698,7 +561,6 @@ if __name__ == "__main__":
             "i22",
             "cm40643-3/bluesky",
             profile,
-            active_detector_names=["saxs", "waxs", "i0", "it"],
             force_load=False,
         )
     )
