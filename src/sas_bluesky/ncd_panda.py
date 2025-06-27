@@ -9,13 +9,13 @@ import bluesky.preprocessors as bpp
 import numpy as np
 from bluesky.run_engine import RunEngine
 from bluesky.utils import MsgGenerator
-
-# from dodal.beamlines.i22 import saxs, waxs, i0, it, TetrammDetector, panda1
-# from dodal.plan_stubs.data_session import attach_data_session_metadata_decorator
 from dodal.common import inject
 from dodal.common.beamlines.beamline_utils import get_path_provider, set_path_provider
 from dodal.common.visit import RemoteDirectoryServiceClient, StaticVisitPathProvider
 from dodal.log import LOGGER
+
+# from dodal.beamlines.i22 import saxs, waxs, i0, it, TetrammDetector, panda1
+from dodal.plan_stubs.data_session import attach_data_session_metadata_decorator
 from dodal.utils import get_beamline_name
 from ophyd_async.core import (
     AsyncStatus,
@@ -592,6 +592,7 @@ def configure_panda_triggering(
         yield from run_panda_triggering(panda, active_detectors, active_pulses)
 
 
+@attach_data_session_metadata_decorator
 @bpp.run_decorator()  #    # open/close run
 @validate_call(config={"arbitrary_types_allowed": True})
 def run_panda_triggering(
