@@ -84,18 +84,17 @@ def set_experiment_directory(beamline: str, visit_path: Path):
 
     print("should not require this to also be set in i22.py")
 
-    set_path_provider(
-        StaticVisitPathProvider(
-            beamline,
-            Path(visit_path),
-            client=RemoteDirectoryServiceClient(f"http://{beamline}-control:8088/api"),
-        )
+    path_provider = StaticVisitPathProvider(
+        beamline,
+        Path(visit_path),
+        client=RemoteDirectoryServiceClient(f"http://{beamline}-control:8088/api"),
     )
+    set_path_provider(path_provider)
 
     suffix = datetime.now().strftime("_%Y%m%d%H%M%S")
 
     async def set_panda_dir():
-        await get_path_provider().update(directory=visit_path, suffix=suffix)
+        await path_provider.update(directory=visit_path, suffix=suffix)
 
     yield from bps.wait_for([set_panda_dir])
 
