@@ -10,7 +10,7 @@ import numpy as np
 from bluesky.run_engine import RunEngine
 from bluesky.utils import MsgGenerator
 from dodal.common import inject
-from dodal.common.beamlines.beamline_utils import get_path_provider, set_path_provider
+from dodal.common.beamlines.beamline_utils import set_path_provider
 from dodal.common.visit import RemoteDirectoryServiceClient, StaticVisitPathProvider
 from dodal.log import LOGGER
 
@@ -18,7 +18,6 @@ from dodal.log import LOGGER
 from dodal.plan_stubs.data_session import attach_data_session_metadata_decorator
 from dodal.utils import get_beamline_name
 from ophyd_async.core import (
-    AsyncStatus,
     DetectorTrigger,
     StandardDetector,
     StandardFlyer,
@@ -288,22 +287,6 @@ def set_panda_output(
     output_attr = getattr(panda, f"{output_type.lower()}out")[int(output)]
     yield from bps.abs_set(output_attr.val, state_value, group=group)
     yield from bps.wait(group=group, timeout=GENERAL_TIMEOUT)
-
-
-@AsyncStatus.wrap
-async def update_path():
-    path_provider = get_path_provider()
-    await path_provider.update()
-
-    return path_provider
-
-
-@AsyncStatus.wrap
-async def return_run_number():
-    path_provider = get_path_provider()
-    run = await path_provider.data_session()
-
-    return run
 
 
 def generate_repeated_trigger_info(
