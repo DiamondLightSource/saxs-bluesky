@@ -128,8 +128,10 @@ def arm_panda_pulses(panda: HDFPanda, pulses: list[int], n_seq=1, group="arm_pan
 
     for n_pulse in pulses:
         yield from bps.abs_set(
-            panda.pulse[int(n_pulse)].enable, PANDA.Enable.value, group=group
-        )  # type: ignore
+            panda.pulse[int(n_pulse)].enable,  # type: ignore
+            PANDA.Enable.value,
+            group=group,
+        )
 
     yield from bps.wait(group=group, timeout=GENERAL_TIMEOUT)
 
@@ -151,7 +153,9 @@ def disarm_panda_pulses(
 
     for n_pulse in pulses:
         yield from bps.abs_set(
-            panda.pulse[n_pulse].enable, PANDA.Disable.value, group=group
+            panda.pulse[n_pulse].enable,  # type: ignore
+            PANDA.Disable.value,
+            group=group,
         )
 
     yield from bps.wait(group=group, timeout=GENERAL_TIMEOUT)
