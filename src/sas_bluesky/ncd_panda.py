@@ -26,12 +26,6 @@ from ophyd_async.core import (
     wait_for_value,
 )
 from ophyd_async.fastcs.panda import HDFPanda, SeqTableInfo, StaticSeqTableTriggerLogic
-
-#     PandaPcompDirection,
-#     PcompInfo,
-#     SeqTrigger,
-#     SeqTable,
-# )
 from ophyd_async.plan_stubs import ensure_connected, get_current_settings
 from pydantic import validate_call  # ,NonNegativeFloat,
 
