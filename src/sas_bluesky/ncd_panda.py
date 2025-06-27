@@ -13,8 +13,6 @@ from dodal.common import inject
 from dodal.common.beamlines.beamline_utils import set_path_provider
 from dodal.common.visit import RemoteDirectoryServiceClient, StaticVisitPathProvider
 from dodal.log import LOGGER
-
-# from dodal.beamlines.i22 import saxs, waxs, i0, it, TetrammDetector, panda1
 from dodal.plan_stubs.data_session import attach_data_session_metadata_decorator
 from dodal.utils import get_beamline_name
 from ophyd_async.core import (
@@ -115,7 +113,7 @@ def modify_panda_seq_table(panda: HDFPanda, profile: Profile, n_seq=1):
     yield from bps.wait(group=group, timeout=GENERAL_TIMEOUT)
 
 
-def arm_panda_pulses(panda: HDFPanda, pulses: list | None, n_seq=1, group="arm_panda"):
+def arm_panda_pulses(panda: HDFPanda, pulses: list[int], n_seq=1, group="arm_panda"):
     """
 
     Takes a HDFPanda and a list of integers corresponding
@@ -128,11 +126,6 @@ def arm_panda_pulses(panda: HDFPanda, pulses: list | None, n_seq=1, group="arm_p
 
     """
 
-    if isinstance(pulses, int):
-        pulses = list(range(PULSEBLOCKS) + 1)
-
-    # yield from wait_until_complete(panda.seq[n_seq].enable, PANDA.Enable.value)
-
     for n_pulse in pulses:
         yield from bps.abs_set(
             panda.pulse[int(n_pulse)].enable, PANDA.Enable.value, group=group
@@ -142,7 +135,7 @@ def arm_panda_pulses(panda: HDFPanda, pulses: list | None, n_seq=1, group="arm_p
 
 
 def disarm_panda_pulses(
-    panda: HDFPanda, pulses: list | None, n_seq=1, group="disarm_panda"
+    panda: HDFPanda, pulses: list[int], n_seq=1, group="disarm_panda"
 ):
     """
 
@@ -155,9 +148,6 @@ def disarm_panda_pulses(
     and disarms them and then waits for all to be disarmed.
 
     """
-
-    if isinstance(pulses, int):
-        pulses = list(range(PULSEBLOCKS) + 1)
 
     for n_pulse in pulses:
         yield from bps.abs_set(
@@ -417,7 +407,9 @@ def configure_panda_triggering(
         yield from check_and_apply_panda_settings(panda, panda.name)
 
     # because python counts from 0, but panda counts from 1
-    active_pulses = profile.active_out + 1
+    p = profile.active_out + 1
+    active_pulses: list[int] = p.tolist()
+
     n_cycles = profile.cycles
     # seq table should be grabbed from the panda and used instead,
     # in order to decouple run from setup panda
@@ -463,7 +455,7 @@ def configure_panda_triggering(
 @bpp.run_decorator()  #    # open/close run
 @validate_call(config={"arbitrary_types_allowed": True})
 def run_panda_triggering(
-    panda: HDFPanda, active_detectors, active_pulses, group="run"
+    panda: HDFPanda, active_detectors, active_pulses: list[int], group="run"
 ) -> MsgGenerator[None]:
     """
 
