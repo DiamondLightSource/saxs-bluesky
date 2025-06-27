@@ -238,12 +238,12 @@ def generate_repeated_trigger_info(
 
     for multiplier in profile.multiplier:
         trigger_info = TriggerInfo(
-            number_of_triggers=n_triggers * n_cycles,
+            number_of_events=n_triggers * n_cycles,
             trigger=trigger,
             deadtime=max_deadtime,
             livetime=profile.duration,
-            multiplier=multiplier,
-            frame_timeout=None,
+            exposures_per_event=multiplier,
+            exposure_timeout=None,
         )
 
         repeated_trigger_info.append(trigger_info)
