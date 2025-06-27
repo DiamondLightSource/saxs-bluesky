@@ -174,46 +174,6 @@ def disarm_panda_pulses(
     yield from bps.wait(group=group, timeout=GENERAL_TIMEOUT)
 
 
-def start_sequencer(panda: HDFPanda, n_seq: int = 1, group="start"):
-    """
-
-    Takes an HDFPanda, the number of the sequencer block
-
-    and sets the sequencer block to enable, waits for it to complete and then if
-
-    conintuous is not True
-
-    it will wait for the sequnce to finish and disable the sequencer
-
-    """
-
-    yield from bps.abs_set(panda.seq[n_seq].enable, PANDA.Enable.value, group=group)  # type: ignore
-    yield from bps.wait(group=group, timeout=GENERAL_TIMEOUT)
-
-    # even though the signal might be sent it may not actually have happened yet
-    # so so until it's true before continuing
-    yield from wait_until_complete(panda.seq[DEFAULT_SEQ].active, True)
-
-
-def disable_sequencer(
-    panda: HDFPanda, n_seq: int = 1, wait: bool = False, group="stop"
-):
-    """
-
-    Disables the HDFPanda sequencer block.
-
-    Takes an HDF panda and the number fo the sequencer block
-
-    """
-
-    if wait:
-        # wait for this value to be true
-        yield from wait_until_complete(panda.seq[n_seq].active, False)
-
-    yield from bps.abs_set(panda.seq[n_seq].enable, PANDA.Disable.value, group=group)
-    yield from bps.wait(group=group, timeout=GENERAL_TIMEOUT)
-
-
 def stage_and_prepare_detectors(
     detectors: list, flyer: StandardFlyer, trigger_info: TriggerInfo, group="det_atm"
 ):
