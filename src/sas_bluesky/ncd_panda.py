@@ -7,6 +7,7 @@ from typing import Annotated
 import bluesky.plan_stubs as bps
 import bluesky.preprocessors as bpp
 import numpy as np
+from bluesky.protocols import Stageable
 from bluesky.run_engine import RunEngine
 from bluesky.utils import MsgGenerator
 from dodal.common import inject
@@ -33,14 +34,13 @@ from ophyd_async.fastcs.panda import HDFPanda, SeqTableInfo, StaticSeqTableTrigg
 # )
 from ophyd_async.plan_stubs import ensure_connected, get_current_settings
 from pydantic import validate_call  # ,NonNegativeFloat,
-from pydantic_core import from_json
 
 from sas_bluesky.beamline_configs import b21_config, i22_config
+from sas_bluesky.plans.utils import DEFAULT_PANDA, FAST_DETECTORS
 from sas_bluesky.profile_groups import Profile, ProfileLoader  # Group
 from sas_bluesky.stubs.PandAStubs import (
     fly_and_collect_with_wait,
     load_settings_from_yaml,
-    make_beamline_devices,
     return_connected_device,
     upload_yaml_to_panda,
 )
@@ -175,7 +175,10 @@ def disarm_panda_pulses(
 
 
 def stage_and_prepare_detectors(
-    detectors: list, flyer: StandardFlyer, trigger_info: TriggerInfo, group="det_atm"
+    detectors: list[Stageable],
+    flyer: StandardFlyer,
+    trigger_info: TriggerInfo,
+    group="det_atm",
 ):
     """
 
@@ -192,7 +195,9 @@ def stage_and_prepare_detectors(
     yield from bps.wait(group=group, timeout=GENERAL_TIMEOUT)
 
 
-def return_deadtime(detectors: list, exposure: float = 1.0) -> np.ndarray:
+def return_deadtime(
+    detectors: list[StandardDetector], exposure: float = 1.0
+) -> np.ndarray:
     """
     Given a list of connected detector devices, and an exposure time,
     it returns an array of the deadtime for each detector
@@ -358,17 +363,18 @@ def configure_panda_triggering(
         "Experiment name eg. cm12345. This will go into /dls/data/beamline/experiment",
     ],
     profile: Annotated[
-        Profile | str,
+        Profile,
         (
             "Profile or json of a Profile containing the infomation required to setup ",
             "the panda, triggers, times etc",
         ),
     ],
-    active_detector_names: Annotated[
-        list, "List of str of the detector names, eg. saxs, waxs, i0, it"
-    ] = None,
+    detectors: Annotated[
+        set[StandardDetector],
+        "List of str of the detector names, eg. saxs, waxs, i0, it",
+    ] = FAST_DETECTORS,
     run_immediately: bool = True,
-    panda_name="panda1",
+    panda: HDFPanda = DEFAULT_PANDA,
     force_load=True,
 ) -> MsgGenerator[None]:
     """
@@ -380,19 +386,6 @@ def configure_panda_triggering(
     settings and then may or may not run the flyscanning
 
     """
-
-    if active_detector_names is None:
-        active_detector_names = ["saxs", "waxs"]
-    if isinstance(profile, str):
-        # convert from json to Profile object
-        profile = Profile.model_validate(from_json(profile, allow_partial=True))
-    elif isinstance(profile, Profile):
-        pass
-    else:
-        raise TypeError(
-            "Profile must be a Profile object or a json string of a Profile object"
-        )
-
     visit_path = os.path.join(
         f"/dls/{beamline}/data", str(datetime.now().year), experiment
     )
@@ -400,11 +393,7 @@ def configure_panda_triggering(
     LOGGER.info(f"Data will be saved in {visit_path}")
     print(f"Data will be saved in {visit_path}")
 
-    yield from set_experiment_directory(beamline, visit_path)
-
-    # could this be done faster with make_devices instead of make_all_devices?
-    beamline_devices = make_beamline_devices(beamline)
-    panda = beamline_devices[panda_name]
+    yield from set_experiment_directory(beamline, Path(visit_path))
 
     try:
         yield from ensure_connected(panda)  # ensure the panda is connected
@@ -412,34 +401,19 @@ def configure_panda_triggering(
         LOGGER.error(f"Failed to connect to PandA: {e}")
         raise
 
-    ####################
-    # v CHECK TO SEE IF THIS CAN BE PERFORMED IN A SMARTER WAY v
+    print("\n", detectors, "\n")
+    LOGGER.info("\n", detectors, "\n")
 
-    try:
-        active_detectors = inject_all(active_detector_names)
-    except Exception as e:
-        LOGGER.error(f"Failed to inject active detectors: {e}")
-        # must be a tuple to be hashable and therefore work with bps.stage_all
-        active_detectors = tuple(
-            [beamline_devices[det_name] for det_name in active_detector_names]
-        )
-    ######################
-
-    print("\n", active_detectors, "\n")
-    LOGGER.info("\n", active_detectors, "\n")
-
-    for device, device_name in zip(
-        active_detectors, active_detector_names, strict=True
-    ):
+    for device in detectors:
         try:
             yield from ensure_connected(device)
-            print(f"{device_name} is connected")
+            print(f"{device.name} is connected")
         except Exception as e:
             LOGGER.error(f"{device} not connected: {e}")
             raise
 
     detector_deadtime = return_deadtime(
-        detectors=active_detectors, exposure=profile.duration
+        detectors=list(detectors), exposure=profile.duration
     )
 
     max_deadtime = max(detector_deadtime)
@@ -447,7 +421,7 @@ def configure_panda_triggering(
 
     # load Panda setting to panda
     if force_load is True:
-        yield from check_and_apply_panda_settings(panda, panda_name)
+        yield from check_and_apply_panda_settings(panda, panda.name)
 
     # because python counts from 0, but panda counts from 1
     active_pulses = profile.active_out + 1
@@ -471,7 +445,7 @@ def configure_panda_triggering(
         deadtime=max_deadtime,
         livetime=np.amax(profile.duration_per_cycle),
         exposures_per_event=1,
-        frame_timeout=duration,
+        exposure_timeout=duration,
     )
 
     ############################################################
@@ -486,10 +460,10 @@ def configure_panda_triggering(
 
     ###change the sequence table
     # this is the last thing setting up the panda
-    yield from stage_and_prepare_detectors(active_detectors, flyer, trigger_info)
+    yield from stage_and_prepare_detectors(list(detectors), flyer, trigger_info)
 
     if run_immediately:
-        yield from run_panda_triggering(panda, active_detectors, active_pulses)
+        yield from run_panda_triggering(panda, detectors, active_pulses)
 
 
 @attach_data_session_metadata_decorator
