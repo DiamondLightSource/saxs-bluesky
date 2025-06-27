@@ -565,7 +565,6 @@ if __name__ == "__main__":
             "i22",
             "cm40643-3/bluesky",
             profile,
-            active_detector_names=["saxs", "waxs", "i0", "it"],
             force_load=False,
         )
     )
