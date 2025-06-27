@@ -249,22 +249,6 @@ def generate_repeated_trigger_info(
         repeated_trigger_info.append(trigger_info)
 
 
-def prepare_pulses(panda: HDFPanda):
-    """
-
-    Takes a panda and prepares the pulses,
-    this is the last thing to do before starting the run
-
-    """
-
-    group = "panda_pulses"
-    for pulse in range(1, PULSEBLOCKS + 1):
-        yield from bps.prepare(panda.pulse[pulse], group=group)
-
-    # pulse_data = yield from bps.rd(panda.seq[DEFAULT_SEQ])
-    yield from bps.wait(group=group, timeout=GENERAL_TIMEOUT)
-
-
 def check_and_apply_panda_settings(panda: HDFPanda, panda_name: str) -> MsgGenerator:
     """
 
