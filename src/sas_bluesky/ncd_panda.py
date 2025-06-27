@@ -350,8 +350,6 @@ def show_deadtime(detector_deadtime, active_detector_names):
         LOGGER.info(f"deadtime for {dn} is {dt}")
 
 
-# only enable if can't update the path provider, otherwise updates twice
-# @attach_data_session_metadata_decorator()
 @validate_call(config={"arbitrary_types_allowed": True})
 def configure_panda_triggering(
     beamline: Annotated[str, "Name of the beamline to run the scan on eg. i22 or b21."],
