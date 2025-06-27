@@ -122,31 +122,6 @@ def modify_panda_seq_table(panda: HDFPanda, profile: Profile, n_seq=1):
     yield from bps.wait(group=group, timeout=GENERAL_TIMEOUT)
 
 
-def set_pulses(
-    panda: HDFPanda,
-    n_pulse: int,
-    pulse_step: int,
-    frequency_multiplier: int,
-    step_units="ms",
-    width_unit="ms",
-):
-    group = "modify-pulse"
-    # yield from bps.abs_set(panda.pulse[int(n_pulse)].trig_edge, "Rising", group=group)
-    yield from bps.abs_set(panda.pulse[int(n_pulse)].delay, 0, group=group)
-    yield from bps.abs_set(panda.pulse[int(n_pulse)].width, 1, group=group)
-    yield from bps.abs_set(
-        panda.pulse[int(n_pulse)].width_units, width_unit, group=group
-    )
-    yield from bps.abs_set(
-        panda.pulse[int(n_pulse)].pulses, frequency_multiplier, group=group
-    )
-    yield from bps.abs_set(panda.pulse[int(n_pulse)].step, pulse_step, group=group)
-    yield from bps.abs_set(
-        panda.pulse[int(n_pulse)].step_units, step_units, group=group
-    )
-    yield from bps.wait(group=group, timeout=GENERAL_TIMEOUT)
-
-
 def arm_panda_pulses(panda: HDFPanda, pulses: list | None, n_seq=1, group="arm_panda"):
     """
 
