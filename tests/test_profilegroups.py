@@ -11,7 +11,8 @@ yaml_dir = os.path.join(
     SAS_bluesky_ROOT.parent.parent, "src", "sas_bluesky", "profile_yamls"
 )
 
-print(yaml_dir)
+
+os.environ["BEAMLINE"] = "i22"
 
 
 def test_profile_loader():
