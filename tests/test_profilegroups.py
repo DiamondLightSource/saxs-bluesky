@@ -1,4 +1,7 @@
 import os
+
+os.environ["BEAMLINE"] = "i22"
+
 from pathlib import Path
 
 from pydantic_core import from_json
@@ -10,9 +13,6 @@ SAS_bluesky_ROOT = Path(__file__)
 yaml_dir = os.path.join(
     SAS_bluesky_ROOT.parent.parent, "src", "sas_bluesky", "profile_yamls"
 )
-
-
-os.environ["BEAMLINE"] = "i22"
 
 
 def test_profile_loader():
