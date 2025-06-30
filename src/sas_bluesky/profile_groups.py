@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+from string import ascii_lowercase
 
 # from ophyd_async.plan_stubs import store_settings
 # import bluesky.plan_stubs as bps
@@ -11,13 +12,20 @@ import numpy as np
 
 # import copy
 import yaml
+from dodal.utils import get_beamline_name
 from ophyd_async.core import in_micros  # DetectorTrigger, TriggerInfo, wait_for_value,
 from ophyd_async.fastcs.panda import SeqTable, SeqTrigger
 from pydantic import BaseModel
 from pydantic.dataclasses import dataclass
 from pydantic_core import from_json
 
+from sas_bluesky.beamline_configs import b21_config, i22_config
 from sas_bluesky.utils.ncdcore import ncdcore
+
+BL = get_beamline_name(os.environ["BEAMLINE"])
+BL_config = b21_config if "b21" == BL.lower() else i22_config
+
+PULSEBLOCKS = BL_config.PULSEBLOCKS
 
 """
 
@@ -92,25 +100,30 @@ class Group(BaseModel):
         else:
             trigger = eval(f"SeqTrigger.{self.pause_trigger}")
 
-        seq_table = SeqTable.row(
-            repeats=self.frames,
-            trigger=trigger,
-            position=0,
-            time1=in_micros(self.wait_time_s),
-            outa1=bool(self.wait_pulses[0]),
-            outb1=bool(self.wait_pulses[1]),
-            outc1=bool(self.wait_pulses[2]),
-            outd1=bool(self.wait_pulses[3]),
-            # oute1 = self.wait_pulses[4],
-            # outf1 = self.wait_pulses[5],
-            time2=in_micros(self.run_time_s),
-            outa2=bool(self.run_pulses[0]),
-            outb2=bool(self.run_pulses[1]),
-            outc2=bool(self.run_pulses[2]),
-            outd2=bool(self.run_pulses[3]),
-            # oute2 = self.run_pulses[4],
-            # outf2 = self.run_pulses[5],
-        )
+        seq_table_kwargs = {
+            "repeats": self.frames,
+            "trigger": trigger,
+            "position": 0,
+            "time1": in_micros(self.wait_time_s),
+        }
+
+        alphabet = list(ascii_lowercase)
+
+        out1 = {
+            f"out{alphabet[f]}1": self.wait_pulses[f]
+            for f in range(BL_config.PULSEBLOCKS)
+        }
+        seq_table_kwargs.update(out1)
+
+        seq_table_kwargs.update({"time2": in_micros(self.run_time_s)})
+
+        out2 = {
+            f"out{alphabet[f]}2": self.run_pulses[f]
+            for f in range(BL_config.PULSEBLOCKS)
+        }
+        seq_table_kwargs.update(out2)
+
+        seq_table = SeqTable.row(**seq_table_kwargs)
 
         return seq_table
 

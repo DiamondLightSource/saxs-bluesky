@@ -18,7 +18,12 @@ from ophyd_async.fastcs.panda import (
 )
 from ophyd_async.fastcs.panda._block import PandaTimeUnits
 
-from sas_bluesky.beamline_configs import b21_config, i22_config
+from sas_bluesky.beamline_configs import (
+    b21_config,
+    b21_profiles,
+    i22_config,
+    i22_profiles,
+)
 from sas_bluesky.profile_groups import Group, Profile
 from sas_bluesky.utils.ncdcore import ncdcore
 
@@ -26,7 +31,6 @@ SAS_bluesky_ROOT = Path(__file__).parent.parent.parent
 
 print(SAS_bluesky_ROOT)
 
-BL = get_beamline_name(os.environ["BEAMLINE"])
 BL = get_beamline_name(os.environ["BEAMLINE"])
 BL_config = b21_config if "b21" == BL.lower() else i22_config
 
@@ -38,7 +42,9 @@ PULSE_BLOCK_NAMES = BL_config.PULSE_BLOCK_NAMES
 
 TTLIN = BL_config.TTLIN
 TTLOUT = BL_config.TTLOUT
-DEFAULT_GROUP = BL_config.DEFAULT_GROUP
+
+BL_PROF = b21_profiles if "b21" == BL.lower() else i22_profiles
+DEFAULT_GROUP = BL_PROF.DEFAULT_GROUP
 
 
 class EditableTableview(ttk.Treeview):
