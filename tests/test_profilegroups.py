@@ -1,7 +1,9 @@
 import os
 from pathlib import Path
 
-from sas_bluesky.profile_groups import Profile, ProfileLoader
+from pydantic_core import from_json
+
+from sas_bluesky.profile_groups import Group, Profile, ProfileLoader
 
 SAS_bluesky_ROOT = Path(__file__)
 
@@ -19,6 +21,49 @@ def test_profile_loader():
     print(config)
 
     assert isinstance(config.profiles[0], Profile)
+
+
+def test_profile_append():
+    P = Profile()
+    P.append_group(
+        Group(
+            frames=1,
+            wait_time=1,
+            wait_units="S",
+            run_time=1,
+            run_units="S",
+            pause_trigger="IMMEDIATE",
+            wait_pulses=[0, 0, 0, 0],
+            run_pulses=[1, 1, 1, 1],
+        )
+    )
+
+    assert isinstance(P, Profile)
+
+
+def test_profile_json():
+    P = Profile()
+    P.append_group(
+        Group(
+            frames=1,
+            wait_time=1,
+            wait_units="S",
+            run_time=1,
+            run_units="S",
+            pause_trigger="IMMEDIATE",
+            wait_pulses=[0, 0, 0, 0],
+            run_pulses=[1, 1, 1, 1],
+        )
+    )
+
+    json_schema = P.model_dump_json()
+
+    profile = Profile.model_validate(P)
+    converted_profile = Profile.model_validate(
+        from_json(json_schema, allow_partial=True)
+    )
+
+    assert profile.__dict__ == converted_profile.__dict__
 
 
 # def profile_loader_save():
