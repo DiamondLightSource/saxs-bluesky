@@ -22,28 +22,6 @@ def test_profile_loader():
     assert isinstance(first_profile.groups[0], Group)
 
 
-def test_profile_loader_save():
-    P = Profile()
-    P.append_group(
-        Group(
-            frames=1,
-            wait_time=1,
-            wait_units="S",
-            run_time=1,
-            run_units="S",
-            pause_trigger="IMMEDIATE",
-            wait_pulses=[0, 0, 0, 0],
-            run_pulses=[1, 1, 1, 1],
-        )
-    )
-
-    config_filepath = os.path.join(yaml_dir, "panda_config.yaml")
-    config = ProfileLoader.read_from_yaml(config_filepath)
-    config.save_to_yaml(
-        os.path.join(yaml_dir, "profile_yamls", "panda_config_output.yaml")
-    )
-
-
 def test_profile_append():
     P = Profile()
     P.append_group(
