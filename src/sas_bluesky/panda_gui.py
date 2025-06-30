@@ -24,9 +24,6 @@ from sas_bluesky.panda_gui_elements import ProfileTab
 from sas_bluesky.profile_groups import ProfileLoader
 from sas_bluesky.stubs.PandAStubs import return_connected_device
 
-__version__ = "0.2"
-__author__ = "Richard Dixey"
-
 ############################################################################################
 
 BL = get_beamline_name(os.environ["BEAMLINE"])
@@ -44,7 +41,8 @@ LVDSOUT = BL_config.LVDSOUT
 PULSE_CONNECTIONS = BL_config.PULSE_CONNECTIONS
 USE_MULTIPLIERS = BL_config.USE_MULTIPLIERS
 
-DEFAULT_PROFILE = BL_config.DEFAULT_PROFILE
+BL_PROF = import_module(f"sas_bluesky.beamline_configs.{BL}_profiles")
+DEFAULT_PROFILE = BL_PROF.DEFAULT_PROFILE
 
 ############################################################################################
 

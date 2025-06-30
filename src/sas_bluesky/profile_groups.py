@@ -1,21 +1,14 @@
 import os
 from datetime import datetime
-
-# from ophyd_async.plan_stubs import store_settings
-# import bluesky.plan_stubs as bps
-# from bluesky import RunEngine
-# from dodal.beamlines.i22 import panda1
+from string import ascii_lowercase
 from typing import Any
 
 import numpy as np
-
-# import copy
 import yaml
-from ophyd_async.core import in_micros  # DetectorTrigger, TriggerInfo, wait_for_value,
+from ophyd_async.core import in_micros
 from ophyd_async.fastcs.panda import SeqTable, SeqTrigger
 from pydantic import BaseModel
 from pydantic.dataclasses import dataclass
-from pydantic_core import from_json
 
 from sas_bluesky.utils.ncdcore import ncdcore
 
@@ -71,6 +64,7 @@ class Group(BaseModel):
     group_duration: float = 0.0
 
     def model_post_init(self, __context: Any) -> None:
+        assert len(self.wait_pulses) == len(self.run_pulses)
         self.run_units = self.run_units.upper()
         self.wait_units = self.wait_units.upper()
         self.pause_trigger = self.pause_trigger.upper()
@@ -92,25 +86,30 @@ class Group(BaseModel):
         else:
             trigger = eval(f"SeqTrigger.{self.pause_trigger}")
 
-        seq_table = SeqTable.row(
-            repeats=self.frames,
-            trigger=trigger,
-            position=0,
-            time1=in_micros(self.wait_time_s),
-            outa1=bool(self.wait_pulses[0]),
-            outb1=bool(self.wait_pulses[1]),
-            outc1=bool(self.wait_pulses[2]),
-            outd1=bool(self.wait_pulses[3]),
-            # oute1 = self.wait_pulses[4],
-            # outf1 = self.wait_pulses[5],
-            time2=in_micros(self.run_time_s),
-            outa2=bool(self.run_pulses[0]),
-            outb2=bool(self.run_pulses[1]),
-            outc2=bool(self.run_pulses[2]),
-            outd2=bool(self.run_pulses[3]),
-            # oute2 = self.run_pulses[4],
-            # outf2 = self.run_pulses[5],
-        )
+        seq_table_kwargs = {
+            "repeats": self.frames,
+            "trigger": trigger,
+            "position": 0,
+            "time1": in_micros(self.wait_time_s),
+        }
+
+        alphabet = list(ascii_lowercase)
+
+        out1 = {
+            f"out{alphabet[f]}1": self.wait_pulses[f]
+            for f in range(len(self.wait_pulses))
+        }
+        seq_table_kwargs.update(out1)
+
+        seq_table_kwargs.update({"time2": in_micros(self.run_time_s)})
+
+        out2 = {
+            f"out{alphabet[f]}2": self.run_pulses[f]
+            for f in range(len(self.run_pulses))
+        }
+        seq_table_kwargs.update(out2)
+
+        seq_table = SeqTable.row(**seq_table_kwargs)
 
         return seq_table
 
@@ -169,21 +168,16 @@ class Profile(BaseModel):
 
     def append_group(self, Group, analyse_profile=True):
         self.groups.append(Group)
-        # self.re_group_id_groups()
-
         if analyse_profile:
             self.analyse_profile()
 
     def delete_group(self, id, analyse_profile=True):
         self.groups.pop(id)
-        # self.re_group_id_groups()
-
         if analyse_profile:
             self.analyse_profile()
 
     def insert_group(self, id, Group, analyse_profile=True):
         self.groups.insert(id, Group)
-        # self.re_group_id_groups()
         if analyse_profile:
             self.analyse_profile()
 
@@ -198,9 +192,8 @@ class Profile(BaseModel):
 
     @staticmethod
     def inputs():
-        TTLINS = ["TTLIN" + str(f + 1) for f in range(6)]
-        LVDSINS = ["LVDSIN" + str(f + 1) for f in range(2)]
-
+        TTLINS = [f"TTLIN{f + 1}" for f in range(6)]
+        LVDSINS = [f"LVDSIN{f + 1}" for f in range(2)]
         return TTLINS + LVDSINS
 
     @staticmethod
@@ -209,9 +202,8 @@ class Profile(BaseModel):
 
     @staticmethod
     def outputs():
-        TTLOUTS = ["TTLOUT" + str(f + 1) for f in range(10)]
-        LVDSOUTS = ["LVDSOUT" + str(f + 1) for f in range(2)]
-
+        TTLOUTS = [f"TTLOUT{f + 1}" for f in range(10)]
+        LVDSOUTS = [f"LVDSOUT{f + 1}" for f in range(2)]
         return TTLOUTS + LVDSOUTS
 
 
@@ -328,35 +320,3 @@ class ProfileLoader:
     def append_profile(self, Profile):
         self.profiles.append(Profile)
         self.__post_init__()
-
-
-if __name__ == "__main__":
-    P = Profile()
-    P.append_group(
-        Group(
-            frames=1,
-            wait_time=1,
-            wait_units="S",
-            run_time=1,
-            run_units="S",
-            pause_trigger="IMMEDIATE",
-            wait_pulses=[0, 0, 0, 0],
-            run_pulses=[1, 1, 1, 1],
-        )
-    )
-
-    json_schema = P.model_dump_json()
-
-    profile = Profile.model_validate(P)
-
-    new_profile = Profile.model_validate(from_json(json_schema, allow_partial=True))
-
-    print(new_profile)
-
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    config_filepath = os.path.join(dir_path, "profile_yamls", "panda_config.yaml")
-
-    config = ProfileLoader.read_from_yaml(config_filepath)
-    config.save_to_yaml(
-        os.path.join(dir_path, "profile_yamls", "panda_config_output.yaml")
-    )

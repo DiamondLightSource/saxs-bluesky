@@ -11,8 +11,6 @@ yaml_dir = os.path.join(
     SAS_bluesky_ROOT.parent.parent, "src", "sas_bluesky", "profile_yamls"
 )
 
-print(yaml_dir)
-
 
 def test_profile_loader():
     config_filepath = os.path.join(yaml_dir, "panda_config.yaml")
@@ -106,8 +104,3 @@ def test_active_out():
     )
 
     assert P.active_out == [1, 2, 3, 4]
-
-
-if __name__ == "__main__":
-    # Run the test function
-    test_profile_loader()

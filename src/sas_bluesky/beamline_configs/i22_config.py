@@ -4,11 +4,6 @@ Configuration for i22 PandA beamline
 
 """
 
-from sas_bluesky.profile_groups import Group, Profile  # nows
-
-BL = "i22"
-
-
 # GUI Elements
 
 PULSEBLOCKS = 4
@@ -54,20 +49,3 @@ DEADTIME_BUFFER = 20e-6  # Buffer added to deadtime to handle minor discrepencie
 DEFAULT_SEQ = 1  # default sequencer is this one, pandas can have 2
 GENERAL_TIMEOUT = 30  # seconds before each wait times out
 CONFIG_NAME = "PandaTrigger"
-
-
-DEFAULT_GROUP = Group(
-    frames=1,
-    wait_time=1,
-    wait_units="S",
-    run_time=1,
-    run_units="S",
-    pause_trigger="IMMEDIATE",
-    wait_pulses=[0, 0, 0, 0],
-    run_pulses=[1, 1, 1, 1],
-)
-
-
-DEFAULT_PROFILE = Profile(
-    cycles=1, seq_trigger="IMMEDIATE", groups=[DEFAULT_GROUP], multiplier=[1, 1, 1, 1]
-)
