@@ -151,11 +151,19 @@ class Profile(BaseModel):
         return duration
 
     @property
-    def active_out(self):
+    def active_out(self) -> list[int]:
+        """
+        Checks which outputs are active in the wait phase,
+        checks which outputs are active in the run phase
+        and returns a list of active outputs. Because python uses 0-based indexing
+        while the Panda uses 1-based indexing,
+        the output indices are adjusted accordingly.
+        """
         wait_matrix = np.array([g.wait_pulses for g in self.groups])
         run_matrix = np.array([g.run_pulses for g in self.groups])
         active_matrix = wait_matrix + run_matrix
-        active_out = np.where((np.sum(active_matrix, axis=0)) != 0)[0]
+        active_out = np.where((np.sum(active_matrix, axis=0)) != 0)[0] + 1
+        active_out = active_out.tolist()
 
         return active_out
 

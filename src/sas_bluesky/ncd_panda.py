@@ -514,9 +514,7 @@ def configure_and_run_panda_triggering(
 
     """
 
-    # because python counts from 0, but panda counts from 1
-    p = profile.active_out + 1
-    active_pulses: list[int] = p.tolist()
+    active_pulses: list[int] = profile.active_out
 
     yield from configure_panda_triggering(
         beamline=beamline,
