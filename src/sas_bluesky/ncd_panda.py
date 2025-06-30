@@ -360,7 +360,6 @@ def configure_panda_triggering(
         set[StandardDetector],
         "List of str of the detector names, eg. saxs, waxs, i0, it",
     ] = FAST_DETECTORS,
-    run_immediately: bool = True,
     panda: HDFPanda = DEFAULT_PANDA,
     force_load=True,
 ) -> MsgGenerator[None]:
@@ -370,7 +369,7 @@ def configure_panda_triggering(
 
     setting them up for hardware triggering, loads all of the correct
 
-    settings and then may or may not run the flyscanning
+    settings.
 
     """
     visit_path = os.path.join(
@@ -410,10 +409,6 @@ def configure_panda_triggering(
     if force_load is True:
         yield from check_and_apply_panda_settings(panda, panda.name)
 
-    # because python counts from 0, but panda counts from 1
-    p = profile.active_out + 1
-    active_pulses: list[int] = p.tolist()
-
     n_cycles = profile.cycles
     # seq table should be grabbed from the panda and used instead,
     # in order to decouple run from setup panda
@@ -451,9 +446,6 @@ def configure_panda_triggering(
     # this is the last thing setting up the panda
     yield from stage_and_prepare_detectors(list(detectors), flyer, trigger_info)
 
-    if run_immediately:
-        yield from run_panda_triggering(panda, detectors, active_pulses)
-
 
 @attach_data_session_metadata_decorator
 @bpp.run_decorator()  #    # open/close run
@@ -488,6 +480,52 @@ def run_panda_triggering(
     # start set to false because currently don't actually want to collect data
     yield from disarm_panda_pulses(panda=panda, pulses=active_pulses)
     yield from bps.unstage_all(*active_detectors, flyer)  # stops the hdf capture mode
+
+
+@attach_data_session_metadata_decorator
+@bpp.run_decorator()  #    # open/close run
+def configure_and_run_panda_triggering(
+    beamline: Annotated[str, "Name of the beamline to run the scan on eg. i22 or b21."],
+    experiment: Annotated[
+        str,
+        "Experiment name eg. cm12345. This will go into /dls/data/beamline/experiment",
+    ],
+    profile: Annotated[
+        Profile,
+        (
+            "Profile or json of a Profile containing the infomation required to setup ",
+            "the panda, triggers, times etc",
+        ),
+    ],
+    detectors: Annotated[
+        set[StandardDetector],
+        "List of str of the detector names, eg. saxs, waxs, i0, it",
+    ] = FAST_DETECTORS,
+    panda: HDFPanda = DEFAULT_PANDA,
+    force_load=True,
+) -> MsgGenerator[None]:
+    """
+
+    This plans configures the panda and the detectors,
+
+    setting them up for hardware triggering, loads all of the correct
+
+    settings and then runs the flyscanning
+
+    """
+
+    active_pulses: list[int] = profile.active_out
+
+    yield from configure_panda_triggering(
+        beamline=beamline,
+        experiment=experiment,
+        profile=profile,
+        detectors=detectors,
+        panda=panda,
+        force_load=force_load,
+    )
+
+    yield from run_panda_triggering(panda, detectors, active_pulses)
 
 
 if __name__ == "__main__":
