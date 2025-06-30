@@ -20,16 +20,15 @@ from ophyd_async.fastcs.panda._block import PandaTimeUnits
 
 from sas_bluesky.beamline_configs import (
     b21_config,
-    b21_profiles,
+    b21_profile,
     i22_config,
-    i22_profiles,
+    i22_profile,
 )
 from sas_bluesky.profile_groups import Group, Profile
 from sas_bluesky.utils.ncdcore import ncdcore
 
 SAS_bluesky_ROOT = Path(__file__).parent.parent.parent
 
-print(SAS_bluesky_ROOT)
 
 BL = get_beamline_name(os.environ["BEAMLINE"])
 BL_config = b21_config if "b21" == BL.lower() else i22_config
@@ -43,7 +42,7 @@ PULSE_BLOCK_NAMES = BL_config.PULSE_BLOCK_NAMES
 TTLIN = BL_config.TTLIN
 TTLOUT = BL_config.TTLOUT
 
-BL_PROF = b21_profiles if "b21" == BL.lower() else i22_profiles
+BL_PROF = b21_profile if "b21" == BL.lower() else i22_profile
 DEFAULT_GROUP = BL_PROF.DEFAULT_GROUP
 
 
