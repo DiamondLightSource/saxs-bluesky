@@ -90,6 +90,24 @@ def test_profile_delete():
     assert len(P.groups) == 4
 
 
+def test_active_out():
+    P = Profile()
+    P.append_group(
+        Group(
+            frames=1,
+            wait_time=1,
+            wait_units="S",
+            run_time=1,
+            run_units="S",
+            pause_trigger="IMMEDIATE",
+            wait_pulses=[0, 0, 0, 0],
+            run_pulses=[1, 1, 1, 1],
+        )
+    )
+
+    assert P.active_out == [1, 2, 3, 4]
+
+
 if __name__ == "__main__":
     # Run the test function
     test_profile_loader()
