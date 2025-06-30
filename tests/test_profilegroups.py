@@ -18,9 +18,10 @@ def test_profile_loader():
     config_filepath = os.path.join(yaml_dir, "panda_config.yaml")
     config = ProfileLoader.read_from_yaml(config_filepath)
 
-    print(config)
+    first_profile = config.profiles[0]
 
-    assert isinstance(config.profiles[0], Profile)
+    assert isinstance(first_profile, Profile)
+    assert isinstance(first_profile.groups[0], Group)
 
 
 def test_profile_append():
@@ -39,6 +40,7 @@ def test_profile_append():
     )
 
     assert isinstance(P, Profile)
+    assert len(P.groups) == 1
 
 
 def test_profile_json():
@@ -66,30 +68,26 @@ def test_profile_json():
     assert profile.__dict__ == converted_profile.__dict__
 
 
-# def profile_loader_save():
+def test_profile_delete():
+    P = Profile()
 
-#         P = Profile()
-#     P.append_group(Group(frames=1,
-#                          wait_time=1,
-#                          wait_units="S",
-#                          run_time=1,
-#                          run_units="S",
-#                          pause_trigger="IMMEDIATE",
-#                          wait_pulses=[0,0,0,0],
-#                          run_pulses=[1,1,1,1]))
+    for _i in range(5):
+        P.append_group(
+            Group(
+                frames=1,
+                wait_time=1,
+                wait_units="S",
+                run_time=1,
+                run_units="S",
+                pause_trigger="IMMEDIATE",
+                wait_pulses=[0, 0, 0, 0],
+                run_pulses=[1, 1, 1, 1],
+            )
+        )
 
-#     json_schema = P.model_dump_json()
+    P.delete(len(P.groups) - 1)
 
-
-#     profile = Profile.model_validate(P)
-
-#     new_profile = Profile.model_validate(from_json(json_schema, allow_partial=True))
-
-#     print(new_profile)
-
-
-#     dir_path = os.path.dirname(os.path.realpath(__file__))
-#     config_filepath = os.path.join(dir_path,"profile_yamls","panda_config.yaml")
+    assert len(P.groups) == 4
 
 
 if __name__ == "__main__":
