@@ -12,20 +12,13 @@ import numpy as np
 
 # import copy
 import yaml
-from dodal.utils import get_beamline_name
 from ophyd_async.core import in_micros  # DetectorTrigger, TriggerInfo, wait_for_value,
 from ophyd_async.fastcs.panda import SeqTable, SeqTrigger
 from pydantic import BaseModel
 from pydantic.dataclasses import dataclass
 from pydantic_core import from_json
 
-from sas_bluesky.beamline_configs import b21_config, i22_config
 from sas_bluesky.utils.ncdcore import ncdcore
-
-BL = get_beamline_name(os.environ["BEAMLINE"])
-BL_config = b21_config if "b21" == BL.lower() else i22_config
-
-PULSEBLOCKS = BL_config.PULSEBLOCKS
 
 """
 
@@ -79,6 +72,7 @@ class Group(BaseModel):
     group_duration: float = 0.0
 
     def model_post_init(self, __context: Any) -> None:
+        assert len(self.wait_pulses) == len(self.run_pulses)
         self.run_units = self.run_units.upper()
         self.wait_units = self.wait_units.upper()
         self.pause_trigger = self.pause_trigger.upper()
@@ -111,7 +105,7 @@ class Group(BaseModel):
 
         out1 = {
             f"out{alphabet[f]}1": self.wait_pulses[f]
-            for f in range(BL_config.PULSEBLOCKS)
+            for f in range(len(self.wait_pulses))
         }
         seq_table_kwargs.update(out1)
 
@@ -119,7 +113,7 @@ class Group(BaseModel):
 
         out2 = {
             f"out{alphabet[f]}2": self.run_pulses[f]
-            for f in range(BL_config.PULSEBLOCKS)
+            for f in range(len(self.run_pulses))
         }
         seq_table_kwargs.update(out2)
 
@@ -182,21 +176,16 @@ class Profile(BaseModel):
 
     def append_group(self, Group, analyse_profile=True):
         self.groups.append(Group)
-        # self.re_group_id_groups()
-
         if analyse_profile:
             self.analyse_profile()
 
     def delete_group(self, id, analyse_profile=True):
         self.groups.pop(id)
-        # self.re_group_id_groups()
-
         if analyse_profile:
             self.analyse_profile()
 
     def insert_group(self, id, Group, analyse_profile=True):
         self.groups.insert(id, Group)
-        # self.re_group_id_groups()
         if analyse_profile:
             self.analyse_profile()
 

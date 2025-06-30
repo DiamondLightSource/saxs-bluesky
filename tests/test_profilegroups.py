@@ -1,7 +1,4 @@
 import os
-
-os.environ["BEAMLINE"] = "i22"
-
 from pathlib import Path
 
 from pydantic_core import from_json
