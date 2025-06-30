@@ -85,7 +85,7 @@ def test_profile_delete():
             )
         )
 
-    P.delete(len(P.groups) - 1)
+    P.delete_group(len(P.groups) - 1)
 
     assert len(P.groups) == 4
 
