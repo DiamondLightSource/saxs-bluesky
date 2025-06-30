@@ -41,7 +41,7 @@ LVDSOUT = BL_config.LVDSOUT
 PULSE_CONNECTIONS = BL_config.PULSE_CONNECTIONS
 USE_MULTIPLIERS = BL_config.USE_MULTIPLIERS
 
-BL_PROF = import_module(f"sas_bluesky.beamline_configs.{BL}_profiles")
+BL_PROF = import_module(f"sas_bluesky.beamline_configs.{BL}_profile")
 DEFAULT_PROFILE = BL_PROF.DEFAULT_PROFILE
 
 ############################################################################################
