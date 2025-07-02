@@ -9,7 +9,6 @@ Python dataclasses and GUI as a replacement for NCDDetectors
 
 import os
 import tkinter
-from importlib import import_module
 from tkinter import filedialog, messagebox, simpledialog, ttk
 
 import matplotlib.pyplot as plt
@@ -18,18 +17,21 @@ import matplotlib.pyplot as plt
 # from stomp import Connection
 # from blueapi.client.event_bus import EventBusClient
 # from bluesky_stomp.messaging import StompClient, BasicAuthentication
-from dodal.utils import get_beamline_name
-
 from sas_bluesky.panda_gui_elements import ProfileTab
 from sas_bluesky.profile_groups import ExperimentProfiles
 from sas_bluesky.stubs.panda_stubs import return_connected_device
+from sas_bluesky.utils.utils import (
+    get_sas_beamline,
+    load_beamline_config,
+    load_beamline_profile,
+)
 
 ############################################################################################
 
-BL = get_beamline_name(os.environ["BEAMLINE"])
-CONFIG = import_module(f"sas_bluesky.defaults_configs.{BL}.{BL}_config")
+BL = get_sas_beamline()
+CONFIG = load_beamline_config()
 
-BL_PROF = import_module(f"sas_bluesky.defaults_configs.{BL}.{BL}_profile")
+BL_PROF = load_beamline_profile()
 DEFAULT_PROFILE = BL_PROF.DEFAULT_PROFILE
 
 ############################################################################################
