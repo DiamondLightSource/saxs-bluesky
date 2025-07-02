@@ -30,22 +30,22 @@ from ophyd_async.fastcs.panda import (
 from ophyd_async.plan_stubs import ensure_connected, get_current_settings
 from pydantic import validate_call  # ,NonNegativeFloat,
 
-from sas_bluesky.defaults_configs.b21 import b21_config
-from sas_bluesky.defaults_configs.i22 import i22_config
-from sas_bluesky.plans.utils import DEFAULT_PANDA, FAST_DETECTORS
 from sas_bluesky.profile_groups import ExperimentProfiles, Profile  # Group
-from sas_bluesky.stubs.PandAStubs import (
+from sas_bluesky.stubs.panda_stubs import (
     fly_and_collect_with_wait,
     load_settings_from_yaml,
     return_connected_device,
     upload_yaml_to_panda,
 )
+from sas_bluesky.utils.utils import load_beamline_config, load_beamline_devices
 
 # from stubs.PandAStubs import save_device_to_yaml, return_module_name
 
-
 BL = get_beamline_name(os.environ["BEAMLINE"])
-CONFIG = b21_config if "b21" == BL.lower() else i22_config
+CONFIG = load_beamline_config()
+DEV = load_beamline_devices()
+DEFAULT_PANDA = DEV.DEFAULT_PANDA
+FAST_DETECTORS = DEV.FAST_DETECTORS
 
 
 def wait_until_complete(pv_obj, waiting_value=0, timeout=None):
