@@ -22,7 +22,7 @@ from dodal.utils import get_beamline_name
 
 from sas_bluesky.panda_gui_elements import ProfileTab
 from sas_bluesky.profile_groups import ExperimentProfiles
-from sas_bluesky.stubs.PandAStubs import return_connected_device
+from sas_bluesky.stubs.panda_stubs import return_connected_device
 
 ############################################################################################
 
