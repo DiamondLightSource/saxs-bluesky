@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 from dodal.utils import get_beamline_name
 
 from sas_bluesky.panda_gui_elements import ProfileTab
-from sas_bluesky.profile_groups import ProfileLoader
+from sas_bluesky.profile_groups import ExperimentProfiles
 from sas_bluesky.stubs.PandAStubs import return_connected_device
 
 ############################################################################################
@@ -48,7 +48,7 @@ DEFAULT_PROFILE = BL_PROF.DEFAULT_PROFILE
 
 
 class PandAGUI(tkinter.Tk):
-    def __init__(self, panda_config_yaml=None):
+    def __init__(self, panda_config_yaml=None, configuration=None):
         user = os.environ.get("USER")
 
         if user not in ["akz63626", "rjcd"]:  # check if I am runing this
@@ -74,10 +74,21 @@ class PandAGUI(tkinter.Tk):
             "default_panda_config.yaml",
         )
 
-        if self.panda_config_yaml is None:
-            self.configuration = ProfileLoader.read_from_yaml(self.default_config_path)
+        if (self.panda_config_yaml is None) and (configuration is None):
+            self.configuration = ExperimentProfiles.read_from_yaml(
+                self.default_config_path
+            )
+        elif (self.panda_config_yaml is not None) and (configuration is None):
+            self.configuration = ExperimentProfiles.read_from_yaml(
+                self.panda_config_yaml
+            )
+        elif (self.panda_config_yaml is None) and (configuration is not None):
+            self.configuration = configuration
         else:
-            self.configuration = ProfileLoader.read_from_yaml(self.panda_config_yaml)
+            print(
+                "Must pass either panda_config_yaml or configuration object. Not both"
+            )
+            quit()
 
         if self.configuration.experiment is None:
             user_input = simpledialog.askstring(
@@ -544,6 +555,6 @@ if __name__ == "__main__":
     # https://github.com/DiamondLightSource/blueapi/blob/main/src/blueapi/client/client.py
     # blueapi -c i22_blueapi_config.yaml controller run count '{"detectors":["saxs"]}'
 
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    config_filepath = os.path.join(dir_path, "profile_yamls", "panda_config.yaml")
-    PandAGUI(config_filepath)
+    # dir_path = os.path.dirname(os.path.realpath(__file__))
+    # config_filepath = os.path.join(dir_path, "profile_yamls", "panda_config.yaml")
+    PandAGUI(configuration=DEFAULT_PROFILE)

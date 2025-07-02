@@ -28,7 +28,7 @@ from pydantic import validate_call  # ,NonNegativeFloat,
 
 from sas_bluesky.beamline_configs import b21_config, i22_config
 from sas_bluesky.plans.utils import DEFAULT_PANDA, FAST_DETECTORS
-from sas_bluesky.profile_groups import Profile, ProfileLoader  # Group
+from sas_bluesky.profile_groups import ExperimentProfiles, Profile  # Group
 from sas_bluesky.stubs.PandAStubs import (
     fly_and_collect_with_wait,
     load_settings_from_yaml,
@@ -580,7 +580,7 @@ if __name__ == "__main__":
         "profile_yamls",
         "panda_config.yaml",
     )
-    configuration = ProfileLoader.read_from_yaml(default_config_path)
+    configuration = ExperimentProfiles.read_from_yaml(default_config_path)
     profile = configuration.profiles[1]
     # RE(
     #     setup_panda(

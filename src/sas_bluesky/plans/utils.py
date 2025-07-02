@@ -5,8 +5,8 @@ from ophyd_async.core import StandardDetector
 from ophyd_async.fastcs.panda import HDFPanda
 
 FAST_DETECTORS: set[StandardDetector] = (
-    set()
-    if os.getenv("BEAMLINE") == "B21"
+    {inject("saxs"), inject("waxs")}
+    if os.getenv("BEAMLINE") == "b21"
     else {
         inject("saxs"),
         inject("waxs"),
