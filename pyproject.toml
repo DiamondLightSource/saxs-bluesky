@@ -13,11 +13,11 @@ classifiers = [
 ]
 description = "Bluesky plans, plan stubs and utilities for Small Angle Scattering beamline at DLS"
 dependencies = [
-    "dls-dodal",
+    "dls-dodal @ git+https://github.com/DiamondLightSource/dodal.git@main",
     "ophyd_async>=0.9.0",
     "numpy",
     "blueapi",
-	"matplotlib",
+    "matplotlib",
     "pydantic",
 ] # Add project dependencies here, e.g. ["click", "numpy"]
 dynamic = ["version"]
@@ -54,7 +54,7 @@ version_file = "src/sas_bluesky/_version.py"
 
 [tool.pyright]
 typeCheckingMode = "standard"
-reportMissingImports = false # Ignore missing stubs in imported modules
+reportMissingImports = false  # Ignore missing stubs in imported modules
 
 [tool.pytest.ini_options]
 # Run pytest with all our checkers, and don't spam us with massive tracebacks on error

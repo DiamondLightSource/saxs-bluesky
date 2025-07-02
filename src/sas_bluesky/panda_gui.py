@@ -9,7 +9,6 @@ Python dataclasses and GUI as a replacement for NCDDetectors
 
 import os
 import tkinter
-from importlib import import_module
 from tkinter import filedialog, messagebox, simpledialog, ttk
 
 import matplotlib.pyplot as plt
@@ -18,37 +17,28 @@ import matplotlib.pyplot as plt
 # from stomp import Connection
 # from blueapi.client.event_bus import EventBusClient
 # from bluesky_stomp.messaging import StompClient, BasicAuthentication
-from dodal.utils import get_beamline_name
-
 from sas_bluesky.panda_gui_elements import ProfileTab
-from sas_bluesky.profile_groups import ProfileLoader
-from sas_bluesky.stubs.PandAStubs import return_connected_device
+from sas_bluesky.profile_groups import ExperimentProfiles
+from sas_bluesky.stubs.panda_stubs import return_connected_device
+from sas_bluesky.utils.utils import (
+    get_sas_beamline,
+    load_beamline_config,
+    load_beamline_profile,
+)
 
 ############################################################################################
 
-BL = get_beamline_name(os.environ["BEAMLINE"])
-BL_config = import_module(f"sas_bluesky.beamline_configs.{BL}_config")
+BL = get_sas_beamline()
+CONFIG = load_beamline_config()
 
-THEME_NAME = BL_config.THEME_NAME
-PULSEBLOCKS = BL_config.PULSEBLOCKS
-THEME_NAME = BL_config.THEME_NAME
-
-TTLIN = BL_config.TTLIN
-TTLOUT = BL_config.TTLOUT
-LVDSIN = BL_config.LVDSIN
-LVDSOUT = BL_config.LVDSOUT
-
-PULSE_CONNECTIONS = BL_config.PULSE_CONNECTIONS
-USE_MULTIPLIERS = BL_config.USE_MULTIPLIERS
-
-BL_PROF = import_module(f"sas_bluesky.beamline_configs.{BL}_profile")
+BL_PROF = load_beamline_profile()
 DEFAULT_PROFILE = BL_PROF.DEFAULT_PROFILE
 
 ############################################################################################
 
 
 class PandAGUI(tkinter.Tk):
-    def __init__(self, panda_config_yaml=None):
+    def __init__(self, panda_config_yaml=None, configuration=None):
         user = os.environ.get("USER")
 
         if user not in ["akz63626", "rjcd"]:  # check if I am runing this
@@ -74,10 +64,21 @@ class PandAGUI(tkinter.Tk):
             "default_panda_config.yaml",
         )
 
-        if self.panda_config_yaml is None:
-            self.configuration = ProfileLoader.read_from_yaml(self.default_config_path)
+        if (self.panda_config_yaml is None) and (configuration is None):
+            self.configuration = ExperimentProfiles.read_from_yaml(
+                self.default_config_path
+            )
+        elif (self.panda_config_yaml is not None) and (configuration is None):
+            self.configuration = ExperimentProfiles.read_from_yaml(
+                self.panda_config_yaml
+            )
+        elif (self.panda_config_yaml is None) and (configuration is not None):
+            self.configuration = configuration
         else:
-            self.configuration = ProfileLoader.read_from_yaml(self.panda_config_yaml)
+            print(
+                "Must pass either panda_config_yaml or configuration object. Not both"
+            )
+            quit()
 
         if self.configuration.experiment is None:
             user_input = simpledialog.askstring(
@@ -91,7 +92,7 @@ class PandAGUI(tkinter.Tk):
         self.window = tkinter.Tk()
         self.window.wm_resizable(True, True)
         self.window.minsize(600, 200)
-        self.theme("alt")
+        self.theme(CONFIG.THEME_NAME)
 
         menubar = tkinter.Menu(self.window)
         filemenu = tkinter.Menu(menubar, tearoff=0)
@@ -184,7 +185,7 @@ class PandAGUI(tkinter.Tk):
     def theme(self, theme_name):
         style = ttk.Style(self.window)
         print("All themes:", style.theme_names())
-        style.theme_use(THEME_NAME)
+        style.theme_use(theme_name)
 
     def add_profile_tab(self, event):
         if self.notebook.select() == self.notebook.tabs()[-1]:
@@ -311,26 +312,26 @@ class PandAGUI(tkinter.Tk):
 
         labels = ["TTLIN", "LVDSIN", "TTLOUT", "LVDSOUT"]
 
-        for key in TTLIN.keys():
-            INDev = TTLIN[key]
+        for key in CONFIG.TTLIN.keys():
+            INDev = CONFIG.TTLIN[key]
 
             ax.scatter(0, key, color="k", s=50)
             ax.text(0 + 0.1, key, INDev)
 
-        for key in LVDSIN.keys():
-            LVDSINDev = LVDSIN[key]
+        for key in CONFIG.LVDSIN.keys():
+            LVDSINDev = CONFIG.VDSIN[key]
 
             ax.scatter(1, key, color="k", s=50)
             ax.text(1 + 0.1, key, LVDSINDev)
 
-        for key in TTLOUT.keys():
-            TTLOUTDev = TTLOUT[key]
+        for key in CONFIG.TTLOUT.keys():
+            TTLOUTDev = CONFIG.TTLOUT[key]
 
             ax.scatter(2, key, color="b", s=50)
             ax.text(2 + 0.1, key, TTLOUTDev)
 
-        for key in LVDSOUT.keys():
-            LVDSOUTDev = LVDSOUT[key]
+        for key in CONFIG.LVDSOUT.keys():
+            LVDSOUTDev = CONFIG.VDSOUT[key]
             ax.scatter(3, key, color="b", s=50)
             ax.text(3 + 0.1, key, LVDSOUTDev)
 
@@ -498,7 +499,7 @@ class PandAGUI(tkinter.Tk):
     def build_active_detectors_frame(self):
         self.active_detectors_frames = {}
 
-        for pulse in range(PULSEBLOCKS):
+        for pulse in range(CONFIG.PULSEBLOCKS):
             active_detectors_frame_n = ttk.Frame(
                 self.pulse_frame, borderwidth=5, relief="raised"
             )
@@ -517,7 +518,7 @@ class PandAGUI(tkinter.Tk):
             TTLLabel = ttk.Label(active_detectors_frame_n, text="TTL:")
             TTLLabel.grid(column=0, row=1, padx=5, pady=5, sticky="w")
 
-            for n, det in enumerate(PULSE_CONNECTIONS[pulse + 1]):
+            for n, det in enumerate(CONFIG.PULSE_CONNECTIONS[pulse + 1]):
                 # experiment_var=tkinter.StringVar(value=self.configuration.experiment)
 
                 if (det.lower() == "fs") or ("shutter" in det.lower()):
@@ -544,6 +545,6 @@ if __name__ == "__main__":
     # https://github.com/DiamondLightSource/blueapi/blob/main/src/blueapi/client/client.py
     # blueapi -c i22_blueapi_config.yaml controller run count '{"detectors":["saxs"]}'
 
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    config_filepath = os.path.join(dir_path, "profile_yamls", "panda_config.yaml")
-    PandAGUI(config_filepath)
+    # dir_path = os.path.dirname(os.path.realpath(__file__))
+    # config_filepath = os.path.join(dir_path, "profile_yamls", "panda_config.yaml")
+    PandAGUI(configuration=BL_PROF.DEFAULT_EXPERIMENT)

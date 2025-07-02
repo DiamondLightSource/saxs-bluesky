@@ -3,7 +3,7 @@ from pathlib import Path
 
 from pydantic_core import from_json
 
-from sas_bluesky.profile_groups import Group, Profile, ProfileLoader
+from sas_bluesky.profile_groups import ExperimentProfiles, Group, Profile
 
 SAS_bluesky_ROOT = Path(__file__)
 
@@ -14,7 +14,7 @@ yaml_dir = os.path.join(
 
 def test_profile_loader():
     config_filepath = os.path.join(yaml_dir, "panda_config.yaml")
-    config = ProfileLoader.read_from_yaml(config_filepath)
+    config = ExperimentProfiles.read_from_yaml(config_filepath)
 
     first_profile = config.profiles[0]
 
