@@ -28,4 +28,5 @@ Or if it is a commandline tool then you might put some example commands here:
 
 ```
 python -m sas_bluesky --version
+python -m sas_bluesky start_gui
 ```
