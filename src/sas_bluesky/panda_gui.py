@@ -90,7 +90,7 @@ class PandAGUI(tkinter.Tk):
         self.window = tkinter.Tk()
         self.window.wm_resizable(True, True)
         self.window.minsize(600, 200)
-        self.theme(CONFIG.THEME)
+        self.theme(CONFIG.THEME_NAME)
 
         menubar = tkinter.Menu(self.window)
         filemenu = tkinter.Menu(menubar, tearoff=0)
