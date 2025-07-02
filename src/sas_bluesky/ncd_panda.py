@@ -39,8 +39,6 @@ from sas_bluesky.stubs.panda_stubs import (
 )
 from sas_bluesky.utils.utils import load_beamline_config, load_beamline_devices
 
-# from stubs.PandAStubs import save_device_to_yaml, return_module_name
-
 BL = get_beamline_name(os.environ["BEAMLINE"])
 CONFIG = load_beamline_config()
 DEV = load_beamline_devices()

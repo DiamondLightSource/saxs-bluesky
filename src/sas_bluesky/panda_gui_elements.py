@@ -7,26 +7,26 @@ Python Elements for NCD PandA config GUI
 
 """
 
-import os
 import tkinter
 from tkinter import messagebox, ttk
 
-from dodal.utils import get_beamline_name
 from ophyd_async.fastcs.panda import (
     SeqTrigger,
 )
 from ophyd_async.fastcs.panda._block import PandaTimeUnits
 
-from sas_bluesky.defaults_configs.b21 import b21_config, b21_profile
-from sas_bluesky.defaults_configs.i22 import i22_config, i22_profile
 from sas_bluesky.profile_groups import Group, Profile
 from sas_bluesky.utils.ncdcore import ncdcore
+from sas_bluesky.utils.utils import (
+    get_sas_beamline,
+    load_beamline_config,
+    load_beamline_profile,
+)
 
-BL = get_beamline_name(os.environ["BEAMLINE"])
-CONFIG = b21_config if "b21" == BL.lower() else i22_config
-
-BL_PROF = b21_profile if "b21" == BL.lower() else i22_profile
+CONFIG = load_beamline_config()
+BL_PROF = load_beamline_profile()
 DEFAULT_GROUP = BL_PROF.DEFAULT_GROUP
+Bl = get_sas_beamline()
 
 
 class EditableTableview(ttk.Treeview):

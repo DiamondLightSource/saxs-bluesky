@@ -5,10 +5,18 @@ from dodal.utils import get_beamline_name
 
 ############################################################################################
 
-BL = get_beamline_name(os.getenv("BEAMLINE"))  # type: ignore
 
-if BL is None:
-    BL = "i22"
+def get_sas_beamline():
+    BL = get_beamline_name(os.getenv("BEAMLINE"))  # type: ignore
+
+    if BL is None:
+        BL = "i22"
+        os.environ["DEBUSSY"] = BL
+
+    return BL
+
+
+BL = get_sas_beamline()
 
 
 def load_beamline_config():
