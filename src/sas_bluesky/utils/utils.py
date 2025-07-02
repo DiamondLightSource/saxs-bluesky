@@ -5,7 +5,8 @@ from dodal.utils import get_beamline_name
 
 ############################################################################################
 
-BL = get_beamline_name(os.environ["BEAMLINE"])
+BL = get_beamline_name(os.getenv["BEAMLINE"])  # type: ignore
+
 if BL is None:
     BL = "i22"
 
