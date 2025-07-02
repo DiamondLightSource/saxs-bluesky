@@ -9,7 +9,6 @@ Python Elements for NCD PandA config GUI
 
 import os
 import tkinter
-from pathlib import Path
 from tkinter import messagebox, ttk
 
 from dodal.utils import get_beamline_name
@@ -18,29 +17,13 @@ from ophyd_async.fastcs.panda import (
 )
 from ophyd_async.fastcs.panda._block import PandaTimeUnits
 
-from sas_bluesky.beamline_configs import (
-    b21_config,
-    b21_profile,
-    i22_config,
-    i22_profile,
-)
+from sas_bluesky.defaults_configs.b21 import b21_config, b21_profile
+from sas_bluesky.defaults_configs.i22 import i22_config, i22_profile
 from sas_bluesky.profile_groups import Group, Profile
 from sas_bluesky.utils.ncdcore import ncdcore
 
-SAS_bluesky_ROOT = Path(__file__).parent.parent.parent
-
-
 BL = get_beamline_name(os.environ["BEAMLINE"])
-BL_config = b21_config if "b21" == BL.lower() else i22_config
-
-PULSEBLOCKS = BL_config.PULSEBLOCKS
-USE_MULTIPLIERS = BL_config.USE_MULTIPLIERS
-THEME_NAME = BL_config.THEME_NAME
-PULSEBLOCKASENTRYBOX = BL_config.PULSEBLOCKASENTRYBOX
-PULSE_BLOCK_NAMES = BL_config.PULSE_BLOCK_NAMES
-
-TTLIN = BL_config.TTLIN
-TTLOUT = BL_config.TTLOUT
+CONFIG = b21_config if "b21" == BL.lower() else i22_config
 
 BL_PROF = b21_profile if "b21" == BL.lower() else i22_profile
 DEFAULT_GROUP = BL_PROF.DEFAULT_GROUP
@@ -106,7 +89,7 @@ class EditableTableview(ttk.Treeview):
             self.Popup.place(x=x, y=y + pady, width=width, height=height, anchor="w")
 
         elif column in ["#8", "#9"]:
-            if not PULSEBLOCKASENTRYBOX:
+            if not CONFIG.PULSEBLOCKASENTRYBOX:
                 self.Popup = CheckButtonPopup(
                     self,
                     rowid,
@@ -115,7 +98,7 @@ class EditableTableview(ttk.Treeview):
                     y=y,
                     columns=self.kwargs["columns"],
                 )
-            if PULSEBLOCKASENTRYBOX:
+            if CONFIG.PULSEBLOCKASENTRYBOX:
                 self.Popup = EntryPopup(self, rowid, int(column[1:]) - 1, text)
                 self.Popup.place(
                     x=x, y=y + pady, width=width, height=height, anchor="w"
@@ -218,13 +201,15 @@ class CheckButtonPopup(ttk.Checkbutton):
         self.root.geometry("%dx%d+%d+%d" % (w, h, x - 60, y))  # NOQA: UP031 The geometry call needs it specified in this way
         self.save_pulse_button = ttk.Button(
             self.root, text="Ok", command=self.on_return
-        ).grid(column=PULSEBLOCKS, row=0, padx=5, pady=5, columnspan=1, sticky="e")
+        ).grid(
+            column=CONFIG.PULSEBLOCKS, row=0, padx=5, pady=5, columnspan=1, sticky="e"
+        )
 
         self.root.protocol("WM_DELETE_WINDOW", self.abort)
         self.root.bind("<Escape>", lambda *ignore: self.destroy())
 
     def create_checkbuttons(self):
-        for pulse in range(PULSEBLOCKS):
+        for pulse in range(CONFIG.PULSEBLOCKS):
             value = ncdcore.str2bool(str(self.pulse_vals[pulse]))
             if value is None:
                 raise ValueError("Pulse value is None")
@@ -264,7 +249,7 @@ class CheckButtonPopup(ttk.Checkbutton):
         del self
 
     def on_return(self):
-        for pulse in range(PULSEBLOCKS):
+        for pulse in range(CONFIG.PULSEBLOCKS):
             val = str(self.option_var[pulse].get())
             self.pulse_vals[pulse] = val
 
@@ -527,10 +512,10 @@ class ProfileTab(ttk.Frame):
             column=2, row=0, padx=5, pady=5, sticky="news"
         )
 
-        for i in range(PULSEBLOCKS):  # 4 pulse blocks
+        for i in range(CONFIG.PULSEBLOCKS):  # 4 pulse blocks
             col_pos = i + 3
 
-            ttk.Label(self, text=f"{PULSE_BLOCK_NAMES[i]}:").grid(
+            ttk.Label(self, text=f"{CONFIG.PULSE_BLOCK_NAMES[i]}:").grid(
                 column=col_pos, row=0, padx=5, pady=5, sticky="nsw"
             )
 
@@ -574,7 +559,7 @@ class ProfileTab(ttk.Frame):
         self.outputs = self.profile.outputs()
         self.inputs = self.profile.inputs()
 
-        if USE_MULTIPLIERS:
+        if CONFIG.USE_MULTIPLIERS:
             self.build_multiplier_choices()
             ### add tree view ############################################
 

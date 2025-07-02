@@ -26,7 +26,9 @@ def return_connected_device(beamline: str, device_name: str):
     Returns:
         StandardDetector: The connected device.
     """
+
     module_name = module_name_for_beamline(beamline)
+
     devices = make_device(
         f"dodal.beamlines.{module_name}", device_name, connect_immediately=True
     )

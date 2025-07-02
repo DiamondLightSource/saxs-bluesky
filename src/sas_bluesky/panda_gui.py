@@ -27,21 +27,9 @@ from sas_bluesky.stubs.PandAStubs import return_connected_device
 ############################################################################################
 
 BL = get_beamline_name(os.environ["BEAMLINE"])
-BL_config = import_module(f"sas_bluesky.beamline_configs.{BL}_config")
+CONFIG = import_module(f"sas_bluesky.defaults_configs.{BL}.{BL}_config")
 
-THEME_NAME = BL_config.THEME_NAME
-PULSEBLOCKS = BL_config.PULSEBLOCKS
-THEME_NAME = BL_config.THEME_NAME
-
-TTLIN = BL_config.TTLIN
-TTLOUT = BL_config.TTLOUT
-LVDSIN = BL_config.LVDSIN
-LVDSOUT = BL_config.LVDSOUT
-
-PULSE_CONNECTIONS = BL_config.PULSE_CONNECTIONS
-USE_MULTIPLIERS = BL_config.USE_MULTIPLIERS
-
-BL_PROF = import_module(f"sas_bluesky.beamline_configs.{BL}_profile")
+BL_PROF = import_module(f"sas_bluesky.defaults_configs.{BL}.{BL}_profile")
 DEFAULT_PROFILE = BL_PROF.DEFAULT_PROFILE
 
 ############################################################################################
@@ -102,7 +90,7 @@ class PandAGUI(tkinter.Tk):
         self.window = tkinter.Tk()
         self.window.wm_resizable(True, True)
         self.window.minsize(600, 200)
-        self.theme("alt")
+        self.theme(CONFIG.THEME)
 
         menubar = tkinter.Menu(self.window)
         filemenu = tkinter.Menu(menubar, tearoff=0)
@@ -195,7 +183,7 @@ class PandAGUI(tkinter.Tk):
     def theme(self, theme_name):
         style = ttk.Style(self.window)
         print("All themes:", style.theme_names())
-        style.theme_use(THEME_NAME)
+        style.theme_use(theme_name)
 
     def add_profile_tab(self, event):
         if self.notebook.select() == self.notebook.tabs()[-1]:
@@ -322,26 +310,26 @@ class PandAGUI(tkinter.Tk):
 
         labels = ["TTLIN", "LVDSIN", "TTLOUT", "LVDSOUT"]
 
-        for key in TTLIN.keys():
-            INDev = TTLIN[key]
+        for key in CONFIG.TTLIN.keys():
+            INDev = CONFIG.TTLIN[key]
 
             ax.scatter(0, key, color="k", s=50)
             ax.text(0 + 0.1, key, INDev)
 
-        for key in LVDSIN.keys():
-            LVDSINDev = LVDSIN[key]
+        for key in CONFIG.LVDSIN.keys():
+            LVDSINDev = CONFIG.VDSIN[key]
 
             ax.scatter(1, key, color="k", s=50)
             ax.text(1 + 0.1, key, LVDSINDev)
 
-        for key in TTLOUT.keys():
-            TTLOUTDev = TTLOUT[key]
+        for key in CONFIG.TTLOUT.keys():
+            TTLOUTDev = CONFIG.TTLOUT[key]
 
             ax.scatter(2, key, color="b", s=50)
             ax.text(2 + 0.1, key, TTLOUTDev)
 
-        for key in LVDSOUT.keys():
-            LVDSOUTDev = LVDSOUT[key]
+        for key in CONFIG.LVDSOUT.keys():
+            LVDSOUTDev = CONFIG.VDSOUT[key]
             ax.scatter(3, key, color="b", s=50)
             ax.text(3 + 0.1, key, LVDSOUTDev)
 
@@ -509,7 +497,7 @@ class PandAGUI(tkinter.Tk):
     def build_active_detectors_frame(self):
         self.active_detectors_frames = {}
 
-        for pulse in range(PULSEBLOCKS):
+        for pulse in range(CONFIG.PULSEBLOCKS):
             active_detectors_frame_n = ttk.Frame(
                 self.pulse_frame, borderwidth=5, relief="raised"
             )
@@ -528,7 +516,7 @@ class PandAGUI(tkinter.Tk):
             TTLLabel = ttk.Label(active_detectors_frame_n, text="TTL:")
             TTLLabel.grid(column=0, row=1, padx=5, pady=5, sticky="w")
 
-            for n, det in enumerate(PULSE_CONNECTIONS[pulse + 1]):
+            for n, det in enumerate(CONFIG.PULSE_CONNECTIONS[pulse + 1]):
                 # experiment_var=tkinter.StringVar(value=self.configuration.experiment)
 
                 if (det.lower() == "fs") or ("shutter" in det.lower()):
@@ -557,4 +545,4 @@ if __name__ == "__main__":
 
     # dir_path = os.path.dirname(os.path.realpath(__file__))
     # config_filepath = os.path.join(dir_path, "profile_yamls", "panda_config.yaml")
-    PandAGUI(configuration=DEFAULT_PROFILE)
+    PandAGUI(configuration=BL_PROF.DEFAULT_EXPERIMENT)
