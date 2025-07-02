@@ -6,6 +6,8 @@ from dodal.utils import get_beamline_name
 ############################################################################################
 
 BL = get_beamline_name(os.environ["BEAMLINE"])
+if BL is None:
+    BL = "i22"
 
 
 def load_beamline_config():
