@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+from pathlib import Path
 from string import ascii_lowercase
 from typing import Any
 
@@ -70,7 +71,7 @@ class Group(BaseModel):
         self.pause_trigger = self.pause_trigger.upper()
         self.recalc_times()
 
-    def recalc_times(self):
+    def recalc_times(self) -> None:
         self.wait_time_s = self.wait_time * ncdcore.to_seconds(self.wait_units)
         self.run_time_s = self.run_time * ncdcore.to_seconds(self.run_units)
         self.group_duration = (self.wait_time_s + self.run_time_s) * self.frames
@@ -131,13 +132,13 @@ class Profile(BaseModel):
         self.calc_total_frames()
         self.calc_duration_per_cycle()
 
-    def calc_total_frames(self):
+    def calc_total_frames(self) -> int:
         self.total_frames = 0
         for n_group in self.groups:
             self.total_frames += n_group.frames
         return self.total_frames
 
-    def calc_duration_per_cycle(self):
+    def calc_duration_per_cycle(self) -> float:
         self.duration_per_cycle = 0
 
         for n_group in self.groups:
@@ -145,7 +146,7 @@ class Profile(BaseModel):
         return self.duration_per_cycle
 
     @property
-    def duration(self):
+    def duration(self) -> float:
         duration = self.duration_per_cycle * self.cycles
         return duration
 
@@ -166,17 +167,17 @@ class Profile(BaseModel):
 
         return active_out
 
-    def append_group(self, Group, analyse_profile=True):
+    def append_group(self, Group: Group, analyse_profile: bool = True):
         self.groups.append(Group)
         if analyse_profile:
             self.analyse_profile()
 
-    def delete_group(self, id, analyse_profile=True):
+    def delete_group(self, id: int, analyse_profile: bool = True):
         self.groups.pop(id)
         if analyse_profile:
             self.analyse_profile()
 
-    def insert_group(self, id, Group, analyse_profile=True):
+    def insert_group(self, id: int, Group: Group, analyse_profile: bool = True):
         self.groups.insert(id, Group)
         if analyse_profile:
             self.analyse_profile()
@@ -191,17 +192,17 @@ class Profile(BaseModel):
         return seq
 
     @staticmethod
-    def inputs():
+    def inputs() -> list[str]:
         TTLINS = [f"TTLIN{f + 1}" for f in range(6)]
         LVDSINS = [f"LVDSIN{f + 1}" for f in range(2)]
         return TTLINS + LVDSINS
 
     @staticmethod
-    def seq_triggers():
+    def seq_triggers() -> list[str]:
         return list(SeqTrigger.__dict__["_member_names_"])
 
     @staticmethod
-    def outputs():
+    def outputs() -> list[str]:
         TTLOUTS = [f"TTLOUT{f + 1}" for f in range(10)]
         LVDSOUTS = [f"LVDSOUT{f + 1}" for f in range(2)]
         return TTLOUTS + LVDSOUTS
@@ -223,7 +224,7 @@ class ExperimentProfiles:
         self.n_profiles = len(self.profiles)
 
     @staticmethod
-    def read_from_yaml(config_filepath):
+    def read_from_yaml(config_filepath: str | Path):
         with open(config_filepath, "rb") as file:
             print("Using config:", config_filepath)
 
@@ -297,7 +298,7 @@ class ExperimentProfiles:
 
         return exp_dict
 
-    def save_to_yaml(self, filepath: str):
+    def save_to_yaml(self, filepath: str | Path):
         print("Saving configuration to:", filepath)
 
         config_dict = self.to_dict()
@@ -312,11 +313,11 @@ class ExperimentProfiles:
                 explicit_start=True,
             )
 
-    def delete_profile(self, n):
-        self.profiles.pop(n)
+    def delete_profile(self, id: int):
+        self.profiles.pop(id)
         # self.re_group_id_profiles()
         self.__post_init__()
 
-    def append_profile(self, Profile):
+    def append_profile(self, Profile: Profile):
         self.profiles.append(Profile)
         self.__post_init__()

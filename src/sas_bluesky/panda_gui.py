@@ -23,8 +23,11 @@ from sas_bluesky.stubs.panda_stubs import return_connected_device
 from sas_bluesky.utils.utils import (
     get_sas_beamline,
     load_beamline_config,
+    load_beamline_devices,
     load_beamline_profile,
 )
+
+from ._version import version
 
 ############################################################################################
 
@@ -33,17 +36,21 @@ CONFIG = load_beamline_config()
 
 BL_PROF = load_beamline_profile()
 DEFAULT_PROFILE = BL_PROF.DEFAULT_PROFILE
-
+DEV = load_beamline_devices()
 ############################################################################################
 
 
 class PandAGUI(tkinter.Tk):
-    def __init__(self, panda_config_yaml=None, configuration=None):
+    def __init__(
+        self,
+        panda_config_yaml: str | None = None,
+        configuration: ExperimentProfiles | None = None,
+    ):
         user = os.environ.get("USER")
 
         if user not in ["akz63626", "rjcd"]:  # check if I am runing this
             try:
-                self.panda = return_connected_device(BL, "panda1")
+                self.panda = return_connected_device(BL, DEV.DEFAULT_PANDA)
             except Exception:
                 answer = (
                     messagebox.askyesno(
@@ -96,16 +103,16 @@ class PandAGUI(tkinter.Tk):
 
         menubar = tkinter.Menu(self.window)
         filemenu = tkinter.Menu(menubar, tearoff=0)
-        filemenu.add_command(label="New", command=self.window.quit)
-        filemenu.add_command(label="Open", command=self.window.quit)
-        filemenu.add_command(label="Save", command=self.window.quit)
+        filemenu.add_command(label="New", command=self.open_new_window)
+        filemenu.add_command(label="Open", command=self.load_config)
+        filemenu.add_command(label="Save", command=self.save_config)
         filemenu.add_separator()
         filemenu.add_command(label="Exit", command=self.window.quit)
         menubar.add_cascade(label="File", menu=filemenu)
 
         helpmenu = tkinter.Menu(menubar, tearoff=0)
-        helpmenu.add_command(label="Help Index", command=self.window.quit)
-        helpmenu.add_command(label="About...", command=self.window.quit)
+        helpmenu.add_command(label="Help Index", command=self.show_about)
+        helpmenu.add_command(label="About...", command=self.show_about)
         menubar.add_cascade(label="Help", menu=helpmenu)
 
         self.window.config(menu=menubar)
@@ -182,7 +189,13 @@ class PandAGUI(tkinter.Tk):
 
         self.window.mainloop()
 
-    def theme(self, theme_name):
+    def open_new_window(self):
+        PandAGUI()
+
+    def show_about(self):
+        messagebox.showinfo("About", version)
+
+    def theme(self, theme_name: str):
         style = ttk.Style(self.window)
         print("All themes:", style.theme_names())
         style.theme_use(theme_name)
@@ -264,15 +277,16 @@ class PandAGUI(tkinter.Tk):
     def load_config(self):
         panda_config_yaml = filedialog.askopenfilename()
 
-        answer = messagebox.askyesno(
-            "Close/Open New", "Finished editing this profile? Continue?"
-        )
+        if (len(panda_config_yaml)) != 0:
+            answer = messagebox.askyesno(
+                "Close/Open New", "Finished editing this profile? Continue?"
+            )
 
-        if answer:
-            self.window.destroy()
-            PandAGUI(panda_config_yaml)
-        else:
-            return
+            if answer:
+                self.window.destroy()
+                PandAGUI(panda_config_yaml)
+            else:
+                return
 
     def save_config(self):
         panda_config_yaml = filedialog.asksaveasfile(

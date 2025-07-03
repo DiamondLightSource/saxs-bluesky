@@ -6,7 +6,7 @@ from dodal.utils import get_beamline_name
 ############################################################################################
 
 
-def get_sas_beamline():
+def get_sas_beamline() -> str:
     BL = get_beamline_name(os.getenv("BEAMLINE"))  # type: ignore
 
     if BL is None:
