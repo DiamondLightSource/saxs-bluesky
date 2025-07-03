@@ -11,7 +11,7 @@ def get_sas_beamline():
 
     if BL is None:
         BL = "i22"
-        os.environ["DEBUSSY"] = BL
+        os.environ["BEAMLINE"] = BL
 
     return BL
 
