@@ -13,6 +13,8 @@ from tkinter import filedialog, messagebox, simpledialog, ttk
 
 import matplotlib.pyplot as plt
 
+from sas_bluesky._version import __version__
+
 # uncomment if needed in future
 # from stomp import Connection
 # from blueapi.client.event_bus import EventBusClient
@@ -26,8 +28,6 @@ from sas_bluesky.utils.utils import (
     load_beamline_devices,
     load_beamline_profile,
 )
-
-from ._version import version
 
 ############################################################################################
 
@@ -194,7 +194,7 @@ class PandAGUI(tkinter.Tk):
         PandAGUI()
 
     def show_about(self):
-        messagebox.showinfo("About", version)
+        messagebox.showinfo("About", __version__)
 
     def theme(self, theme_name: str):
         style = ttk.Style(self.window)
