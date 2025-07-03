@@ -186,13 +186,13 @@ class Profile(BaseModel):
         if analyse_profile:
             self.analyse_profile()
 
-    def delete_group(self, id: int, analyse_profile: bool = True):
-        self.groups.pop(id)
+    def delete_group(self, n: int, analyse_profile: bool = True):
+        self.groups.pop(n)
         if analyse_profile:
             self.analyse_profile()
 
-    def insert_group(self, id: int, Group: Group, analyse_profile: bool = True):
-        self.groups.insert(id, Group)
+    def insert_group(self, n: int, Group: Group, analyse_profile: bool = True):
+        self.groups.insert(n, Group)
         if analyse_profile:
             self.analyse_profile()
 
