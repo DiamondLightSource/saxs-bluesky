@@ -45,6 +45,7 @@ class PandAGUI(tkinter.Tk):
         self,
         panda_config_yaml: str | None = None,
         configuration: ExperimentProfiles | None = None,
+        start: bool = True,
     ):
         user = os.environ.get("USER")
 
@@ -186,8 +187,8 @@ class PandAGUI(tkinter.Tk):
         ## config_loader.use_values_from_yaml(blueapi_config_path)
         ## loaded_config = config_loader.load()
         ## self.client = BlueapiClient.from_config(loaded_config)
-
-        self.window.mainloop()
+        if start:
+            self.window.mainloop()
 
     def open_new_window(self):
         PandAGUI()
@@ -333,7 +334,7 @@ class PandAGUI(tkinter.Tk):
             ax.text(0 + 0.1, key, INDev)
 
         for key in CONFIG.LVDSIN.keys():
-            LVDSINDev = CONFIG.VDSIN[key]
+            LVDSINDev = CONFIG.LVDSIN[key]
 
             ax.scatter(1, key, color="k", s=50)
             ax.text(1 + 0.1, key, LVDSINDev)
@@ -345,7 +346,7 @@ class PandAGUI(tkinter.Tk):
             ax.text(2 + 0.1, key, TTLOUTDev)
 
         for key in CONFIG.LVDSOUT.keys():
-            LVDSOUTDev = CONFIG.VDSOUT[key]
+            LVDSOUTDev = CONFIG.LVDSOUT[key]
             ax.scatter(3, key, color="b", s=50)
             ax.text(3 + 0.1, key, LVDSOUTDev)
 
@@ -523,7 +524,7 @@ class PandAGUI(tkinter.Tk):
             )
 
             Pulselabel = ttk.Label(
-                active_detectors_frame_n, text=f"Pulse Block: {pulse + 1}"
+                active_detectors_frame_n, text=f"Pulse Group: {pulse + 1}"
             )
 
             Pulselabel.grid(column=0, row=0, padx=5, pady=5, sticky="w")

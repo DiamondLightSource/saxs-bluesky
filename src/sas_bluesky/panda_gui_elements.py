@@ -322,7 +322,7 @@ class ProfileTab(ttk.Frame):
 
     def delete_last_groups_button_action(self):
         row_int = len(self.profile.groups) - 1
-        self.profile.delete_group(id=row_int)
+        self.profile.delete_group(n=row_int)
         self.build_profile_tree()
         self.generate_info_boxes()
 
@@ -337,7 +337,7 @@ class ProfileTab(ttk.Frame):
 
             row_str = "0X" + (row.replace("I", ""))
             row_int = (int(row_str, 16)) - 1
-            self.profile.delete_group(id=row_int)
+            self.profile.delete_group(n=row_int)
 
             self.build_profile_tree()
             self.generate_info_boxes()
@@ -352,7 +352,7 @@ class ProfileTab(ttk.Frame):
 
         row_str = "0X" + (row.replace("I", ""))
         row_int = (int(row_str, 16)) - 1
-        self.profile.insert_group(id=row_int, Group=DEFAULT_GROUP)
+        self.profile.insert_group(n=row_int, Group=DEFAULT_GROUP)
         self.build_profile_tree()
         self.generate_info_boxes()
 
