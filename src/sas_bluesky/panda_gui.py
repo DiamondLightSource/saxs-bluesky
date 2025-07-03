@@ -45,6 +45,7 @@ class PandAGUI(tkinter.Tk):
         self,
         panda_config_yaml: str | None = None,
         configuration: ExperimentProfiles | None = None,
+        start: bool = True,
     ):
         user = os.environ.get("USER")
 
@@ -186,8 +187,8 @@ class PandAGUI(tkinter.Tk):
         ## config_loader.use_values_from_yaml(blueapi_config_path)
         ## loaded_config = config_loader.load()
         ## self.client = BlueapiClient.from_config(loaded_config)
-
-        self.window.mainloop()
+        if start:
+            self.window.mainloop()
 
     def open_new_window(self):
         PandAGUI()
