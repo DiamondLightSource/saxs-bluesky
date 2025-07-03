@@ -333,7 +333,7 @@ class PandAGUI(tkinter.Tk):
             ax.text(0 + 0.1, key, INDev)
 
         for key in CONFIG.LVDSIN.keys():
-            LVDSINDev = CONFIG.VDSIN[key]
+            LVDSINDev = CONFIG.LVDSIN[key]
 
             ax.scatter(1, key, color="k", s=50)
             ax.text(1 + 0.1, key, LVDSINDev)
@@ -345,7 +345,7 @@ class PandAGUI(tkinter.Tk):
             ax.text(2 + 0.1, key, TTLOUTDev)
 
         for key in CONFIG.LVDSOUT.keys():
-            LVDSOUTDev = CONFIG.VDSOUT[key]
+            LVDSOUTDev = CONFIG.LVDSOUT[key]
             ax.scatter(3, key, color="b", s=50)
             ax.text(3 + 0.1, key, LVDSOUTDev)
 
@@ -523,7 +523,7 @@ class PandAGUI(tkinter.Tk):
             )
 
             Pulselabel = ttk.Label(
-                active_detectors_frame_n, text=f"Pulse Block: {pulse + 1}"
+                active_detectors_frame_n, text=f"Pulse Group: {pulse + 1}"
             )
 
             Pulselabel.grid(column=0, row=0, padx=5, pady=5, sticky="w")

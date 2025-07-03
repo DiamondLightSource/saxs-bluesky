@@ -246,6 +246,8 @@ class ExperimentProfiles:
 
     @staticmethod
     def read_from_yaml(config_filepath: str | Path):
+        """Reads an Experimental configuration, containing n profiles
+        and generates a ExperimentalProfiles object"""
         with open(config_filepath, "rb") as file:
             print("Using config:", config_filepath)
 
@@ -334,9 +336,9 @@ class ExperimentProfiles:
                 explicit_start=True,
             )
 
-    def delete_profile(self, id: int):
-        self.profiles.pop(id)
-        # self.re_group_id_profiles()
+    def delete_profile(self, n: int):
+        """Deletes the nth profile from the object"""
+        self.profiles.pop(n)
         self.__post_init__()
 
     def append_profile(self, Profile: Profile):
