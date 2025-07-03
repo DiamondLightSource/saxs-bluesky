@@ -15,39 +15,9 @@ from sas_bluesky.utils.ncdcore import ncdcore
 
 """
 
-Note to self:
-
-HDFPanda:
-    pulse
-    seq
-    pcomp
-    pcap
-    data
-    inenc
-
-
-"""
-
-"""
-
 Group and Profile BaseModels
 
 """
-
-
-time_units = {
-    "ns": 1e-9,
-    "nsec": 1e-9,
-    "usec": 1e-6,
-    "ms": 1e-3,
-    "msec": 1e-3,
-    "s": 1,
-    "sec": 1,
-    "min": 60,
-    "m": 60,
-    "hour": 60 * 60,
-    "h": 60 * 60,
-}
 
 
 class Group(BaseModel):
