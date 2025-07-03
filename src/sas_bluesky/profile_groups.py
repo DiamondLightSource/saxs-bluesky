@@ -51,6 +51,11 @@ time_units = {
 
 
 class Group(BaseModel):
+    """A Group represents the information of one line in the PandA sequence table.
+    Additional information is stored and used for configuration in the GUI
+    This can be used alonside the Profile class
+    to build up complex experimental profiles"""
+
     frames: int
     wait_time: int
     wait_units: str
@@ -116,6 +121,15 @@ class Group(BaseModel):
 
 
 class Profile(BaseModel):
+    """A basemodel for all the information needed to configure the PandA triggering.
+    Cycles are the number of times the who sequence table is run
+    Seq trigger must be set to either immediate or one of the panda trigger types.
+    A group is effectively a line in the sequencer table
+    Multiplier is use when the PandA is set up for triggering different
+    sets of detetcors at different rates
+    The information stored in this BaseModel can be passed to ncd_panda and applied.
+    The information can also be used to configure it in the gui"""
+
     cycles: int = 1
     seq_trigger: str = "IMMEDIATE"
     groups: list[Group] = []
@@ -210,6 +224,13 @@ class Profile(BaseModel):
 
 @PydanticDataclass
 class ExperimentProfiles:
+    """
+    The stores multiple Profiles and can be used in the GUI.
+    The is analoaghous to the information shown in the legacy
+    ncd_detectors configuration GUI in GDA
+    These can be stored as yaml files or as objects and used for experiments
+    """
+
     profiles: list[Profile]
     instrument: str
     experiment: str
