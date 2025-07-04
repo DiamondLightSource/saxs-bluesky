@@ -88,7 +88,7 @@ def test_profile_delete():
     assert len(P.groups) == 4
 
 
-def test_active_out():
+def test_active_pulses():
     P = Profile()
     P.append_group(
         Group(
@@ -103,4 +103,4 @@ def test_active_out():
         )
     )
 
-    assert P.active_out == [1, 2, 3, 4]
+    assert P.active_pulses == [1, 2, 3, 4]
