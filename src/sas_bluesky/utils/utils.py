@@ -75,7 +75,20 @@ if __name__ == "__main__":
 
     experimental_profiles = ExperimentProfiles.read_from_yaml(default_config_path)
 
-    trigger_time, signal = generate_pulse_signal(experimental_profiles.profiles[1], 1)
+    profile = experimental_profiles.profiles[0]
 
-    plt.step(trigger_time, signal)
+    figure, axes = plt.subplots(
+        len(profile.active_out) + 1,
+        1,
+        sharex=True,
+        figsize=(10, len(profile.active_out) * 4),
+    )  # noqa
+
+    if len(profile.active_out) > 0:
+        for i in range(len(profile.active_out)):
+            trigger_time, signal = generate_pulse_signal(profile, i)
+
+            axes[i].step(trigger_time, signal)
+            axes[i].set_ylabel(f"Seq Pulse {i} Signal")
+
     plt.show()
