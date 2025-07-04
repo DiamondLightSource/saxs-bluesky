@@ -135,7 +135,7 @@ class Profile(BaseModel):
         return duration
 
     @property
-    def active_out(self) -> list[int]:
+    def active_pulses(self) -> list[int]:
         """
         Checks which outputs are active in the wait phase,
         checks which outputs are active in the run phase
@@ -146,10 +146,10 @@ class Profile(BaseModel):
         wait_matrix = np.array([g.wait_pulses for g in self.groups])
         run_matrix = np.array([g.run_pulses for g in self.groups])
         active_matrix = wait_matrix + run_matrix
-        active_out = np.where((np.sum(active_matrix, axis=0)) != 0)[0] + 1
-        active_out = active_out.tolist()
+        active_pulses = np.where((np.sum(active_matrix, axis=0)) != 0)[0] + 1
+        active_pulses = active_pulses.tolist()
 
-        return active_out
+        return active_pulses
 
     def append_group(self, Group: Group, analyse_profile: bool = True):
         self.groups.append(Group)
