@@ -40,7 +40,8 @@ def load_beamline_devices():
 
 
 class ProfilePlotter:
-    def generate_pulse_signal(self, profile: Profile, pulse: int):
+    @staticmethod
+    def generate_pulse_signal(profile: Profile, pulse: int):
         current_time = 0.0
         trigger_time = [current_time]
         signal = [0]  # starts low and ends low
@@ -67,18 +68,18 @@ class ProfilePlotter:
         return trigger_time, signal
 
     def plot_pulses(self, profile):
-        print(profile.active_out)
-
         _, axes = plt.subplots(
-            len(profile.active_out),
+            len(profile.active_pulses),
             1,
             sharex=True,
-            figsize=(10, len(profile.active_out) * 4),
+            figsize=(10, len(profile.active_pulses) * 4),
         )  # noqa
 
-        if len(profile.active_out) > 0:
-            for n, i in enumerate(profile.active_out):
-                trigger_time, signal = self.generate_pulse_signal(profile, i - 1)
+        if len(profile.active_pulses) > 0:
+            for n, i in enumerate(profile.active_pulses):
+                trigger_time, signal = ProfilePlotter.generate_pulse_signal(
+                    profile, i - 1
+                )
 
                 axes[n].step(trigger_time, signal)
                 axes[n].set_ylabel(f"Seq Pulse {i} Signal")

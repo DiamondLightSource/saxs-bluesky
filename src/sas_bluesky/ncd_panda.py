@@ -508,7 +508,7 @@ def configure_and_run_panda_triggering(
 
     """
 
-    active_pulses: list[int] = profile.active_out
+    active_pulses: list[int] = profile.active_pulses
 
     yield from configure_panda_triggering(
         beamline=beamline,
