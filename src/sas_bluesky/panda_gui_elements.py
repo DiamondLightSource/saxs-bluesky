@@ -533,7 +533,7 @@ class ProfileTab(ttk.Frame):
         # self.edit_config_for_profile()
         self.parent.commit_config()
 
-        ProfilePlotter(self.profile)
+        ProfilePlotter(self.profile, CONFIG.PULSE_BLOCK_NAMES)
 
     # def focus_out_generate_info_boxes(event):
     #     self.generate_info_boxes()

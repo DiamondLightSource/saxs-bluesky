@@ -41,7 +41,9 @@ def load_beamline_devices():
 
 class ProfilePlotter:
     @staticmethod
-    def generate_pulse_signal(profile: Profile, pulse: int):
+    def generate_pulse_signal(
+        profile: Profile, pulse: int
+    ) -> tuple[np.ndarray, np.ndarray]:
         current_time = 0.0
         trigger_time = [current_time]
         signal = [0]  # starts low and ends low
@@ -67,7 +69,10 @@ class ProfilePlotter:
 
         return trigger_time, signal
 
-    def plot_pulses(self, profile):
+    def plot_pulses(self, profile, pulse_names=None):
+        if pulse_names is None:
+            pulse_names = [f"Seq Pulse {f}" for f in range(len(profile.active_pulses))]
+
         _, axes = plt.subplots(
             len(profile.active_pulses),
             1,
@@ -82,13 +87,13 @@ class ProfilePlotter:
                 )
 
                 axes[n].step(trigger_time, signal)
-                axes[n].set_ylabel(f"Seq Pulse {i} Signal")
+                axes[n].set_ylabel(f"{pulse_names[n]} Signal")
 
         plt.xlabel("Time (s)")
         plt.show()
 
-    def __init__(self, profile):
-        self.plot_pulses(profile)
+    def __init__(self, profile, pulse_names=None):
+        self.plot_pulses(profile, pulse_names)
 
 
 if __name__ == "__main__":
