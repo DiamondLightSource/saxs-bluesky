@@ -39,31 +39,55 @@ def load_beamline_devices():
     return BL_DEV
 
 
-def generate_pulse_signal(profile: Profile, pulse: int):
-    current_time = 0.0
-    trigger_time = [current_time]
-    signal = [0]  # starts low and ends low
+class ProfilePlotter:
+    def generate_pulse_signal(self, profile: Profile, pulse: int):
+        current_time = 0.0
+        trigger_time = [current_time]
+        signal = [0]  # starts low and ends low
 
-    for group in profile.groups:
-        wait_active = group.wait_pulses[pulse]
-        run_active = group.run_pulses[pulse]
+        for group in profile.groups:
+            wait_active = group.wait_pulses[pulse]
+            run_active = group.run_pulses[pulse]
 
-        for _frame in range(group.frames):
-            current_time += group.wait_time * ncdcore.to_seconds(group.wait_units)
-            trigger_time.append(current_time)
-            signal.append(wait_active)
+            for _frame in range(group.frames):
+                current_time += group.wait_time * ncdcore.to_seconds(group.wait_units)
+                trigger_time.append(current_time)
+                signal.append(wait_active)
 
-            current_time += group.run_time * ncdcore.to_seconds(group.run_units)
-            trigger_time.append(current_time)
-            signal.append(run_active)
+                current_time += group.run_time * ncdcore.to_seconds(group.run_units)
+                trigger_time.append(current_time)
+                signal.append(run_active)
 
-    trigger_time.append(current_time + (current_time) / 10)
-    signal.append(0)  # starts low and ends low
+        trigger_time.append(current_time + (current_time) / 10)
+        signal.append(0)  # starts low and ends low
 
-    trigger_time = np.asarray(trigger_time)
-    signal = np.asarray(signal)
+        trigger_time = np.asarray(trigger_time)
+        signal = np.asarray(signal)
 
-    return trigger_time, signal
+        return trigger_time, signal
+
+    def plot_pulses(self, profile):
+        print(profile.active_out)
+
+        _, axes = plt.subplots(
+            len(profile.active_out),
+            1,
+            sharex=True,
+            figsize=(10, len(profile.active_out) * 4),
+        )  # noqa
+
+        if len(profile.active_out) > 0:
+            for n, i in enumerate(profile.active_out):
+                trigger_time, signal = self.generate_pulse_signal(profile, i - 1)
+
+                axes[n].step(trigger_time, signal)
+                axes[n].set_ylabel(f"Seq Pulse {i} Signal")
+
+        plt.xlabel("Time (s)")
+        plt.show()
+
+    def __init__(self, profile):
+        self.plot_pulses(profile)
 
 
 if __name__ == "__main__":
@@ -74,21 +98,6 @@ if __name__ == "__main__":
     )
 
     experimental_profiles = ExperimentProfiles.read_from_yaml(default_config_path)
-
     profile = experimental_profiles.profiles[0]
 
-    figure, axes = plt.subplots(
-        len(profile.active_out) + 1,
-        1,
-        sharex=True,
-        figsize=(10, len(profile.active_out) * 4),
-    )  # noqa
-
-    if len(profile.active_out) > 0:
-        for i in range(len(profile.active_out)):
-            trigger_time, signal = generate_pulse_signal(profile, i)
-
-            axes[i].step(trigger_time, signal)
-            axes[i].set_ylabel(f"Seq Pulse {i} Signal")
-
-    plt.show()
+    ProfilePlotter(profile)
