@@ -18,6 +18,7 @@ from ophyd_async.fastcs.panda._block import PandaTimeUnits
 from sas_bluesky.profile_groups import Group, Profile
 from sas_bluesky.utils.ncdcore import ncdcore
 from sas_bluesky.utils.utils import (
+    ProfilePlotter,
     get_sas_beamline,
     load_beamline_config,
     load_beamline_profile,
@@ -531,6 +532,8 @@ class ProfileTab(ttk.Frame):
     def commit_and_plot(self):
         # self.edit_config_for_profile()
         self.parent.commit_config()
+
+        ProfilePlotter(self.profile)
 
     # def focus_out_generate_info_boxes(event):
     #     self.generate_info_boxes()
