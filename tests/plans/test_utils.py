@@ -9,4 +9,6 @@ FAST_DETECTORS = DEV.FAST_DETECTORS
 
 
 def test_fast_detectors_without_beamline_env_var_makes_set():
-    assert FAST_DETECTORS == {"saxs", "waxs"}
+    assert "saxs" in FAST_DETECTORS
+    assert "waxs" in FAST_DETECTORS
+    assert len(FAST_DETECTORS) == 2
