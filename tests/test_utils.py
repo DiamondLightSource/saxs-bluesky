@@ -2,7 +2,12 @@ import os
 from pathlib import Path
 
 from sas_bluesky.profile_groups import Group, Profile
-from sas_bluesky.utils.utils import ProfilePlotter
+from sas_bluesky.utils.utils import ProfilePlotter, load_beamline_devices
+
+os.environ["BEAMLINE"] = "i22"
+
+DEV = load_beamline_devices()
+FAST_DETECTORS = DEV.FAST_DETECTORS
 
 SAS_bluesky_ROOT = Path(__file__)
 
@@ -28,3 +33,9 @@ def test_profile_append():
 
     time, signal = ProfilePlotter.generate_pulse_signal(P, 1)
     assert len(time) == len(signal)
+
+
+def test_fast_detectors_without_beamline_env_var_makes_set():
+    assert "saxs" in FAST_DETECTORS
+    assert "waxs" in FAST_DETECTORS
+    assert len(FAST_DETECTORS) == 2
