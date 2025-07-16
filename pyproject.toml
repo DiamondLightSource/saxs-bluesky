@@ -9,12 +9,11 @@ classifiers = [
     "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13",
 ]
 description = "Bluesky plans, plan stubs and utilities for Small Angle Scattering beamline at DLS"
 dependencies = [
     "dls-dodal @ git+https://github.com/DiamondLightSource/dodal.git@main",
-    "ophyd_async>=0.9.0",
+    "ophyd_async",
     "numpy",
     "blueapi",
     "matplotlib",
