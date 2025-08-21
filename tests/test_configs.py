@@ -1,5 +1,5 @@
-from sas_bluesky.defaults_configs.b21 import b21_profile
-from sas_bluesky.defaults_configs.i22 import i22_profile
+from saxs_bluesky.defaults_configs.b21 import b21_profile
+from saxs_bluesky.defaults_configs.i22 import i22_profile
 
 
 def test_i22_profile():
