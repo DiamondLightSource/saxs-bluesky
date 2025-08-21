@@ -3,7 +3,7 @@
 import click
 from bluesky import RunEngine
 
-from sas_bluesky.panda_gui import PandAGUI
+from sas_bluesky.gui.panda_gui import PandAGUI
 from sas_bluesky.stubs.panda_stubs import return_connected_device, save_device_to_yaml
 from sas_bluesky.utils.utils import load_beamline_devices, load_beamline_profile
 

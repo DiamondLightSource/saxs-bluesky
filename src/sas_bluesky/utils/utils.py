@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from dodal.utils import get_beamline_name
 
-from sas_bluesky.profile_groups import ExperimentProfiles, Profile
 from sas_bluesky.utils.ncdcore import ncdcore
+from sas_bluesky.utils.profile_groups import ExperimentProfiles, Profile
 
 
 def get_sas_beamline() -> str:

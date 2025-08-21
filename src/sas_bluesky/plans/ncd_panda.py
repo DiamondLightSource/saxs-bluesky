@@ -30,13 +30,13 @@ from ophyd_async.fastcs.panda import (
 from ophyd_async.plan_stubs import ensure_connected, get_current_settings
 from pydantic import validate_call  # ,NonNegativeFloat,
 
-from sas_bluesky.profile_groups import ExperimentProfiles, Profile  # Group
 from sas_bluesky.stubs.panda_stubs import (
     fly_and_collect_with_wait,
     load_settings_from_yaml,
     return_connected_device,
     upload_yaml_to_panda,
 )
+from sas_bluesky.utils.profile_groups import ExperimentProfiles, Profile  # Group
 from sas_bluesky.utils.utils import load_beamline_config, load_beamline_devices
 
 BL = get_beamline_name(os.environ["BEAMLINE"])

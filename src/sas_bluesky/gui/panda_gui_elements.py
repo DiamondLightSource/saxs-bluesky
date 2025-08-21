@@ -15,8 +15,8 @@ from ophyd_async.fastcs.panda import (
 )
 from ophyd_async.fastcs.panda._block import PandaTimeUnits
 
-from sas_bluesky.profile_groups import Group, Profile
 from sas_bluesky.utils.ncdcore import ncdcore
+from sas_bluesky.utils.profile_groups import Group, Profile
 from sas_bluesky.utils.utils import (
     ProfilePlotter,
     get_sas_beamline,

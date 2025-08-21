@@ -9,7 +9,7 @@ import yaml
 from ophyd_async.core import in_micros
 from ophyd_async.fastcs.panda import SeqTable, SeqTrigger
 from pydantic import BaseModel
-from pydantic.dataclasses import dataclass as PydanticDataclass
+from pydantic.dataclasses import dataclass as pydanticdataclass
 
 from sas_bluesky.utils.ncdcore import ncdcore
 
@@ -192,7 +192,7 @@ class Profile(BaseModel):
         return TTLOUTS + LVDSOUTS
 
 
-@PydanticDataclass
+@pydanticdataclass
 class ExperimentProfiles:
     """
     The stores multiple Profiles and can be used in the GUI.

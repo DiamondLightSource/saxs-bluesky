@@ -19,9 +19,9 @@ from sas_bluesky._version import __version__
 # from stomp import Connection
 # from blueapi.client.event_bus import EventBusClient
 # from bluesky_stomp.messaging import StompClient, BasicAuthentication
-from sas_bluesky.panda_gui_elements import ProfileTab
-from sas_bluesky.profile_groups import ExperimentProfiles
+from sas_bluesky.gui.panda_gui_elements import ProfileTab
 from sas_bluesky.stubs.panda_stubs import return_connected_device
+from sas_bluesky.utils.profile_groups import ExperimentProfiles
 from sas_bluesky.utils.utils import (
     get_sas_beamline,
     load_beamline_config,
