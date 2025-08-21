@@ -29,7 +29,6 @@ from ophyd_async.fastcs.panda import (
 )
 from ophyd_async.plan_stubs import ensure_connected, get_current_settings
 from pydantic import validate_call  # ,NonNegativeFloat,
-
 from sas_bluesky.stubs.panda_stubs import (
     fly_and_collect_with_wait,
     load_settings_from_yaml,

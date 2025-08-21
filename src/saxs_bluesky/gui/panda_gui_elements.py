@@ -15,11 +15,11 @@ from ophyd_async.fastcs.panda import (
 )
 from ophyd_async.fastcs.panda._block import PandaTimeUnits
 
-from sas_bluesky.utils.ncdcore import ncdcore
-from sas_bluesky.utils.profile_groups import Group, Profile
-from sas_bluesky.utils.utils import (
+from saxs_bluesky.utils.ncdcore import ncdcore
+from saxs_bluesky.utils.profile_groups import Group, Profile
+from saxs_bluesky.utils.utils import (
     ProfilePlotter,
-    get_sas_beamline,
+    get_saxs_beamline,
     load_beamline_config,
     load_beamline_profile,
 )
@@ -27,7 +27,7 @@ from sas_bluesky.utils.utils import (
 CONFIG = load_beamline_config()
 BL_PROF = load_beamline_profile()
 DEFAULT_GROUP = BL_PROF.DEFAULT_GROUP
-Bl = get_sas_beamline()
+Bl = get_saxs_beamline()
 
 
 class EditableTableview(ttk.Treeview):
@@ -505,7 +505,7 @@ class ProfileTab(ttk.Frame):
         for i in self.profile.groups:
             print(i)
 
-    # TODO: https://github.com/DiamondLightSource/sas-bluesky/issues/23
+    # TODO: https://github.com/DiamondLightSource/saxs-bluesky/issues/23
     def build_multiplier_choices(self):
         self.multiplier_var_options = []
 

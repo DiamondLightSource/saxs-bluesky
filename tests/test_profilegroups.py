@@ -3,12 +3,12 @@ from pathlib import Path
 
 from pydantic_core import from_json
 
-from sas_bluesky.profile_groups import ExperimentProfiles, Group, Profile
+from saxs_bluesky.utils.profile_groups import ExperimentProfiles, Group, Profile
 
-SAS_bluesky_ROOT = Path(__file__)
+SAXS_bluesky_ROOT = Path(__file__)
 
 yaml_dir = os.path.join(
-    SAS_bluesky_ROOT.parent.parent, "src", "sas_bluesky", "profile_yamls"
+    SAXS_bluesky_ROOT.parent.parent, "src", "saxs_bluesky", "profile_yamls"
 )
 
 
