@@ -49,7 +49,7 @@ class PandAGUI(tkinter.Tk):
     ):
         user = os.environ.get("USER")
 
-        if user not in ["akz63626", "rjcd"]:  # check if I am runing this
+        if user not in ["root", "rjcd"]:  # check to see if in dev mode
             try:
                 self.panda = return_connected_device(BL, DEV.DEFAULT_PANDA)
             except Exception:
