@@ -1,6 +1,7 @@
 from dodal.beamlines import i22
 from dodal.common.beamlines.beamline_utils import get_path_provider
-from sas_bluesky.utils.profile_groups import ExperimentProfiles, Group, Profile
+
+from saxs_bluesky.utils.profile_groups import ExperimentProfiles, Group, Profile
 
 PP = get_path_provider()
 visit_id = PP._root  # type: ignore #noqa

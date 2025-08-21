@@ -10,7 +10,8 @@ from ophyd_async.core import in_micros
 from ophyd_async.fastcs.panda import SeqTable, SeqTrigger
 from pydantic import BaseModel
 from pydantic.dataclasses import dataclass as pydanticdataclass
-from sas_bluesky.utils.ncdcore import ncdcore
+
+from saxs_bluesky.utils.ncdcore import ncdcore
 
 """
 
