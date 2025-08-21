@@ -4,17 +4,18 @@ _src_path: https://github.com/DiamondLightSource/python-copier-template
 author_email: richard.dixey@diamond.ac.uk
 author_name: Richard Dixey
 component_lifecycle: experimental
-component_owner: ''
+component_owner: ""
 component_type: library
-description: Bluesky plans, plan stubs and utilities for Small Angle Scattering beamline
+description:
+    Bluesky plans, plan stubs and utilities for Small Angle Scattering beamline
     at DLS
-distribution_name: sas-bluesky
+distribution_name: saxs-bluesky
 docker: false
 docs_type: README
 git_platform: github.com
 github_org: DiamondLightSource
-package_name: sas_bluesky
+package_name: saxs_bluesky
 pypi: false
-repo_name: sas-bluesky
+repo_name: saxs-bluesky
 strict_typing: false
 type_checker: pyright

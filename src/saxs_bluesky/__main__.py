@@ -1,11 +1,13 @@
-"""Interface for ``python -m sas_bluesky``."""
+"""Interface for ``python -m saxs_bluesky``."""
+
+import os
 
 import click
 from bluesky import RunEngine
 
-from sas_bluesky.panda_gui import PandAGUI
-from sas_bluesky.stubs.panda_stubs import return_connected_device, save_device_to_yaml
-from sas_bluesky.utils.utils import load_beamline_devices, load_beamline_profile
+from saxs_bluesky.gui.panda_gui import PandAGUI
+from saxs_bluesky.stubs.panda_stubs import return_connected_device, save_device_to_yaml
+from saxs_bluesky.utils.utils import load_beamline_devices, load_beamline_profile
 
 from . import __version__
 
@@ -32,7 +34,7 @@ def save_panda():
 
     DEV = load_beamline_devices()
     panda_name = DEV.DEFAULT_PANDA
-    connected_panda = return_connected_device("i22", panda_name)
+    connected_panda = return_connected_device(os.environ["BEAMLINE"], panda_name)
     yaml_dir = input("Input directory to save")
     RE(
         save_device_to_yaml(

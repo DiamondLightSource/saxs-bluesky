@@ -1,18 +1,18 @@
 import os
 from pathlib import Path
 
-from sas_bluesky.profile_groups import Group, Profile
-from sas_bluesky.utils.utils import ProfilePlotter, load_beamline_devices
+from saxs_bluesky.utils.profile_groups import Group, Profile
+from saxs_bluesky.utils.utils import ProfilePlotter, load_beamline_devices
 
 os.environ["BEAMLINE"] = "i22"
 
 DEV = load_beamline_devices()
 FAST_DETECTORS = DEV.FAST_DETECTORS
 
-SAS_bluesky_ROOT = Path(__file__)
+SAXS_bluesky_ROOT = Path(__file__)
 
 yaml_dir = os.path.join(
-    SAS_bluesky_ROOT.parent.parent, "src", "sas_bluesky", "profile_yamls"
+    SAXS_bluesky_ROOT.parent.parent, "src", "saxs_bluesky", "profile_yamls"
 )
 
 

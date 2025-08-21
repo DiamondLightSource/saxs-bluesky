@@ -3,7 +3,7 @@ requires = ["setuptools>=64", "setuptools_scm[toml]>=8"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "sas-bluesky"
+name = "saxs-bluesky"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "License :: OSI Approved :: Apache Software License",
@@ -38,10 +38,10 @@ dev = [
 ]
 
 [project.scripts]
-sas-bluesky = "sas_bluesky.__main__:main"
+saxs-bluesky = "saxs_bluesky.__main__:main"
 
 [project.urls]
-GitHub = "https://github.com/DiamondLightSource/sas-bluesky"
+GitHub = "https://github.com/DiamondLightSource/saxs-bluesky"
 
 [[project.authors]] # Further authors may be added by duplicating this section
 email = "richard.dixey@diamond.ac.uk"
@@ -49,7 +49,7 @@ name = "Richard Dixey"
 
 
 [tool.setuptools_scm]
-version_file = "src/sas_bluesky/_version.py"
+version_file = "src/saxs_bluesky/_version.py"
 
 [tool.pyright]
 typeCheckingMode = "standard"
@@ -66,7 +66,7 @@ filterwarnings = "error"
 testpaths = "docs src tests"
 
 [tool.coverage.run]
-data_file = "/tmp/sas_bluesky.coverage"
+data_file = "/tmp/saxs_bluesky.coverage"
 
 [tool.coverage.paths]
 # Tests are run from installed location, map back to the src directory
@@ -90,7 +90,7 @@ allowlist_externals =
 commands =
     pre-commit: pre-commit run --all-files --show-diff-on-failure {posargs}
     type-checking: pyright src tests {posargs}
-    tests: pytest --cov=sas_bluesky --cov-report term --cov-report xml:cov.xml {posargs}
+    tests: pytest --cov=saxs_bluesky --cov-report term --cov-report xml:cov.xml {posargs}
 """
 
 [tool.ruff]
