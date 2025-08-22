@@ -7,6 +7,7 @@ Python Elements for NCD PandA config GUI
 
 """
 
+import os
 import tkinter
 from tkinter import messagebox, ttk
 
@@ -27,7 +28,7 @@ from saxs_bluesky.utils.utils import (
 CONFIG = load_beamline_config()
 BL_PROF = load_beamline_profile()
 DEFAULT_GROUP = BL_PROF.DEFAULT_GROUP
-BL = get_beamline_name()  # type: ignore
+BL = get_beamline_name(os.environ["BEAMLINE"])
 
 
 class EditableTableview(ttk.Treeview):

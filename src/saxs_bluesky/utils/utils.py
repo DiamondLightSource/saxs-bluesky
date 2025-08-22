@@ -10,7 +10,7 @@ from dodal.utils import get_beamline_name
 from saxs_bluesky.utils.ncdcore import ncdcore
 from saxs_bluesky.utils.profile_groups import ExperimentProfiles, Profile
 
-BL = get_beamline_name()  # type: ignore
+BL = get_beamline_name(os.environ["BEAMLINE"])
 
 
 def load_beamline_config():
