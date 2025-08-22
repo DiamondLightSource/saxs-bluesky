@@ -39,7 +39,7 @@ from saxs_bluesky.stubs.panda_stubs import (
 from saxs_bluesky.utils.profile_groups import ExperimentProfiles, Profile  # Group
 from saxs_bluesky.utils.utils import load_beamline_config, load_beamline_devices
 
-BL = get_beamline_name(os.environ["BEAMLINE"])
+BL = get_beamline_name(os.getenv["BEAMLINE"])  # type: ignore
 CONFIG = load_beamline_config()
 DEV = load_beamline_devices()
 DEFAULT_PANDA = DEV.DEFAULT_PANDA

@@ -10,7 +10,10 @@ from dodal.utils import get_beamline_name
 from saxs_bluesky.utils.ncdcore import ncdcore
 from saxs_bluesky.utils.profile_groups import ExperimentProfiles, Profile
 
-BL = get_beamline_name(os.environ["BEAMLINE"])
+BL = get_beamline_name(os.getenv["BEAMLINE"])  # type: ignore
+
+if BL is None:
+    BL = "i22"
 
 
 def load_beamline_config():

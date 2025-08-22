@@ -30,7 +30,7 @@ from saxs_bluesky.utils.utils import (
 
 ############################################################################################
 
-BL = get_beamline_name(os.environ["BEAMLINE"])
+BL = get_beamline_name(os.getenv["BEAMLINE"])  # type: ignore
 CONFIG = load_beamline_config()
 
 BL_PROF = load_beamline_profile()

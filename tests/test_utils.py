@@ -1,10 +1,12 @@
 import os
+
+os.environ["BEAMLINE"] = "i22"
+
+
 from pathlib import Path
 
 from saxs_bluesky.utils.profile_groups import Group, Profile
 from saxs_bluesky.utils.utils import ProfilePlotter, load_beamline_devices
-
-os.environ["BEAMLINE"] = "i22"
 
 DEV = load_beamline_devices()
 FAST_DETECTORS = DEV.FAST_DETECTORS
