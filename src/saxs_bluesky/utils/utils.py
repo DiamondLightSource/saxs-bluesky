@@ -5,15 +5,19 @@ from pathlib import Path
 ############################################################################################
 import matplotlib.pyplot as plt
 import numpy as np
-from dodal.utils import get_beamline_name
 
 from saxs_bluesky.utils.ncdcore import ncdcore
 from saxs_bluesky.utils.profile_groups import ExperimentProfiles, Profile
 
-BL = get_beamline_name(os.getenv["BEAMLINE"])  # type: ignore
 
-if BL is None:
-    BL = "i22"
+def get_saxs_beamline():
+    BL = os.environ["BEAMLINE"]
+
+    if BL is None:
+        BL = "i22"
+
+
+BL = get_saxs_beamline()
 
 
 def load_beamline_config():

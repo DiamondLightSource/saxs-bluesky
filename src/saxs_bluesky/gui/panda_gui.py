@@ -12,7 +12,6 @@ import tkinter
 from tkinter import filedialog, messagebox, simpledialog, ttk
 
 import matplotlib.pyplot as plt
-from dodal.utils import get_beamline_name
 
 from saxs_bluesky._version import __version__
 
@@ -23,6 +22,7 @@ from saxs_bluesky._version import __version__
 from saxs_bluesky.gui.panda_gui_elements import ProfileTab
 from saxs_bluesky.utils.profile_groups import ExperimentProfiles
 from saxs_bluesky.utils.utils import (
+    get_saxs_beamline,
     load_beamline_config,
     load_beamline_devices,
     load_beamline_profile,
@@ -30,7 +30,7 @@ from saxs_bluesky.utils.utils import (
 
 ############################################################################################
 
-BL = get_beamline_name(os.getenv["BEAMLINE"])  # type: ignore
+BL = get_saxs_beamline()
 CONFIG = load_beamline_config()
 
 BL_PROF = load_beamline_profile()

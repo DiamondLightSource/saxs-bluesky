@@ -7,11 +7,9 @@ Python Elements for NCD PandA config GUI
 
 """
 
-import os
 import tkinter
 from tkinter import messagebox, ttk
 
-from dodal.utils import get_beamline_name
 from ophyd_async.fastcs.panda import (
     SeqTrigger,
 )
@@ -21,6 +19,7 @@ from saxs_bluesky.utils.ncdcore import ncdcore
 from saxs_bluesky.utils.profile_groups import Group, Profile
 from saxs_bluesky.utils.utils import (
     ProfilePlotter,
+    get_saxs_beamline,
     load_beamline_config,
     load_beamline_profile,
 )
@@ -28,7 +27,7 @@ from saxs_bluesky.utils.utils import (
 CONFIG = load_beamline_config()
 BL_PROF = load_beamline_profile()
 DEFAULT_GROUP = BL_PROF.DEFAULT_GROUP
-BL = get_beamline_name(os.getenv["BEAMLINE"])  # type: ignore
+BL = get_saxs_beamline()
 
 
 class EditableTableview(ttk.Treeview):
