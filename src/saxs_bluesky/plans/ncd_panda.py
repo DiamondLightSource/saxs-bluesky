@@ -594,7 +594,7 @@ if __name__ == "__main__":
     RE(
         configure_panda_triggering(
             "i22",
-            "cm40643-3/bluesky",
+            "cm40643-4/bluesky",
             profile,
             force_load=False,
         )
