@@ -1,8 +1,4 @@
 import os
-
-os.environ["BEAMLINE"] = "i22"
-
-
 from pathlib import Path
 
 from saxs_bluesky.utils.profile_groups import Group, Profile
