@@ -1,8 +1,8 @@
 api:
-  url: https://b21-blueapi.diamond.ac.uk
+  url: https://i22-blueapi.diamond.ac.uk
 stomp:
   auth:
     username: guest
     password: guest
-  url: tcp://b21-rabbitmq-daq.diamond.ac.uk:61613
+  url: tcp://i22-rabbitmq-daq.diamond.ac.uk:61613
   enabled: true
