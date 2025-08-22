@@ -21,7 +21,6 @@ from saxs_bluesky._version import __version__
 # from blueapi.client.event_bus import EventBusClient
 # from bluesky_stomp.messaging import StompClient, BasicAuthentication
 from saxs_bluesky.gui.panda_gui_elements import ProfileTab
-from saxs_bluesky.stubs.panda_stubs import return_connected_device
 from saxs_bluesky.utils.profile_groups import ExperimentProfiles
 from saxs_bluesky.utils.utils import (
     load_beamline_config,
@@ -47,24 +46,6 @@ class PandAGUI(tkinter.Tk):
         configuration: ExperimentProfiles | None = None,
         start: bool = True,
     ):
-        user = os.environ.get("USER")
-
-        if user not in ["root", "rjcd"]:  # check to see if in dev mode
-            try:
-                self.panda = return_connected_device(BL, DEV.DEFAULT_PANDA)
-            except Exception:
-                answer = (
-                    messagebox.askyesno(
-                        "PandA not Connected",
-                        "PandA is not connected, if you continue things will not work."
-                        " Continue?",
-                    ),
-                )
-                if answer:
-                    pass
-                else:
-                    quit()
-
         self.panda_config_yaml = panda_config_yaml
         self.default_config_path = os.path.join(
             os.path.dirname(os.path.realpath(__file__)),
