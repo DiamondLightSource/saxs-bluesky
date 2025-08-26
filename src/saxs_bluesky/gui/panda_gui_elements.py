@@ -168,7 +168,7 @@ class CheckButtonPopup(ttk.Checkbutton):
 
         self.row_num = int(rowid[-2::], 16) - 1
 
-        w = 420  # width for the Tk root
+        w = ((CONFIG.PULSEBLOCKS) * 100) + 50
         h = 50  # height for the Tk root
 
         self.root = tkinter.Toplevel()  ##HOLY MOLY

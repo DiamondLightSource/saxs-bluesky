@@ -12,14 +12,11 @@ import tkinter
 from tkinter import filedialog, messagebox, ttk
 
 import matplotlib.pyplot as plt
+from blueapi.service.model import TaskRequest
 
 from saxs_bluesky._version import __version__
-
-# uncomment if needed in future
-# from stomp import Connection
-# from blueapi.client.event_bus import EventBusClient
-# from bluesky_stomp.messaging import StompClient, BasicAuthentication
 from saxs_bluesky.gui.panda_gui_elements import ProfileTab
+from saxs_bluesky.utils.beamline_client import blueapi_beamline_client_loader
 from saxs_bluesky.utils.profile_groups import ExperimentProfiles
 from saxs_bluesky.utils.utils import (
     get_saxs_beamline,
@@ -52,6 +49,8 @@ class PandAGUI(tkinter.Tk):
             "profile_yamls",
             "default_panda_config.yaml",
         )
+
+        self.instrument_session = str(input("Enter an intrument session"))
 
         if (self.panda_config_yaml is None) and (configuration is None):
             self.configuration = ExperimentProfiles.read_from_yaml(
@@ -119,48 +118,11 @@ class PandAGUI(tkinter.Tk):
         self.build_active_detectors_frame()
 
         self.build_add_frame()
+
         #################################################################
 
-        # option 1 - but doesn't work
+        self.client = blueapi_beamline_client_loader(BL)
 
-        # self.config = RestConfig(
-        #     host=f"{BL}-blueapi.diamond.ac.uk", port=443, protocol="https"
-        # )
-        # self.rest_client = BlueapiRestClient(self.config)
-
-        # self.stomp_connection = Connection([(f"{BL}-rabbitmq-daq.diamond.ac.uk",443)])
-        # self.stomp_connection.connect(BL, BL[::-1], wait=True)
-        # self.authentication = BasicAuthentication(username=BL, password=BL[::-1])
-        # self.event_bus = EventBusClient(
-        #     StompClient(
-        #         conn=self.stomp_connection,
-        #         authentication=self.authentication,
-        #     )
-        # )
-        # self.client = BlueapiClient(rest=self.rest_client, events=self.events_bus)
-
-        # option 2 - but doesn't work with tasks creation/running plans etc
-
-        # self.config = RestConfig(
-        #     host=f"{BL}-blueapi.diamond.ac.uk", port=443, protocol="https"
-        # )
-        # # self.rest_client = BlueapiRestClient(self.config)
-        # self.client = BlueapiClient(rest=self.rest_client, events=self.events_bus)
-
-        # option 3 - return bad request error when trying to run a plan
-
-        # TODO: https://github.com/DiamondLightSource/saxs-bluesky/issues/22
-        ## blueapi_config_path = Path(
-        ##     os.path.join(
-        ##         os.path.dirname(os.path.realpath(__file__)),
-        ##         "blueapi_configs",
-        ##         f"{BL}_blueapi_config.yaml",
-        ##     )
-        ## )
-        ## config_loader = ConfigLoader(ApplicationConfig)
-        ## config_loader.use_values_from_yaml(blueapi_config_path)
-        ## loaded_config = config_loader.load()
-        ## self.client = BlueapiClient.from_config(loaded_config)
         if start:
             self.window.mainloop()
 
@@ -270,21 +232,6 @@ class PandAGUI(tkinter.Tk):
             self.commit_config()
             self.configuration.save_to_yaml(panda_config_yaml.name)
 
-    # TODO: https://github.com/DiamondLightSource/saxs-bluesky/issues/11
-    def configure_panda(self):
-        pass
-        # self.commit_config()
-
-        # index = self.notebook.index("current")
-
-        # profile_to_upload = self.configuration.profiles[index]
-        # json_schema_profile = profile_to_upload.model_dump_json()
-
-        # try:
-        #     self.client.run_plan(f"setup_panda {json_schema_profile}")
-        # except ConnectionError:
-        #     print("Could not upload profile to panda")
-
     def open_textedit(self):
         if os.path.exists("/dls_sw/apps/atom/1.42.0/atom"):
             os.system(f"/dls_sw/apps/atom/1.42.0/atom {self.panda_config_yaml} &")
@@ -330,54 +277,65 @@ class PandAGUI(tkinter.Tk):
         ax.set_xticklabels(labels, rotation=90)
         plt.show()
 
-    # TODO: https://github.com/DiamondLightSource/saxs-bluesky/issues/22
     def get_plans(self):
-        pass
-        # plans = self.client.get_plans().plans
+        plans = self.client.get_plans().plans
 
-        # for plan in plans:
-        #     print(plan, "\n\n")
+        for plan in plans:
+            print(plan, "\n\n")
 
-    # TODO: https://github.com/DiamondLightSource/saxs-bluesky/issues/22
     def get_devices(self):
-        pass
-        # devices = self.client.get_devices().devices
+        devices = self.client.get_devices().devices
 
-        # for dev in devices:
-        #     print(dev, "\n\n")
+        for dev in devices:
+            print(dev, "\n\n")
 
-    # TODO: https://github.com/DiamondLightSource/saxs-bluesky/issues/22
     def stop_plans(self):
-        pass
-        # self.client.stop()
+        self.client.stop()
 
-    # TODO: https://github.com/DiamondLightSource/saxs-bluesky/issues/22
     def pause_plans(self):
-        pass
-        # self.client.pause()
+        self.client.pause()
 
-    # TODO: https://github.com/DiamondLightSource/saxs-bluesky/issues/22
     def resume_plans(self):
-        pass
-        # self.client.resume()
+        self.client.resume()
 
-    # TODO: https://github.com/DiamondLightSource/saxs-bluesky/issues/11
+    def configure_panda(self):
+        self.commit_config()
+
+        index = int(self.notebook.index("current"))
+
+        profile_to_upload = self.configuration.profiles[index]
+        json_schema_profile = profile_to_upload.model_dump_json()
+
+        params = {"profile": json_schema_profile, "detectors": DEV.FAST_DETECTORS}
+
+        task = TaskRequest(
+            name="configure_panda_triggering",
+            params=params,
+            instrument_session=self.instrument_session,
+        )
+
+        try:
+            self.client.create_and_start_task(task)
+        except ConnectionError:
+            print("Could not upload profile to panda")
+
     def run_plan(self):
-        pass
-        # current_profile = self.notebook.index("current")
+        index = int(self.notebook.index("current"))
+        profile_to_upload = self.configuration.profiles[index]
+        json_schema_profile = profile_to_upload.model_dump_json()
 
-        # profile = self.configuration.profiles[current_profile]
-        # json_schema_profile = profile.model_dump_json()
-        # print(json_schema_profile)
+        params = {"profile": json_schema_profile, "detectors": DEV.FAST_DETECTORS}
 
-        # experiment = "cm40643-3"
+        task = TaskRequest(
+            name="run_panda_triggering",
+            params=params,
+            instrument_session=self.instrument_session,
+        )
 
-        # command = (
-        #     f"run_panda_triggering(experiment={experiment}"
-        #     ",profile={json_schema_profile}))"
-        # )
-
-        # print(self.client.run_task(command))
+        try:
+            self.client.create_and_start_task(task)
+        except ConnectionError:
+            print("Could not upload profile to panda")
 
     def build_exp_run_frame(self):
         self.run_frame = ttk.Frame(self.window, borderwidth=5, relief="raised")

@@ -1,5 +1,4 @@
 import os
-from datetime import datetime
 from pathlib import Path
 from string import ascii_lowercase
 from typing import Any
@@ -206,7 +205,6 @@ class ExperimentProfiles:
     detectors: list[str]
 
     def __post_init__(self):
-        self.year = datetime.now().year
         self.n_profiles = len(self.profiles)
 
     @staticmethod
