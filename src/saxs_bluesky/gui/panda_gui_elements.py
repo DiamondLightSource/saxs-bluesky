@@ -31,9 +31,9 @@ BL = get_saxs_beamline()
 
 
 class EditableTableview(ttk.Treeview):
-    def __init__(self, parent, *args, **kwargs):
-        self.parent = parent
-        super().__init__(parent, *args, **kwargs)
+    def __init__(self, proftab, *args, **kwargs):
+        self.proftab = proftab
+        super().__init__(self.proftab, *args, **kwargs)
         self.bind("<Double-1>", lambda event: self.onDoubleClick(event))
         self.kwargs = kwargs
 
@@ -116,16 +116,19 @@ class EditableTableview(ttk.Treeview):
 
 
 class DropdownPopup(ttk.Combobox):
-    def __init__(self, parent, rowid, column, text, options, **kw):
+    def __init__(self, tableview, rowid, column, text, options, **kw):
         ttk.Style().configure("pad.TEntry", padding="1 1 1 1")
 
         self.option_var = tkinter.StringVar()
-        self.tv = parent
-        self.rowid = rowid
-        self.column = column
+        self.tableview: EditableTableview = tableview
+        self.rowid: int = rowid
+        self.column: int = column
 
         super().__init__(
-            parent, textvariable=self.option_var, values=options, state="readonly"
+            self.tableview,
+            textvariable=self.option_var,
+            values=options,
+            state="readonly",
         )
 
         self.current(options.index(text))
@@ -138,31 +141,31 @@ class DropdownPopup(ttk.Combobox):
         self.focus_force()
 
     def on_return(self, event):
-        rowid = self.tv.focus()
-        vals = self.tv.item(rowid, "values")
+        rowid = self.tableview.focus()
+        vals = self.tableview.item(rowid, "values")
         vals = list(vals)
 
         selection = ncdcore.str2bool(self.option_var.get())
 
         if selection is not None:
-            vals[self.column] = selection
+            vals[self.column] = selection  # type: ignore
         else:
             selection = self.option_var.get()
             vals[self.column] = self.option_var.get()
 
         self.selection = selection
 
-        self.tv.item(rowid, values=vals)
+        self.tableview.item(rowid, values=vals)
         self.destroy()
 
-        self.tv.parent.parent.commit_config()
-        self.tv.parent.profile.analyse_profile()
-        self.tv.parent.generate_info_boxes()
+        self.tableview.proftab.parent.commit_config()
+        self.tableview.proftab.profile.analyse_profile()
+        self.tableview.proftab.generate_info_boxes()
 
 
 class CheckButtonPopup(ttk.Checkbutton):
-    def __init__(self, parent, rowid, column, x, y, columns, **kw):
-        self.parent: EditableTableview = parent
+    def __init__(self, tableview, rowid, column, x, y, columns, **kw):
+        self.tableview: EditableTableview = tableview
         self.rowid: int = rowid
         self.column: int = column
 
@@ -180,7 +183,7 @@ class CheckButtonPopup(ttk.Checkbutton):
         self.root.minsize(w, h)
         self.root.title(f"{columns[column]} - Group: {self.row_num}")
 
-        vals = self.parent.item(self.rowid, "values")
+        vals = self.tableview.item(self.rowid, "values")
         self.vals: list[str] = list(vals)
         self.pulse_vals: list[str] = self.vals[self.column].split()
 
@@ -258,16 +261,25 @@ class CheckButtonPopup(ttk.Checkbutton):
 
         self.vals[self.column] = pulse_vals
 
-        self.parent.item(self.rowid, values=self.vals)
+        self.tableview.item(self.rowid, values=self.vals)
         self.root.destroy()
         del self
 
 
 class EntryPopup(ttk.Entry):
-    def __init__(self, parent, iid, column, text, entrytype=int, **kw):
+    def __init__(
+        self,
+        tableview: EditableTableview,
+        iid: str,
+        column: int,
+        text: str,
+        entrytype=int,
+        **kw,
+    ):
+        super().__init__(tableview, style="pad.TEntry", **kw)
+
         ttk.Style().configure("pad.TEntry", padding="1 1 1 1")
-        super().__init__(parent, style="pad.TEntry", **kw)
-        self.tv = parent
+        self.tableview = tableview
         self.iid = iid
         self.column = column
         self.entrytype = entrytype
@@ -281,8 +293,8 @@ class EntryPopup(ttk.Entry):
         self.bind("<Escape>", lambda *ignore: self.destroy())
 
     def on_return(self, event):
-        rowid = self.tv.focus()
-        vals = self.tv.item(rowid, "values")
+        rowid = self.tableview.focus()
+        vals = self.tableview.item(rowid, "values")
         vals = list(vals)
 
         if isinstance(self.entrytype, int):
@@ -295,16 +307,16 @@ class EntryPopup(ttk.Entry):
         else:
             selection = self.get()
 
-        vals[self.column] = selection
+        vals[self.column] = selection  # type: ignore
 
         self.selection = selection
 
-        self.tv.item(rowid, values=vals)
+        self.tableview.item(rowid, values=vals)
         self.destroy()
 
-        self.tv.parent.parent.commit_config()
-        self.tv.parent.profile.analyse_profile()
-        self.tv.parent.generate_info_boxes()
+        self.tableview.proftab.parent.commit_config()
+        self.tableview.proftab.profile.analyse_profile()
+        self.tableview.proftab.generate_info_boxes()
 
     def select_all(self, *ignore):
         """Set selection on the whole text"""
@@ -334,8 +346,6 @@ class ProfileTab(ttk.Frame):
             messagebox.showinfo("Info", "Select a group to delete")
 
         for row in rows[::-1]:
-            print(row)
-
             row_str = "0X" + (row.replace("I", ""))
             row_int = (int(row_str, 16)) - 1
             self.profile.delete_group(n=row_int)

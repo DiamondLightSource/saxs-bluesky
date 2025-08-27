@@ -100,7 +100,7 @@ class PandAGUI(tkinter.Tk):
         for i in range(self.configuration.n_profiles):
             ProfileTab(self, self.notebook, self.configuration, i)
             tab_names = self.notebook.tabs()
-            proftab_object = self.notebook.nametowidget(tab_names[i])
+            proftab_object: ProfileTab = self.notebook.nametowidget(tab_names[i])
             self.delete_profile_button = ttk.Button(
                 proftab_object, text="Delete Profile", command=self.delete_profile_tab
             )
@@ -195,7 +195,7 @@ class PandAGUI(tkinter.Tk):
 
         for n, _tab in enumerate(self.notebook.tabs()[0:-1]):
             self.notebook.tab(n, text="Profile " + str(n))
-            proftab_object = self.notebook.nametowidget(tab_names[n])
+            proftab_object: ProfileTab = self.notebook.nametowidget(tab_names[n])
             ttk.Label(proftab_object, text="Profile " + str(n)).grid(
                 column=0, row=0, padx=5, pady=5, sticky="w"
             )
@@ -206,7 +206,7 @@ class PandAGUI(tkinter.Tk):
         tab_names = self.notebook.tabs()
 
         for i in range(self.configuration.n_profiles):
-            proftab_object = self.notebook.nametowidget(tab_names[i])
+            proftab_object: ProfileTab = self.notebook.nametowidget(tab_names[i])
             proftab_object.edit_config_for_profile()
 
     def load_config(self):
@@ -432,7 +432,7 @@ class PandAGUI(tkinter.Tk):
         ).grid(column=0, row=0, padx=5, pady=5, sticky="w")
 
     def build_active_detectors_frame(self):
-        self.active_detectors_frames = {}
+        self.active_detectors_checkbuttons = []
 
         for pulse in range(CONFIG.PULSEBLOCKS):
             active_detectors_frame_n = ttk.Frame(
@@ -467,6 +467,8 @@ class PandAGUI(tkinter.Tk):
                     )
 
                 ad_entry.grid(column=n + 1, row=1, padx=5, pady=5, sticky="w")
+
+                self.active_detectors_checkbuttons.append(ad_entry)
 
     def build_pulse_frame(self):
         self.pulse_frame = ttk.Frame(self.window, borderwidth=5, relief="raised")
