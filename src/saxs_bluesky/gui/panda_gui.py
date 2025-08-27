@@ -12,11 +12,10 @@ import tkinter
 from tkinter import filedialog, messagebox, ttk
 
 import matplotlib.pyplot as plt
-from blueapi.service.model import TaskRequest
 
 from saxs_bluesky._version import __version__
 from saxs_bluesky.gui.panda_gui_elements import ProfileTab
-from saxs_bluesky.utils.beamline_client import blueapi_beamline_client_loader
+from saxs_bluesky.utils.beamline_client import BlueAPIPythonClient
 from saxs_bluesky.utils.profile_groups import ExperimentProfiles
 from saxs_bluesky.utils.utils import (
     get_saxs_beamline,
@@ -50,7 +49,7 @@ class PandAGUI(tkinter.Tk):
             "default_panda_config.yaml",
         )
 
-        self.instrument_session = str(input("Enter an intrument session"))
+        self.instrument_session = str(input("Enter an intrument session:  "))
 
         if (self.panda_config_yaml is None) and (configuration is None):
             self.configuration = ExperimentProfiles.read_from_yaml(
@@ -121,7 +120,13 @@ class PandAGUI(tkinter.Tk):
 
         #################################################################
 
-        self.client = blueapi_beamline_client_loader(BL)
+        blueapi_config_path = (
+            f"./src/saxs_bluesky/blueapi_configs/{BL}_blueapi_config.yaml"
+        )
+
+        self.client = BlueAPIPythonClient(
+            BL, blueapi_config_path, self.instrument_session
+        )
 
         if start:
             self.window.mainloop()
@@ -308,14 +313,8 @@ class PandAGUI(tkinter.Tk):
 
         params = {"profile": json_schema_profile, "detectors": DEV.FAST_DETECTORS}
 
-        task = TaskRequest(
-            name="configure_panda_triggering",
-            params=params,
-            instrument_session=self.instrument_session,
-        )
-
         try:
-            self.client.create_and_start_task(task)
+            self.client.run("configure_panda_triggering", params)
         except ConnectionError:
             print("Could not upload profile to panda")
 
@@ -326,14 +325,8 @@ class PandAGUI(tkinter.Tk):
 
         params = {"profile": json_schema_profile, "detectors": DEV.FAST_DETECTORS}
 
-        task = TaskRequest(
-            name="run_panda_triggering",
-            params=params,
-            instrument_session=self.instrument_session,
-        )
-
         try:
-            self.client.create_and_start_task(task)
+            self.client.run("run_panda_triggering", params)
         except ConnectionError:
             print("Could not upload profile to panda")
 
