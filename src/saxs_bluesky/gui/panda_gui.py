@@ -7,6 +7,7 @@ Python dataclasses and GUI as a replacement for NCDDetectors
 
 """
 
+import json
 import os
 import tkinter
 from tkinter import filedialog, messagebox, ttk
@@ -242,6 +243,11 @@ class PandAGUI(tkinter.Tk):
         if panda_config_yaml:
             self.commit_config()
             self.configuration.save_to_yaml(panda_config_yaml.name)
+
+            config_dict = self.configuration.to_dict()
+
+            with open(panda_config_yaml.name.replace("yaml", "json"), "w") as fpo:
+                json.dump(config_dict, fpo, indent=2)
 
     def open_textedit(self):
         if os.path.exists("/dls_sw/apps/atom/1.42.0/atom"):
