@@ -15,7 +15,7 @@ dependencies = [
     "dls-dodal @ git+https://github.com/DiamondLightSource/dodal.git@main",
     "ophyd_async",
     "numpy",
-    "blueapi >= 1.0.2",
+    "blueapi >= 1.2.1",
     "matplotlib",
     "pydantic",
 ] # Add project dependencies here, e.g. ["click", "numpy"]

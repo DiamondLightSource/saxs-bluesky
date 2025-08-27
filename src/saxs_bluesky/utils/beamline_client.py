@@ -21,7 +21,7 @@ class BlueAPIPythonClient(BlueapiClient):
         config_loader.use_values_from_yaml(blueapi_config_path)
         loaded_config = config_loader.load()
         blueapi_class = BlueapiClient.from_config(loaded_config)
-        super().__init__(blueapi_class)  # type: ignore
+        super().__init__(blueapi_class._rest, blueapi_class._events)  # noqa
 
     def run(self, plan_name: str, params: dict):
         task = TaskRequest(
@@ -30,4 +30,5 @@ class BlueAPIPythonClient(BlueapiClient):
             instrument_session=self.instrument_session,
         )
 
-        self.create_and_start_task(task)
+        response = self.create_and_start_task(task)
+        print(response)

@@ -174,27 +174,6 @@ def return_deadtime(
     return deadtime
 
 
-def set_panda_output(
-    panda: HDFPanda, output_type: str, output: int, state: str, group="switch"
-):
-    """
-    Set a Panda output (TTL or LVDS) to a specified state (ON or OFF).
-
-    Args:
-        panda (HDFPanda): The Panda device.
-        output_type (str): Type of output ("TTL" or "LVDS").
-        output (int): Output number.
-        state (str): Desired state ("ON" or "OFF").
-        group (str): Bluesky group name.
-    """
-    state_value = (
-        PandaBitMux.ONE.value if state.upper() == "ON" else PandaBitMux.ZERO.value
-    )
-    output_attr = getattr(panda, f"{output_type.lower()}out")[int(output)]
-    yield from bps.abs_set(output_attr.val, state_value, group=group)
-    yield from bps.wait(group=group, timeout=CONFIG.GENERAL_TIMEOUT)
-
-
 def generate_repeated_trigger_info(
     profile: Profile,
     max_deadtime: float,
@@ -321,6 +300,31 @@ def show_deadtime(detector_deadtime, active_detector_names):
         LOGGER.info(f"deadtime for {dn} is {dt}")
 
 
+def set_panda_output(
+    panda: HDFPanda,
+    output_type: str = "TTL",
+    output: int = 1,
+    state: str = "ON",
+    group: str = "switch",
+) -> MsgGenerator:
+    """
+    Set a Panda output (TTL or LVDS) to a specified state (ON or OFF).
+
+    Args:
+        panda (HDFPanda): The Panda device.
+        output_type (str): Type of output ("TTL" or "LVDS").
+        output (int): Output number.
+        state (str): Desired state ("ON" or "OFF").
+        group (str): Bluesky group name.
+    """
+    state_value = (
+        PandaBitMux.ONE.value if state.upper() == "ON" else PandaBitMux.ZERO.value
+    )
+    output_attr = getattr(panda, f"{output_type.lower()}out")[int(output)]
+    yield from bps.abs_set(output_attr.val, state_value, group=group)
+    yield from bps.wait(group=group, timeout=CONFIG.GENERAL_TIMEOUT)
+
+
 @validate_call(config={"arbitrary_types_allowed": True})
 def configure_panda_triggering(
     profile: Annotated[
@@ -331,12 +335,12 @@ def configure_panda_triggering(
         ),
     ],
     detectors: Annotated[
-        set[StandardDetector],
+        set[StandardDetector] | list[StandardDetector],
         "List of str of the detector names, eg. saxs, waxs, i0, it",
     ] = FAST_DETECTORS,
     panda: HDFPanda = DEFAULT_PANDA,
-    force_load=True,
-) -> MsgGenerator[None]:
+    force_load: bool = True,
+) -> MsgGenerator:
     """
 
     This plans configures the panda and the detectors,
@@ -431,12 +435,11 @@ def run_panda_triggering(
         ),
     ],
     detectors: Annotated[
-        set[StandardDetector],
+        set[StandardDetector] | list[StandardDetector],
         "List of str of the detector names, eg. saxs, waxs, i0, it",
     ] = FAST_DETECTORS,
     panda: HDFPanda = DEFAULT_PANDA,
-    group="run",
-) -> MsgGenerator[None]:
+) -> MsgGenerator:
     """
 
     This will run whatever flyscanning settings
@@ -462,6 +465,7 @@ def run_panda_triggering(
     # arm the panda pulses
 
     ###########################
+
     yield from fly_and_collect_with_wait(
         stream_name="primary",
         detectors=list(detectors),
@@ -491,8 +495,8 @@ def configure_and_run_panda_triggering(
         "List of str of the detector names, eg. saxs, waxs, i0, it",
     ] = FAST_DETECTORS,
     panda: HDFPanda = DEFAULT_PANDA,
-    force_load=True,
-) -> MsgGenerator[None]:
+    force_load: bool = True,
+) -> MsgGenerator:
     """
 
     This plans configures the panda and the detectors,

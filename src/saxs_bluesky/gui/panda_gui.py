@@ -309,9 +309,9 @@ class PandAGUI(tkinter.Tk):
         index = int(self.notebook.index("current"))
 
         profile_to_upload = self.configuration.profiles[index]
-        json_schema_profile = profile_to_upload.model_dump_json()
+        # json_schema_profile = profile_to_upload.model_dump_json()
 
-        params = {"profile": json_schema_profile, "detectors": DEV.FAST_DETECTORS}
+        params = {"profile": profile_to_upload}
 
         try:
             self.client.run("configure_panda_triggering", params)
@@ -321,9 +321,9 @@ class PandAGUI(tkinter.Tk):
     def run_plan(self):
         index = int(self.notebook.index("current"))
         profile_to_upload = self.configuration.profiles[index]
-        json_schema_profile = profile_to_upload.model_dump_json()
+        # json_schema_profile = profile_to_upload.model_dump_json()
 
-        params = {"profile": json_schema_profile, "detectors": DEV.FAST_DETECTORS}
+        params = {"profile": profile_to_upload, "detectors": list(DEV.FAST_DETECTORS)}
 
         try:
             self.client.run("run_panda_triggering", params)
