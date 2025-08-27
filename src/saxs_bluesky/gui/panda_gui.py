@@ -10,6 +10,7 @@ Python dataclasses and GUI as a replacement for NCDDetectors
 import os
 import tkinter
 from tkinter import filedialog, messagebox, ttk
+from tkinter.simpledialog import askstring
 
 import matplotlib.pyplot as plt
 
@@ -49,7 +50,12 @@ class PandAGUI(tkinter.Tk):
             "default_panda_config.yaml",
         )
 
-        self.instrument_session = str(input("Enter an intrument session:  "))
+        self.instrument_session = str(
+            askstring(
+                "Instrument Session",
+                "Enter an intrument session:",
+            )
+        )
 
         if (self.panda_config_yaml is None) and (configuration is None):
             self.configuration = ExperimentProfiles.read_from_yaml(
