@@ -428,8 +428,13 @@ class PandAGUI(tkinter.Tk):
 
         ttk.Label(
             self.experiment_settings_frame,
-            text="Instrument: " + self.configuration.instrument.upper(),
+            text=f"Instrument: {BL}",
         ).grid(column=0, row=0, padx=5, pady=5, sticky="w")
+
+        ttk.Label(
+            self.experiment_settings_frame,
+            text=f"Instrument Session: {self.instrument_session}",
+        ).grid(column=0, row=1, padx=5, pady=5, sticky="w")
 
     def build_active_detectors_frame(self):
         self.active_detectors_checkbuttons = []
