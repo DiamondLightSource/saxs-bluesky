@@ -116,17 +116,6 @@ class Profile(BaseModel):
     groups: list[Group] = []
     multiplier: list[int] | None = None
 
-    # total_frames: int = 0
-    # duration_per_cycle: float = 0
-
-    # def model_post_init(self, __context: Any):
-    #     if len(self.groups) > 0:
-    #         self.analyse_profile()
-
-    # def analyse_profile(self):
-    #     self.calc_total_frames()
-    #     self.calc_duration_per_cycle()
-
     @property
     def total_frames(self) -> int:
         total_frames = 0
@@ -164,20 +153,14 @@ class Profile(BaseModel):
 
         return active_pulses
 
-    def append_group(self, Group: Group, analyse_profile: bool = True):
+    def append_group(self, Group: Group):
         self.groups.append(Group)
-        # if analyse_profile:
-        #     self.analyse_profile()
 
-    def delete_group(self, n: int, analyse_profile: bool = True):
+    def delete_group(self, n: int):
         self.groups.pop(n)
-        # if analyse_profile:
-        #     self.analyse_profile()
 
-    def insert_group(self, n: int, Group: Group, analyse_profile: bool = True):
+    def insert_group(self, n: int, Group: Group):
         self.groups.insert(n, Group)
-        # if analyse_profile:
-        #     self.analyse_profile()
 
     @property
     def seq_table(self) -> SeqTable:

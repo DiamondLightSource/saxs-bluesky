@@ -157,7 +157,6 @@ class DropdownPopup(ttk.Combobox):
         self.destroy()
 
         self.tableview.proftab.parent.commit_config()
-        # self.tableview.proftab.profile.analyse_profile()
         self.tableview.proftab.generate_info_boxes()
 
 
@@ -313,7 +312,6 @@ class EntryPopup(ttk.Entry):
         self.destroy()
 
         self.tableview.proftab.parent.commit_config()
-        # self.tableview.proftab.profile.analyse_profile()
         self.tableview.proftab.generate_info_boxes()
 
     def select_all(self, *ignore):
@@ -508,7 +506,6 @@ class ProfileTab(ttk.Frame):
 
     def print_profile_button_action(self):
         self.parent.commit_config()
-        # self.profile.analyse_profile()
         self.generate_info_boxes()
 
         print(self.profile)
@@ -549,7 +546,6 @@ class ProfileTab(ttk.Frame):
     # Fucntion that will be called when entry is changed
     def entry_changed(self, *args):
         self.parent.commit_config()
-        # self.profile.analyse_profile()
         self.generate_info_boxes()
 
     def __init__(
