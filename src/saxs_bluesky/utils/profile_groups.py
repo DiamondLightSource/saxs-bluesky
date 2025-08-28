@@ -112,33 +112,35 @@ class Profile(BaseModel):
     The information can also be used to configure it in the gui"""
 
     cycles: int = 1
-    seq_trigger: str = "IMMEDIATE"
+    seq_trigger: str = "Immediate"
     groups: list[Group] = []
     multiplier: list[int] | None = None
 
-    total_frames: int = 0
-    duration_per_cycle: float = 0
+    # total_frames: int = 0
+    # duration_per_cycle: float = 0
 
-    def model_post_init(self, __context: Any):
-        if len(self.groups) > 0:
-            self.analyse_profile()
+    # def model_post_init(self, __context: Any):
+    #     if len(self.groups) > 0:
+    #         self.analyse_profile()
 
-    def analyse_profile(self):
-        self.calc_total_frames()
-        self.calc_duration_per_cycle()
+    # def analyse_profile(self):
+    #     self.calc_total_frames()
+    #     self.calc_duration_per_cycle()
 
-    def calc_total_frames(self) -> int:
-        self.total_frames = 0
+    @property
+    def total_frames(self) -> int:
+        total_frames = 0
         for n_group in self.groups:
-            self.total_frames += n_group.frames
-        return self.total_frames
+            total_frames += n_group.frames
+        return total_frames
 
-    def calc_duration_per_cycle(self) -> float:
-        self.duration_per_cycle = 0
+    @property
+    def duration_per_cycle(self) -> float:
+        duration_per_cycle = 0
 
         for n_group in self.groups:
-            self.duration_per_cycle += n_group.group_duration
-        return self.duration_per_cycle
+            duration_per_cycle += n_group.group_duration
+        return duration_per_cycle
 
     @property
     def duration(self) -> float:
@@ -164,18 +166,18 @@ class Profile(BaseModel):
 
     def append_group(self, Group: Group, analyse_profile: bool = True):
         self.groups.append(Group)
-        if analyse_profile:
-            self.analyse_profile()
+        # if analyse_profile:
+        #     self.analyse_profile()
 
     def delete_group(self, n: int, analyse_profile: bool = True):
         self.groups.pop(n)
-        if analyse_profile:
-            self.analyse_profile()
+        # if analyse_profile:
+        #     self.analyse_profile()
 
     def insert_group(self, n: int, Group: Group, analyse_profile: bool = True):
         self.groups.insert(n, Group)
-        if analyse_profile:
-            self.analyse_profile()
+        # if analyse_profile:
+        #     self.analyse_profile()
 
     @property
     def seq_table(self) -> SeqTable:

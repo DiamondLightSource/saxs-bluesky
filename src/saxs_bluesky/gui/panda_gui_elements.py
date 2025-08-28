@@ -81,7 +81,7 @@ class EditableTableview(ttk.Treeview):
         elif column in ["#7"]:  # these groups create a drop down menu
             # place dropdown popup properly
 
-            options = list(SeqTrigger.__dict__["_member_names_"])
+            options = [str(e.value).upper() for e in SeqTrigger]
 
             # options = ["True", "False"]
             self.Popup = DropdownPopup(self, rowid, int(column[1:]) - 1, text, options)
@@ -157,7 +157,7 @@ class DropdownPopup(ttk.Combobox):
         self.destroy()
 
         self.tableview.proftab.parent.commit_config()
-        self.tableview.proftab.profile.analyse_profile()
+        # self.tableview.proftab.profile.analyse_profile()
         self.tableview.proftab.generate_info_boxes()
 
 
@@ -313,7 +313,7 @@ class EntryPopup(ttk.Entry):
         self.destroy()
 
         self.tableview.proftab.parent.commit_config()
-        self.tableview.proftab.profile.analyse_profile()
+        # self.tableview.proftab.profile.analyse_profile()
         self.tableview.proftab.generate_info_boxes()
 
     def select_all(self, *ignore):
@@ -508,7 +508,7 @@ class ProfileTab(ttk.Frame):
 
     def print_profile_button_action(self):
         self.parent.commit_config()
-        self.profile.analyse_profile()
+        # self.profile.analyse_profile()
         self.generate_info_boxes()
 
         print(self.profile)
@@ -549,7 +549,7 @@ class ProfileTab(ttk.Frame):
     # Fucntion that will be called when entry is changed
     def entry_changed(self, *args):
         self.parent.commit_config()
-        self.profile.analyse_profile()
+        # self.profile.analyse_profile()
         self.generate_info_boxes()
 
     def __init__(
@@ -562,7 +562,7 @@ class ProfileTab(ttk.Frame):
         self.n_profile = n_profile
         self.profile: Profile = self.configuration.profiles[self.n_profile]
 
-        self.seq_table = self.profile.seq_table()
+        self.seq_table = self.profile.seq_table
 
         super().__init__(self.notebook, borderwidth=5, relief="raised")
 
