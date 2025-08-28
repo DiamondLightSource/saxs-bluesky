@@ -546,8 +546,11 @@ class ProfileTab(ttk.Frame):
 
         ProfilePlotter(self.profile, CONFIG.PULSE_BLOCK_NAMES)
 
-    # def focus_out_generate_info_boxes(event):
-    #     self.generate_info_boxes()
+    # Fucntion that will be called when entry is changed
+    def entry_changed(self, *args):
+        self.parent.commit_config()
+        self.profile.analyse_profile()
+        self.generate_info_boxes()
 
     def __init__(
         self, parent, notebook, configuration: ExperimentProfiles, n_profile: int
@@ -614,6 +617,9 @@ class ProfileTab(ttk.Frame):
         )
 
         self.cycles_entry.grid(column=1, row=1, padx=5, pady=5, sticky="w")
+
+        # Tracing the entry and calling the above function
+        self.n_cycles_entry_value.trace_add("write", self.entry_changed)
 
         # cycles_entry.bind("<FocusOut>", self.focus_out_generate_info_boxes)
 
