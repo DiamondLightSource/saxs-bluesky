@@ -299,15 +299,6 @@ class PandAGUI(tkinter.Tk):
         for dev in devices:
             print(dev, "\n\n")
 
-    def stop_plans(self):
-        self.client.stop()
-
-    def pause_plans(self):
-        self.client.pause()
-
-    def resume_plans(self):
-        self.client.resume()
-
     def configure_panda(self):
         self.commit_config()
 
@@ -351,15 +342,15 @@ class PandAGUI(tkinter.Tk):
         ).grid(column=2, row=3, padx=5, pady=5, columnspan=1, sticky="news")
 
         self.stop_plans_button = ttk.Button(
-            self.run_frame, text="Stop Plan", command=self.stop_plans
+            self.run_frame, text="Stop Plan", command=self.client.stop
         ).grid(column=2, row=5, padx=5, pady=5, columnspan=1, sticky="news")
 
         self.pause_plans_button = ttk.Button(
-            self.run_frame, text="Pause Plan", command=self.pause_plans
+            self.run_frame, text="Pause Plan", command=self.client.pause
         ).grid(column=2, row=7, padx=5, pady=5, columnspan=1, sticky="news")
 
         self.resume_plans_button = ttk.Button(
-            self.run_frame, text="Resume Plan", command=self.resume_plans
+            self.run_frame, text="Resume Plan", command=self.client.resume
         ).grid(
             column=2,
             row=9,
