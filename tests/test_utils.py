@@ -2,10 +2,10 @@ import os
 from pathlib import Path
 
 from saxs_bluesky.utils.profile_groups import Group, Profile
-from saxs_bluesky.utils.utils import ProfilePlotter, load_beamline_devices
+from saxs_bluesky.utils.utils import ProfilePlotter, load_beamline_config
 
-DEV = load_beamline_devices()
-FAST_DETECTORS = DEV.FAST_DETECTORS
+CONFIG = load_beamline_config()
+FAST_DETECTORS = CONFIG.FAST_DETECTORS
 
 SAXS_bluesky_ROOT = Path(__file__)
 
