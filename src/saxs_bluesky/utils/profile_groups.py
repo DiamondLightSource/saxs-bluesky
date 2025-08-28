@@ -177,6 +177,7 @@ class Profile(BaseModel):
         if analyse_profile:
             self.analyse_profile()
 
+    @property
     def seq_table(self) -> SeqTable:
         seq_tables = (group.seq_row() for group in self.groups)
 

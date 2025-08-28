@@ -89,7 +89,7 @@ def modify_panda_seq_table(panda: HDFPanda, profile: Profile, n_seq=1):
 
     """
 
-    seq_table = profile.seq_table()
+    seq_table = profile.seq_table
     n_cycles = profile.cycles
     # time_unit = profile.best_time_unit
 
@@ -387,7 +387,7 @@ def configure_panda_triggering(
     n_cycles = profile.cycles
     # seq table should be grabbed from the panda and used instead,
     # in order to decouple run from setup panda
-    seq_table = profile.seq_table()
+    seq_table = profile.seq_table
     n_triggers = [
         group.frames for group in profile.groups
     ]  # [3, 1, 1, 1, 1] or something
@@ -449,7 +449,7 @@ def run_panda_triggering(
     panda_seq_table = panda.seq[CONFIG.DEFAULT_SEQ]
     active_pulses = profile.active_pulses
 
-    # if profile.seq_table() != panda_seq_table:
+    # if profile.seq_table != panda_seq_table:
     #     raise ValueError(
     #         "Profile to run is not the same as the one currently loaded on the panda."
     #     )
