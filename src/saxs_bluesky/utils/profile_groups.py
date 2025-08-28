@@ -207,7 +207,7 @@ class Profile(BaseModel):
 
 
 @pydanticdataclass
-class ExperimentProfiles:
+class ExperimentLoader:
     """
     The stores multiple Profiles and can be used in the GUI.
     The is analoaghous to the information shown in the legacy
@@ -276,7 +276,7 @@ class ExperimentProfiles:
 
                 profiles.append(n_profile)
 
-            return ExperimentProfiles(profiles, instrument, detectors)
+            return ExperimentLoader(profiles, instrument, detectors)
 
     def to_dict(self) -> dict:
         exp_dict = {

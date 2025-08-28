@@ -31,7 +31,7 @@ from saxs_bluesky.stubs.panda_stubs import (
     return_connected_device,
     upload_yaml_to_panda,
 )
-from saxs_bluesky.utils.profile_groups import ExperimentProfiles, Profile  # Group
+from saxs_bluesky.utils.profile_groups import ExperimentLoader, Profile  # Group
 from saxs_bluesky.utils.utils import (
     get_saxs_beamline,
     load_beamline_config,
@@ -568,7 +568,7 @@ if __name__ == "__main__":
         "profile_yamls",
         "panda_config.yaml",
     )
-    configuration = ExperimentProfiles.read_from_yaml(default_config_path)
+    configuration = ExperimentLoader.read_from_yaml(default_config_path)
     profile = configuration.profiles[1]
 
     detectors: set[StandardDetector] = {inject("saxs"), inject("waxs")}

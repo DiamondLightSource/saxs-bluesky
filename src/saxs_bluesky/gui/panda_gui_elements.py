@@ -16,7 +16,7 @@ from ophyd_async.fastcs.panda import (
 from ophyd_async.fastcs.panda._block import PandaTimeUnits
 
 from saxs_bluesky.utils.ncdcore import ncdcore
-from saxs_bluesky.utils.profile_groups import ExperimentProfiles, Group, Profile
+from saxs_bluesky.utils.profile_groups import ExperimentLoader, Group, Profile
 from saxs_bluesky.utils.utils import (
     ProfilePlotter,
     get_saxs_beamline,
@@ -553,7 +553,7 @@ class ProfileTab(ttk.Frame):
         self.generate_info_boxes()
 
     def __init__(
-        self, parent, notebook, configuration: ExperimentProfiles, n_profile: int
+        self, parent, notebook, configuration: ExperimentLoader, n_profile: int
     ):
         self.notebook = notebook
         self.parent = parent

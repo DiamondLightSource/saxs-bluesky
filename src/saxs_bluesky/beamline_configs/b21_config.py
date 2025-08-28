@@ -3,7 +3,7 @@ from dodal.common import inject
 from ophyd_async.core import StandardDetector
 from ophyd_async.fastcs.panda import HDFPanda
 
-from saxs_bluesky.utils.profile_groups import ExperimentProfiles, Group, Profile
+from saxs_bluesky.utils.profile_groups import ExperimentLoader, Group, Profile
 
 """
 
@@ -82,7 +82,7 @@ DEFAULT_PROFILE = Profile(
     multiplier=None,
 )
 
-DEFAULT_EXPERIMENT = ExperimentProfiles(
+DEFAULT_EXPERIMENT = ExperimentLoader(
     profiles=[DEFAULT_PROFILE],
     instrument=b21.BL,
     detectors=["saxs", "waxs"],

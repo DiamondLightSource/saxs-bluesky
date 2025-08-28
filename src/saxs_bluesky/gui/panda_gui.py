@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 from saxs_bluesky._version import __version__
 from saxs_bluesky.gui.panda_gui_elements import ProfileTab
 from saxs_bluesky.utils.beamline_client import BlueAPIPythonClient
-from saxs_bluesky.utils.profile_groups import ExperimentProfiles
+from saxs_bluesky.utils.profile_groups import ExperimentLoader
 from saxs_bluesky.utils.utils import (
     get_saxs_beamline,
     load_beamline_config,
@@ -36,7 +36,7 @@ class PandAGUI(tkinter.Tk):
     def __init__(
         self,
         panda_config_yaml: str | None = None,
-        configuration: ExperimentProfiles | None = None,
+        configuration: ExperimentLoader | None = None,
         start: bool = True,
     ):
         self.panda_config_yaml = panda_config_yaml
@@ -54,13 +54,11 @@ class PandAGUI(tkinter.Tk):
         )
 
         if (self.panda_config_yaml is None) and (configuration is None):
-            self.configuration = ExperimentProfiles.read_from_yaml(
+            self.configuration = ExperimentLoader.read_from_yaml(
                 self.default_config_path
             )
         elif (self.panda_config_yaml is not None) and (configuration is None):
-            self.configuration = ExperimentProfiles.read_from_yaml(
-                self.panda_config_yaml
-            )
+            self.configuration = ExperimentLoader.read_from_yaml(self.panda_config_yaml)
         elif (self.panda_config_yaml is None) and (configuration is not None):
             self.configuration = configuration
         else:
