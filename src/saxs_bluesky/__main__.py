@@ -8,8 +8,7 @@ from bluesky import RunEngine
 from saxs_bluesky.gui.panda_gui import PandAGUI
 from saxs_bluesky.stubs.panda_stubs import return_connected_device, save_device_to_yaml
 from saxs_bluesky.utils.utils import (
-    load_beamline_devices,
-    load_beamline_profile,
+    load_beamline_config,
 )
 
 from . import __version__
@@ -27,8 +26,8 @@ def main(ctx: click.Context) -> None:
 
 @main.command(name="start_gui")
 def start_gui():
-    PROF = load_beamline_profile()
-    PandAGUI(configuration=PROF.DEFAULT_EXPERIMENT)
+    CONFIG = load_beamline_config()
+    PandAGUI(configuration=CONFIG.DEFAULT_EXPERIMENT)
 
 
 @main.command(name="login")
@@ -42,8 +41,8 @@ def login():
 def save_panda():
     RE = RunEngine()
 
-    DEV = load_beamline_devices()
-    panda_name = DEV.DEFAULT_PANDA
+    CONFIG = load_beamline_config()
+    panda_name = CONFIG.DEFAULT_PANDA
     connected_panda = return_connected_device(os.environ["BEAMLINE"], panda_name)
     yaml_dir = input("Input directory to save")
     RE(
