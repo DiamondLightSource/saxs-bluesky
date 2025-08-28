@@ -28,7 +28,6 @@ from pydantic import validate_call  # ,NonNegativeFloat,
 from saxs_bluesky.stubs.panda_stubs import (
     fly_and_collect_with_wait,
     load_settings_from_yaml,
-    return_connected_device,
     upload_yaml_to_panda,
 )
 from saxs_bluesky.utils.profile_groups import ExperimentLoader, Profile  # Group
@@ -78,35 +77,10 @@ def wait_until_complete(pv_obj, waiting_value=0, timeout=None):
 #     yield from bps.wait_for([set_panda_dir])
 
 
-def modify_panda_seq_table(panda: HDFPanda, profile: Profile, n_seq=1):
-    """
-
-    Modifies the panda sequencer table,
-
-    the default sequencer table to modify is the first one.
-
-    Takes the panda and a Profile and then uses this to apply the sequencer table
-
-    """
-
-    seq_table = profile.seq_table
-    n_cycles = profile.cycles
-    # time_unit = profile.best_time_unit
-
-    group = "modify-seq"
-    # yield from bps.stage(panda, group=group) ###maybe need this
-    yield from bps.abs_set(panda.seq[int(n_seq)].table, seq_table, group=group)
-    yield from bps.abs_set(panda.seq[int(n_seq)].repeats, n_cycles, group=group)
-    yield from bps.abs_set(panda.seq[int(n_seq)].prescale, 1, group=group)
-    yield from bps.abs_set(panda.seq[int(n_seq)].prescale_units, "s", group=group)
-    yield from bps.wait(group=group, timeout=CONFIG.GENERAL_TIMEOUT)
-
-
 def set_panda_pulses(
     panda: HDFPanda,
     pulses: list[int],
-    setting: str,
-    n_seq=1,
+    setting: str = "arm",
     group="arm_panda",
 ):
     """
@@ -177,7 +151,7 @@ def generate_repeated_trigger_info(
     max_deadtime: float,
     livetime: float,
     trigger=DetectorTrigger.CONSTANT_GATE,
-):
+) -> list[TriggerInfo]:
     repeated_trigger_info = []
 
     # [3, 1, 1, 1, 1] or something
@@ -196,6 +170,8 @@ def generate_repeated_trigger_info(
             )
 
             repeated_trigger_info.append(trigger_info)
+
+    return repeated_trigger_info
 
 
 def check_and_apply_panda_settings(panda: HDFPanda, panda_name: str) -> MsgGenerator:
@@ -244,33 +220,6 @@ def check_and_apply_panda_settings(panda: HDFPanda, panda_name: str) -> MsgGener
         yield from upload_yaml_to_panda(
             yaml_directory=yaml_directory, yaml_file_name=yaml_file_name, panda=panda
         )
-
-
-def check_tetramm():
-    """
-    Checks if the tetramm is connected and returns the tetramm device.
-    If the tetramm is not connected, it will raise an error.
-    """
-
-    try:
-        tetramm = return_connected_device("i22", "tetramm")
-        return tetramm
-    except Exception as e:
-        LOGGER.error(f"Tetramm not connected: {e}")
-        raise
-
-
-def inject_all(active_detector_names: list[str]) -> list[StandardDetector]:
-    """
-
-    Injects all of the devices into the dodal common beamline devices,
-    so that they can be used in the plans
-
-    """
-
-    active_detectors = [inject(dev) for dev in active_detector_names]
-
-    return active_detectors
 
 
 def multiple_pulse_blocks():
@@ -533,35 +482,8 @@ if __name__ == "__main__":
     #         trigger_info.number_of_events
     #     )
 
-    # still getting the experiment number jumping by two
-    # neeed to sort out pulses on panda
-    # split setup and run
-
     ###if TETRAMMS ARE NOT WORKING TRY TfgAcquisition() in gda to reset all malcolm
     #### stuff to defaults
-
-    ###################################
-    # Profile(
-    #     id=0,
-    #     cycles=1,
-    #     in_trigger="IMMEDIATE",
-    #     out_trigger="TTLOUT1",
-    #     groups=[
-    #         Group(
-    #             id=0,
-    #             frames=1,
-    #             wait_time=100,
-    #             wait_units="ms",
-    #             run_time=100,
-    #             run_units="ms",
-    #             wait_pause=False,
-    #             run_pause=False,
-    #             wait_pulses=[1, 0, 0, 0, 0, 0, 0, 0],
-    #             run_pulses=[0, 0, 0, 0, 0, 0, 0, 0],
-    #         )
-    #     ],
-    #     multiplier=[1, 2, 4, 8, 16],
-    # )
 
     default_config_path = os.path.join(
         os.path.dirname(os.path.realpath(__file__)),
@@ -576,7 +498,7 @@ if __name__ == "__main__":
     RE(
         configure_panda_triggering(
             profile,
-            detectors=detectors,  # type:ignore
+            detectors=detectors,
             force_load=False,
         )
     )
