@@ -43,12 +43,6 @@ class Group(BaseModel):
         self.run_units = self.run_units.upper()
         self.wait_units = self.wait_units.upper()
         self.pause_trigger = self.pause_trigger.upper()
-        # self.recalc_times()
-
-    # def recalc_times(self) -> None:
-    #     self.wait_time_s = self.wait_time * ncdcore.to_seconds(self.wait_units)
-    #     self.run_time_s = self.run_time * ncdcore.to_seconds(self.run_units)
-    #     self.group_duration = (self.wait_time_s + self.run_time_s) * self.frames
 
     @property
     def wait_time_s(self) -> float:
@@ -63,8 +57,6 @@ class Group(BaseModel):
         return (self.wait_time_s + self.run_time_s) * self.frames
 
     def seq_row(self) -> SeqTable:
-        # self.recalc_times()
-
         if not self.pause_trigger:
             trigger = SeqTrigger.IMMEDIATE
         elif self.pause_trigger == "FALSE":
