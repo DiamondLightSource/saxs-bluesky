@@ -7,7 +7,6 @@ Configuration for i22 PandA beamline
 # GUI Elements
 
 PULSEBLOCKS = 4
-USE_MULTIPLIERS = True
 PULSEBLOCKASENTRYBOX = False
 PULSE_BLOCK_NAMES = ["FS", "DETS/TETS", "OAV", "Fluro"]
 THEME_NAME = "clam"  # --> ('clam', 'alt', 'default', 'classic')

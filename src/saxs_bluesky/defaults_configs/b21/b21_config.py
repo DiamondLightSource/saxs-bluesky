@@ -8,7 +8,6 @@ Configuration for b21 PandA beamline
 
 PULSEBLOCKS = 6  # this is higher than the number of pulseblocks
 # so each connection cant have a pulseblock for mutpliers
-USE_MULTIPLIERS = False
 PULSEBLOCKASENTRYBOX = False
 PULSE_BLOCK_NAMES = ["FS", "SAXS/WAXS", "LED1", "LED2", "LED3", "LED4"]
 THEME_NAME = "clam"  # --> ('clam', 'alt', 'default', 'classic')
