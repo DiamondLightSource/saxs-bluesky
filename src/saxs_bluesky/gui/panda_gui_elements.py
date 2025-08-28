@@ -496,7 +496,7 @@ class ProfileTab(ttk.Frame):
         if self.multiplier_var_options:
             multiplier = [int(f.get()) for f in self.multiplier_var_options]
         else:
-            multiplier = [1] * CONFIG.PULSEBLOCKS
+            multiplier = None
 
         new_profile = Profile(
             cycles=cycles,
@@ -534,7 +534,7 @@ class ProfileTab(ttk.Frame):
             )
 
             self.multiplier_var = tkinter.StringVar(
-                value=str(self.profile.multiplier[i])
+                value=str(self.profile.multiplier[i])  # type: ignore
             )
             tkinter.Entry(self, bd=1, width=10, textvariable=self.multiplier_var).grid(
                 column=col_pos, row=0, padx=5, pady=5, sticky="nes"
@@ -577,7 +577,7 @@ class ProfileTab(ttk.Frame):
         self.outputs = self.profile.outputs()
         self.inputs = self.profile.inputs()
 
-        if CONFIG.USE_MULTIPLIERS:
+        if self.profile.multiplier is not None:
             self.build_multiplier_choices()
         else:
             self.multiplier_var_options = None

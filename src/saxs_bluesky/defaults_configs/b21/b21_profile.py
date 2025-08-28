@@ -18,7 +18,7 @@ DEFAULT_PROFILE = Profile(
     cycles=1,
     seq_trigger="IMMEDIATE",
     groups=[DEFAULT_GROUP],
-    multiplier=[1, 1, 1, 1, 1, 1],
+    multiplier=None,
 )
 
 DEFAULT_EXPERIMENT = ExperimentProfiles(

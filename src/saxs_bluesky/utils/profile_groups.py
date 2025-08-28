@@ -102,7 +102,7 @@ class Profile(BaseModel):
     cycles: int = 1
     seq_trigger: str = "IMMEDIATE"
     groups: list[Group] = []
-    multiplier: list[int] = [1, 1, 1, 1]
+    multiplier: list[int] | None = None
 
     total_frames: int = 0
     duration_per_cycle: float = 0
