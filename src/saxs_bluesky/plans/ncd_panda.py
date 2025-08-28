@@ -35,14 +35,12 @@ from saxs_bluesky.utils.profile_groups import ExperimentProfiles, Profile  # Gro
 from saxs_bluesky.utils.utils import (
     get_saxs_beamline,
     load_beamline_config,
-    load_beamline_devices,
 )
 
 BL = get_saxs_beamline()
 CONFIG = load_beamline_config()
-DEV = load_beamline_devices()
-DEFAULT_PANDA = DEV.DEFAULT_PANDA
-FAST_DETECTORS = DEV.FAST_DETECTORS
+DEFAULT_PANDA = CONFIG.DEFAULT_PANDA
+FAST_DETECTORS = CONFIG.FAST_DETECTORS
 
 
 def wait_until_complete(pv_obj, waiting_value=0, timeout=None):
@@ -186,17 +184,18 @@ def generate_repeated_trigger_info(
     n_triggers = [group.frames for group in profile.groups]
     n_cycles = profile.cycles
 
-    for multiplier in profile.multiplier:
-        trigger_info = TriggerInfo(
-            number_of_events=n_triggers * n_cycles,
-            trigger=trigger,
-            deadtime=max_deadtime,
-            livetime=profile.duration,
-            exposures_per_event=multiplier,
-            exposure_timeout=None,
-        )
+    if profile.multiplier is not None:
+        for multiplier in profile.multiplier:
+            trigger_info = TriggerInfo(
+                number_of_events=n_triggers * n_cycles,
+                trigger=trigger,
+                deadtime=max_deadtime,
+                livetime=profile.duration,
+                exposures_per_event=multiplier,
+                exposure_timeout=None,
+            )
 
-        repeated_trigger_info.append(trigger_info)
+            repeated_trigger_info.append(trigger_info)
 
 
 def check_and_apply_panda_settings(panda: HDFPanda, panda_name: str) -> MsgGenerator:

@@ -25,18 +25,8 @@ BL = get_saxs_beamline()
 
 
 def load_beamline_config():
-    BL_CONFIG = import_module(f"saxs_bluesky.defaults_configs.{BL}.{BL}_config")
+    BL_CONFIG = import_module(f"saxs_bluesky.beamline_configs.{BL}_config")
     return BL_CONFIG
-
-
-def load_beamline_profile():
-    BL_PROF = import_module(f"saxs_bluesky.defaults_configs.{BL}.{BL}_profile")
-    return BL_PROF
-
-
-def load_beamline_devices():
-    BL_DEV = import_module(f"saxs_bluesky.defaults_configs.{BL}.{BL}_dev")
-    return BL_DEV
 
 
 class ProfilePlotter:

@@ -1,3 +1,10 @@
+from dodal.beamlines import b21
+from dodal.common import inject
+from ophyd_async.core import StandardDetector
+from ophyd_async.fastcs.panda import HDFPanda
+
+from saxs_bluesky.utils.profile_groups import ExperimentProfiles, Group, Profile
+
 """
 
 Configuration for b21 PandA beamline
@@ -54,3 +61,33 @@ DEADTIME_BUFFER = 20e-6
 DEFAULT_SEQ = 2
 
 CONFIG_NAME = "PandaTriggerWithCounterAndPCAP"
+
+
+DEFAULT_GROUP = Group(
+    frames=1,
+    wait_time=1,
+    wait_units="S",
+    run_time=1,
+    run_units="S",
+    pause_trigger="IMMEDIATE",
+    wait_pulses=[1, 0, 0, 0, 0, 0],
+    run_pulses=[1, 1, 0, 0, 0, 0],
+)
+
+
+DEFAULT_PROFILE = Profile(
+    cycles=1,
+    seq_trigger="IMMEDIATE",
+    groups=[DEFAULT_GROUP],
+    multiplier=None,
+)
+
+DEFAULT_EXPERIMENT = ExperimentProfiles(
+    profiles=[DEFAULT_PROFILE],
+    instrument=b21.BL,
+    detectors=["saxs", "waxs"],
+)
+
+
+FAST_DETECTORS: list[StandardDetector] = [inject("saxs"), inject("waxs")]
+DEFAULT_PANDA: HDFPanda = inject("panda2")

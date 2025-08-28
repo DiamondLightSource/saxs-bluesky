@@ -22,8 +22,6 @@ from saxs_bluesky.utils.profile_groups import ExperimentProfiles
 from saxs_bluesky.utils.utils import (
     get_saxs_beamline,
     load_beamline_config,
-    load_beamline_devices,
-    load_beamline_profile,
 )
 
 ############################################################################################
@@ -31,9 +29,9 @@ from saxs_bluesky.utils.utils import (
 BL = get_saxs_beamline()
 CONFIG = load_beamline_config()
 
-BL_PROF = load_beamline_profile()
-DEFAULT_PROFILE = BL_PROF.DEFAULT_PROFILE
-DEV = load_beamline_devices()
+# BL_PROF = load_beamline_profile()
+DEFAULT_PROFILE = CONFIG.DEFAULT_PROFILE
+# DEV = load_beamline_devices()
 ############################################################################################
 
 
@@ -335,7 +333,10 @@ class PandAGUI(tkinter.Tk):
         profile_to_upload = self.configuration.profiles[index]
         # json_schema_profile = profile_to_upload.model_dump_json()
 
-        params = {"profile": profile_to_upload, "detectors": list(DEV.FAST_DETECTORS)}
+        params = {
+            "profile": profile_to_upload,
+            "detectors": list(CONFIG.FAST_DETECTORS),
+        }
 
         try:
             self.client.run("run_panda_triggering", params)
@@ -494,4 +495,4 @@ if __name__ == "__main__":
 
     # dir_path = os.path.dirname(os.path.realpath(__file__))
     # config_filepath = os.path.join(dir_path, "profile_yamls", "panda_config.yaml")
-    PandAGUI(configuration=BL_PROF.DEFAULT_EXPERIMENT)
+    PandAGUI(configuration=CONFIG.DEFAULT_EXPERIMENT)

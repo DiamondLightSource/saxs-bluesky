@@ -4,6 +4,23 @@ Configuration for i22 PandA beamline
 
 """
 
+from dodal.beamlines import i22
+from dodal.common import inject
+from ophyd_async.core import StandardDetector
+from ophyd_async.fastcs.panda import HDFPanda
+
+from saxs_bluesky.utils.profile_groups import ExperimentProfiles, Group, Profile
+
+FAST_DETECTORS: list[StandardDetector] = [
+    inject("saxs"),
+    inject("waxs"),
+    # inject("i0"),
+    # inject("it"),
+]
+
+
+DEFAULT_PANDA: HDFPanda = inject("panda1")
+
 # GUI Elements
 
 PULSEBLOCKS = 4
@@ -47,3 +64,26 @@ PULSE_CONNECTIONS = {
 DEADTIME_BUFFER = 20e-6  # Buffer added to deadtime to handle minor discrepencies between detector and panda clocks #noqa
 DEFAULT_SEQ = 1  # default sequencer is this one, pandas can have 2
 CONFIG_NAME = "PandaTrigger"
+
+
+DEFAULT_GROUP = Group(
+    frames=1,
+    wait_time=1,
+    wait_units="S",
+    run_time=1,
+    run_units="S",
+    pause_trigger="IMMEDIATE",
+    wait_pulses=[0, 0, 0, 0],
+    run_pulses=[1, 1, 1, 1],
+)
+
+
+DEFAULT_PROFILE = Profile(
+    cycles=1, seq_trigger="IMMEDIATE", groups=[DEFAULT_GROUP], multiplier=[1, 1, 1, 1]
+)
+
+DEFAULT_EXPERIMENT = ExperimentProfiles(
+    profiles=[DEFAULT_PROFILE],
+    instrument=i22.BL,
+    detectors=["saxs", "waxs"],
+)
