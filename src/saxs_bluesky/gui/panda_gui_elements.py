@@ -24,7 +24,6 @@ from saxs_bluesky.utils.utils import (
 )
 
 CONFIG = load_beamline_config()
-# BL_PROF = load_beamline_profile()
 DEFAULT_GROUP = CONFIG.DEFAULT_GROUP
 BL = get_saxs_beamline()
 

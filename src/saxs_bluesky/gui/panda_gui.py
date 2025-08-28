@@ -28,10 +28,7 @@ from saxs_bluesky.utils.utils import (
 
 BL = get_saxs_beamline()
 CONFIG = load_beamline_config()
-
-# BL_PROF = load_beamline_profile()
 DEFAULT_PROFILE = CONFIG.DEFAULT_PROFILE
-# DEV = load_beamline_devices()
 ############################################################################################
 
 

@@ -34,24 +34,36 @@ class Group(BaseModel):
     wait_pulses: list[int]
     run_pulses: list[int]
     # created by model_post_init
-    wait_time_s: float = 0.0
-    run_time_s: float = 0.0
-    group_duration: float = 0.0
+    # wait_time_s: float = 0.0
+    # run_time_s: float = 0.0
+    # group_duration: float = 0.0
 
     def model_post_init(self, __context: Any) -> None:
         assert len(self.wait_pulses) == len(self.run_pulses)
         self.run_units = self.run_units.upper()
         self.wait_units = self.wait_units.upper()
         self.pause_trigger = self.pause_trigger.upper()
-        self.recalc_times()
+        # self.recalc_times()
 
-    def recalc_times(self) -> None:
-        self.wait_time_s = self.wait_time * ncdcore.to_seconds(self.wait_units)
-        self.run_time_s = self.run_time * ncdcore.to_seconds(self.run_units)
-        self.group_duration = (self.wait_time_s + self.run_time_s) * self.frames
+    # def recalc_times(self) -> None:
+    #     self.wait_time_s = self.wait_time * ncdcore.to_seconds(self.wait_units)
+    #     self.run_time_s = self.run_time * ncdcore.to_seconds(self.run_units)
+    #     self.group_duration = (self.wait_time_s + self.run_time_s) * self.frames
+
+    @property
+    def wait_time_s(self) -> float:
+        return self.wait_time * ncdcore.to_seconds(self.wait_units)
+
+    @property
+    def run_time_s(self) -> float:
+        return self.run_time * ncdcore.to_seconds(self.run_units)
+
+    @property
+    def group_duration(self) -> float:
+        return (self.wait_time_s + self.run_time_s) * self.frames
 
     def seq_row(self) -> SeqTable:
-        self.recalc_times()
+        # self.recalc_times()
 
         if not self.pause_trigger:
             trigger = SeqTrigger.IMMEDIATE
