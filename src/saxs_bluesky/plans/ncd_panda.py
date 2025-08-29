@@ -202,7 +202,7 @@ def check_and_apply_panda_settings(panda: HDFPanda, panda_name: str) -> MsgGener
     current_panda_settings = yield from get_current_settings(panda)
     yaml_settings = yield from load_settings_from_yaml(yaml_directory, yaml_file_name)
 
-    if current_panda_settings.__dict__ != yaml_settings.__dict__:
+    if current_panda_settings != yaml_settings:
         print(
             (
                 "Current Panda settings do not match the yaml settings, ",
@@ -326,7 +326,7 @@ def configure_panda_triggering(
     # show_deadtime(detector_deadtime, max_deadtime)
 
     # load Panda setting to panda
-    if force_load is True:
+    if force_load:
         yield from check_and_apply_panda_settings(panda, panda.name)
 
     # n_cycles = profile.cycles
