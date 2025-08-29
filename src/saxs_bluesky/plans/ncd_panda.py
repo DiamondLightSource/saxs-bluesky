@@ -307,16 +307,10 @@ def configure_panda_triggering(
         LOGGER.error(f"Failed to connect to PandA: {e}")
         raise
 
-    print("\n", detectors, "\n")
-    LOGGER.info("\n", detectors, "\n")
-
-    for device in detectors:
-        try:
-            yield from ensure_connected(device)
-            print(f"{device.name} is connected")
-        except Exception as e:
-            LOGGER.error(f"{device} not connected: {e}")
-            raise
+    LOGGER.info("Using the following detectors:")
+    LOGGER.info("")
+    for det in detectors:
+        LOGGER.info(str(det))
 
     detector_deadtime = return_deadtime(
         detectors=list(detectors), exposure=profile.duration
@@ -337,6 +331,7 @@ def configure_panda_triggering(
     number_of_events = profile.number_of_events
 
     if profile.multiplier is not None:
+        LOGGER.info(f"Multiplies are being used: {profile.active_pulses}")
         # arm the panda pulses if the profile has multipliers
         yield from set_panda_pulses(
             panda=panda, pulses=profile.active_pulses, setting="arm"
@@ -370,13 +365,11 @@ def configure_panda_triggering(
 
     # yield from stage_and_prepare_detectors(list(detectors), flyer, trigger_info)
 
-    yield from bps.stage_all(*detectors, flyer, group="stage_prepare")
-
     for det in detectors:
         ###this tells the detector how may triggers to expect and sets the CAN aquire on
-        yield from bps.prepare(det, trigger_info, wait=False, group="stage_prepare")
+        yield from bps.prepare(det, trigger_info, wait=False, group="prepare")
 
-    yield from bps.wait(group="stage_prepare", timeout=DEFAULT_TIMEOUT)
+    yield from bps.wait(group="prepare", timeout=DEFAULT_TIMEOUT)
 
 
 @attach_data_session_metadata_decorator()
@@ -401,6 +394,9 @@ def run_panda_triggering(
     # flyer and prepare fly, sets the sequencers table
     trigger_logic = StaticSeqTableTriggerLogic(panda_seq_table)
     flyer = StandardFlyer(trigger_logic)
+
+    yield from bps.stage_all(*detectors, flyer, group="stage")
+    yield from bps.wait(group="stage", timeout=DEFAULT_TIMEOUT)
 
     yield from fly_and_collect_with_wait(
         stream_name="primary",
