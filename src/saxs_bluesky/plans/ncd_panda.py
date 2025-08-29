@@ -5,7 +5,6 @@ from typing import Annotated
 import bluesky.plan_stubs as bps
 import bluesky.preprocessors as bpp
 import numpy as np
-from bluesky.run_engine import RunEngine
 from bluesky.utils import MsgGenerator
 from dodal.common import inject
 from dodal.log import LOGGER
@@ -25,14 +24,14 @@ from ophyd_async.fastcs.panda import (
     StaticSeqTableTriggerLogic,
 )
 from ophyd_async.plan_stubs import ensure_connected, get_current_settings
-from pydantic import validate_call  # ,NonNegativeFloat,
+from pydantic import validate_call
 
 from saxs_bluesky.stubs.panda_stubs import (
     fly_and_collect_with_wait,
     load_settings_from_yaml,
     upload_yaml_to_panda,
 )
-from saxs_bluesky.utils.profile_groups import ExperimentLoader, Profile  # Group
+from saxs_bluesky.utils.profile_groups import ExperimentLoader, Profile
 from saxs_bluesky.utils.utils import (
     get_saxs_beamline,
     load_beamline_config,
@@ -454,6 +453,8 @@ def configure_and_run_panda_triggering(
 
 
 if __name__ == "__main__":
+    from bluesky.run_engine import RunEngine
+
     RE = RunEngine(call_returns_result=True)
 
     #################################
