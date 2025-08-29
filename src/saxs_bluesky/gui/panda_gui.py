@@ -46,13 +46,6 @@ class PandAGUI(tkinter.Tk):
             "default_panda_config.yaml",
         )
 
-        self.instrument_session = str(
-            askstring(
-                "Instrument Session",
-                "Enter an intrument session:",
-            )
-        )
-
         if (self.panda_config_yaml is None) and (configuration is None):
             self.configuration = ExperimentLoader.read_from_yaml(
                 self.default_config_path
@@ -66,6 +59,14 @@ class PandAGUI(tkinter.Tk):
                 "Must pass either panda_config_yaml or configuration object. Not both"
             )
             quit()
+
+        self.instrument_session = str(
+            askstring(
+                "Instrument Session",
+                "Enter an intrument session:",
+                initialvalue=configuration.instrument_session,
+            )
+        )
 
         self.profiles = self.configuration.profiles
 
@@ -315,8 +316,8 @@ class PandAGUI(tkinter.Tk):
             print("Could not upload profile to panda")
 
     def run_plan(self):
-        index = int(self.notebook.index("current"))
-        profile_to_upload = self.configuration.profiles[index]
+        # index = int(self.notebook.index("current"))
+        # profile_to_upload = self.configuration.profiles[index]
         # json_schema_profile = profile_to_upload.model_dump_json()
 
         params = {

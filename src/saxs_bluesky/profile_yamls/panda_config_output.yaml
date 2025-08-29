@@ -1,6 +1,6 @@
 ---
 title: Panda Configure
-experiment: cm40643-2/bluesky
+instrument_session: cm40643-4
 instrument: i22
 detectors: [saxs, waxs]
 profile-0:

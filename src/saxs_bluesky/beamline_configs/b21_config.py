@@ -96,6 +96,7 @@ DEFAULT_EXPERIMENT = ExperimentLoader(
     profiles=[DEFAULT_PROFILE],
     instrument=b21.BL,
     detectors=["saxs", "waxs"],
+    instrument_session="cm40642-4",
 )
 
 

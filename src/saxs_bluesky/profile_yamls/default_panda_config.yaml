@@ -1,6 +1,6 @@
 ---
 title: "Panda Default Configuration"
-experiment: "cm40643-3/bluesky"
+instrument_session: "cm40643-4"
 instrument: "i22"
 detectors: ["saxs", "waxs"] #For i22 this is a list which can contain, "saxs", "waxs", "i0", "it", "oav" and others listed in the i22 dodal modules
 BITA:

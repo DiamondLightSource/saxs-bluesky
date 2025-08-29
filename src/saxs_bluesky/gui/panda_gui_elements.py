@@ -81,7 +81,7 @@ class EditableTableview(ttk.Treeview):
         elif column in ["#7"]:  # these groups create a drop down menu
             # place dropdown popup properly
 
-            options = [str(e.value).upper() for e in SeqTrigger]
+            options = [str(e.name).upper() for e in SeqTrigger]
 
             # options = ["True", "False"]
             self.Popup = DropdownPopup(self, rowid, int(column[1:]) - 1, text, options)

@@ -210,6 +210,7 @@ class ExperimentLoader:
     profiles: list[Profile]
     instrument: str
     detectors: list[str]
+    instrument_session: str = ""
 
     def __post_init__(self):
         self.n_profiles = len(self.profiles)
