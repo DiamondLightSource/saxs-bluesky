@@ -274,6 +274,7 @@ def set_panda_output(
     yield from bps.wait(group=group, timeout=DEFAULT_TIMEOUT)
 
 
+@attach_data_session_metadata_decorator()
 @validate_call(config={"arbitrary_types_allowed": True})
 def configure_panda_triggering(
     profile: Annotated[
@@ -297,6 +298,11 @@ def configure_panda_triggering(
     setting them up for hardware triggering, loads all of the correct
 
     settings.
+
+    Stage - sets the hdf writer
+    Prepare - sets the trigger info
+
+    Stage must come before prepare
 
     """
 
@@ -355,6 +361,10 @@ def configure_panda_triggering(
     trigger_logic = StaticSeqTableTriggerLogic(panda.seq[CONFIG.DEFAULT_SEQ])
     flyer = StandardFlyer(trigger_logic)
 
+    # STAGE SETS HDF WRITER TO ON
+    yield from bps.stage_all(*detectors, flyer, group="stage")
+    yield from bps.wait(group="stage", timeout=DEFAULT_TIMEOUT * len(detectors))
+
     # stage the detectors, the flyer, the panda
     # setup triggering on panda - changes the sequence table
     # - wait otherwise risking _context missing error
@@ -368,7 +378,7 @@ def configure_panda_triggering(
         ###this tells the detector how may triggers to expect and sets the CAN aquire on
         yield from bps.prepare(det, trigger_info, wait=False, group="prepare")
 
-    yield from bps.wait(group="prepare", timeout=DEFAULT_TIMEOUT)
+    # yield from bps.wait(group="prepare", timeout=DEFAULT_TIMEOUT * len(detectors))
 
 
 @attach_data_session_metadata_decorator()
@@ -393,9 +403,6 @@ def run_panda_triggering(
     # flyer and prepare fly, sets the sequencers table
     trigger_logic = StaticSeqTableTriggerLogic(panda_seq_table)
     flyer = StandardFlyer(trigger_logic)
-
-    yield from bps.stage_all(*detectors, flyer, group="stage")
-    yield from bps.wait(group="stage", timeout=DEFAULT_TIMEOUT)
 
     yield from fly_and_collect_with_wait(
         stream_name="primary",
@@ -450,6 +457,19 @@ def configure_and_run_panda_triggering(
     )
 
     yield from run_panda_triggering(profile, detectors=detectors, panda=panda)  # type: ignore
+
+
+@validate_call(config={"arbitrary_types_allowed": True})
+def set_detectors(bs_detectors: list[str]) -> MsgGenerator:
+    global detectors
+    detectors = [inject(f) for f in bs_detectors]
+    yield from bps.sleep(0.1)
+
+
+@validate_call(config={"arbitrary_types_allowed": True})
+def log_detectors() -> MsgGenerator:
+    LOGGER.info(detectors)
+    yield from bps.sleep(0.1)
 
 
 if __name__ == "__main__":

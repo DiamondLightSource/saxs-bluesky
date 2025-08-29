@@ -329,6 +329,22 @@ class PandAGUI(tkinter.Tk):
         except ConnectionError:
             print("Could not upload profile to panda")
 
+    def set_detectors(self):
+        params = {
+            "bs_detectors": list(CONFIG.FAST_DETECTORS),
+        }
+
+        try:
+            self.client.run("set_detectors", params)
+        except ConnectionError:
+            print("Could not upload profile to panda")
+
+    def log_detectors(self):
+        try:
+            self.client.run("log_detectors", {})
+        except ConnectionError:
+            print("Could not upload profile to panda")
+
     def stop_plan(self):
         self.client.stop()
 
@@ -379,6 +395,14 @@ class PandAGUI(tkinter.Tk):
         self.reload_env_button = ttk.Button(
             self.run_frame, text="Reload Env", command=self.reload_environment
         ).grid(column=2, row=12, padx=5, pady=5, columnspan=1, sticky="news")
+
+        self.set_det_button = ttk.Button(
+            self.run_frame, text="Set dets", command=self.set_detectors
+        ).grid(column=2, row=13, padx=5, pady=5, columnspan=1, sticky="news")
+
+        self.show_det_button = ttk.Button(
+            self.run_frame, text="Log dets", command=self.log_detectors
+        ).grid(column=2, row=14, padx=5, pady=5, columnspan=1, sticky="news")
 
     def build_global_settings_frame(self):
         self.global_settings_frame = ttk.Frame(
