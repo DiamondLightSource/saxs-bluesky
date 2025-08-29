@@ -27,11 +27,11 @@ def test_profile_append():
     P.append_group(
         Group(
             frames=1,
+            trigger="IMMEDIATE",
             wait_time=1,
             wait_units="S",
             run_time=1,
             run_units="S",
-            pause_trigger="IMMEDIATE",
             wait_pulses=[0, 0, 0, 0],
             run_pulses=[1, 1, 1, 1],
         )
@@ -46,11 +46,11 @@ def test_profile_json():
     P.append_group(
         Group(
             frames=1,
+            trigger="IMMEDIATE",
             wait_time=1,
             wait_units="S",
             run_time=1,
             run_units="S",
-            pause_trigger="IMMEDIATE",
             wait_pulses=[0, 0, 0, 0],
             run_pulses=[1, 1, 1, 1],
         )
@@ -73,11 +73,11 @@ def test_profile_delete():
         P.append_group(
             Group(
                 frames=1,
+                trigger="IMMEDIATE",
                 wait_time=1,
                 wait_units="S",
                 run_time=1,
                 run_units="S",
-                pause_trigger="IMMEDIATE",
                 wait_pulses=[0, 0, 0, 0],
                 run_pulses=[1, 1, 1, 1],
             )
@@ -93,11 +93,11 @@ def test_active_pulses():
     P.append_group(
         Group(
             frames=1,
+            trigger="IMMEDIATE",
             wait_time=1,
             wait_units="S",
             run_time=1,
             run_units="S",
-            pause_trigger="IMMEDIATE",
             wait_pulses=[0, 0, 0, 0],
             run_pulses=[1, 1, 1, 1],
         )
