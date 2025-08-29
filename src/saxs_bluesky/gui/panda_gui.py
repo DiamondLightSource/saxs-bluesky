@@ -362,7 +362,7 @@ class PandAGUI(tkinter.Tk):
         ).grid(column=2, row=7, padx=5, pady=5, columnspan=1, sticky="news")
 
         self.resume_plans_button = ttk.Button(
-            self.run_frame, text="Resume Plan", command=self.resume_plan
+            self.run_frame, text="Reload Env", command=self.resume_plan
         ).grid(
             column=2,
             row=9,
