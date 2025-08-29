@@ -75,11 +75,11 @@ CONFIG_NAME = "PandaTriggerWithCounterAndPCAP"
 
 DEFAULT_GROUP = Group(
     frames=1,
+    trigger="IMMEDIATE",
     wait_time=1,
     wait_units="S",
     run_time=1,
     run_units="S",
-    pause_trigger="Immediate",
     wait_pulses=[1, 0, 0, 0, 0, 0],
     run_pulses=[1, 1, 0, 0, 0, 0],
 )
@@ -87,7 +87,7 @@ DEFAULT_GROUP = Group(
 
 DEFAULT_PROFILE = Profile(
     cycles=1,
-    seq_trigger="Immediate",
+    seq_trigger="IMMEDIATE",
     groups=[DEFAULT_GROUP],
     multiplier=None,
 )

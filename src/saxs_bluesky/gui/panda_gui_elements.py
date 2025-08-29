@@ -70,7 +70,7 @@ class EditableTableview(ttk.Treeview):
         elif column == "#1":
             return
 
-        elif column in ["#4", "#6"]:  # these groups create a drop down menu
+        elif column in ["#5", "#7"]:  # these groups create a drop down menu
             # place dropdown popup properly
             options = list(PandaTimeUnits.__dict__["_member_names_"])
             # options = [f.lower() for f in options]
@@ -78,7 +78,7 @@ class EditableTableview(ttk.Treeview):
             self.Popup = DropdownPopup(self, rowid, int(column[1:]) - 1, text, options)
             self.Popup.place(x=x, y=y + pady, width=width, height=height, anchor="w")
 
-        elif column in ["#7"]:  # these groups create a drop down menu
+        elif column in ["#3"]:  # these groups create a drop down menu
             # place dropdown popup properly
 
             options = [str(e.name).upper() for e in SeqTrigger]
@@ -475,11 +475,11 @@ class ProfileTab(ttk.Frame):
 
             n_group = Group(
                 frames=int(group[1]),
-                wait_time=int(group[2]),
-                wait_units=group[3],
-                run_time=int(group[4]),
-                run_units=group[5],
-                pause_trigger=group[6],
+                trigger=group[2],
+                wait_time=int(group[3]),
+                wait_units=group[4],
+                run_time=int(group[5]),
+                run_units=group[6],
                 wait_pulses=wait_pulses,
                 run_pulses=run_pulses,
             )

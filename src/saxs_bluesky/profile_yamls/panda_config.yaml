@@ -19,51 +19,51 @@ profile-0:
 
   group-0:
     frames: 1
+    trigger: "IMMEDIATE"
     wait_time: 3000
     wait_units: "MS" #can be "MIN", "S", "MS", "US"
     run_time: 3000
     run_units: "MS"
-    pause_trigger: "IMMEDIATE"
     wait_pulses: [1, 0, 0, 0]
     run_pulses: [1, 0, 0, 0]
 
   group-1:
     frames: 1
+    trigger: "IMMEDIATE"
     wait_time: 1000
     wait_units: "MS"
     run_time: 1000
     run_units: "MS"
-    pause_trigger: "IMMEDIATE"
     wait_pulses: [0, 0, 0, 0]
     run_pulses: [1, 1, 0, 0]
 
   group-2:
     frames: 8
+    trigger: "IMMEDIATE"
     wait_time: 1000
     wait_units: "MS"
     run_time: 1000
     run_units: "MS"
-    pause_trigger: "IMMEDIATE"
     wait_pulses: [0, 0, 0, 0]
     run_pulses: [1, 0, 0, 0]
 
   group-3:
     frames: 1
+    trigger: "IMMEDIATE"
     wait_time: 1000
     wait_units: "MS"
     run_time: 3000
     run_units: "MS"
-    pause_trigger: "IMMEDIATE"
     wait_pulses: [0, 0, 0, 0]
     run_pulses: [1, 0, 0, 0]
 
   group-5:
     frames: 1
+    trigger: "IMMEDIATE"
     wait_time: 3000
     wait_units: "MS"
     run_time: 1000
     run_units: "MS"
-    pause_trigger: "IMMEDIATE"
     wait_pulses: [0, 0, 0, 0]
     run_pulses: [0, 0, 0, 0]
 
@@ -74,11 +74,11 @@ profile-1:
 
   group-0:
     frames: 1
+    trigger: "IMMEDIATE"
     wait_time: 1
     wait_units: "S"
     run_time: 1
     run_units: "S"
-    pause_trigger: "IMMEDIATE"
     wait_pulses: [0, 0, 0, 0]
     run_pulses: [1, 1, 1, 1]
 
@@ -89,21 +89,21 @@ profile-2:
 
   group-0:
     frames: 1
+    trigger: "IMMEDIATE"
     wait_time: 1
     wait_units: "S"
     run_time: 1
     run_units: "S"
-    pause_trigger: "IMMEDIATE"
     wait_pulses: [0, 0, 0, 0]
     run_pulses: [1, 1, 1, 1]
 
   group-1:
     frames: 1
+    trigger: "IMMEDIATE"
     wait_time: 1
     wait_units: "S"
     run_time: 1
     run_units: "S"
-    pause_trigger: "IMMEDIATE"
     wait_pulses: [0, 0, 0, 0]
     run_pulses: [1, 1, 1, 1]
 
@@ -117,11 +117,11 @@ profile-3:
 
   group-0:
     frames: 100
+    trigger: "IMMEDIATE"
     wait_time: 0
     wait_units: "S"
     run_time: 1
     run_units: "S"
-    pause_trigger: "IMMEDIATE"
     wait_pulses: [0, 0, 0, 0]
     run_pulses: [1, 1, 1, 1]
 
@@ -133,11 +133,11 @@ profile-4:
 
   group-0:
     frames: 100
+    trigger: "IMMEDIATE"
     wait_time: 0
     wait_units: "S"
     run_time: 1
     run_units: "S"
-    pause_trigger: "IMMEDIATE"
     wait_pulses: [0, 0, 0, 0]
     run_pulses: [1, 1, 1, 1]
 
@@ -151,30 +151,30 @@ profile-5:
 
   group-0:
     frames: 5
+    trigger: "IMMEDIATE"
     wait_time: 0
     wait_units: "MS"
     run_time: 1
     run_units: "MS"
-    pause_trigger: "IMMEDIATE"
     wait_pulses: [0, 0, 0, 0]
     run_pulses: [1, 1, 0, 0]
 
   group-1:
     frames: 500
+    trigger: "IMMEDIATE"
     wait_time: 0
     wait_units: "MS"
     run_time: 5
     run_units: "MS"
-    pause_trigger: "IMMEDIATE"
     wait_pulses: [0, 0, 0, 0]
     run_pulses: [1, 1, 0, 1]
 
   group-2:
     frames: 500
+    trigger: "IMMEDIATE"
     wait_time: 0
     wait_units: "MS"
     run_time: 5
     run_units: "MS"
-    pause_trigger: "IMMEDIATE"
     wait_pulses: [0, 0, 0, 0]
     run_pulses: [1, 1, 0, 1]

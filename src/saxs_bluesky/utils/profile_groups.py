@@ -26,11 +26,11 @@ class Group(BaseModel):
     to build up complex experimental profiles"""
 
     frames: int
+    trigger: str
     wait_time: int
     wait_units: str
     run_time: int
     run_units: str
-    pause_trigger: str
     wait_pulses: list[int]
     run_pulses: list[int]
     # created by model_post_init
@@ -42,7 +42,7 @@ class Group(BaseModel):
         assert len(self.wait_pulses) == len(self.run_pulses)
         self.run_units = self.run_units.upper()
         self.wait_units = self.wait_units.upper()
-        self.pause_trigger = self.pause_trigger.upper()
+        self.trigger = self.trigger.upper()
 
     @property
     def wait_time_s(self) -> float:
@@ -57,13 +57,13 @@ class Group(BaseModel):
         return (self.wait_time_s + self.run_time_s) * self.frames
 
     def seq_row(self) -> SeqTable:
-        if not self.pause_trigger:
+        if not self.trigger:
             trigger = SeqTrigger.IMMEDIATE
-        elif self.pause_trigger == "FALSE":
+        elif self.trigger == "FALSE":
             trigger = SeqTrigger.IMMEDIATE
-            self.pause_trigger = "IMMEDIATE"
+            self.trigger = "IMMEDIATE"
         else:
-            trigger = eval(f"SeqTrigger.{self.pause_trigger}")
+            trigger = eval(f"SeqTrigger.{self.trigger}")
 
         seq_table_kwargs = {
             "repeats": self.frames,
@@ -249,11 +249,11 @@ class ExperimentLoader:
 
                     n_Group = Group(
                         frames=group["frames"],
+                        trigger=group["trigger"],
                         wait_time=group["wait_time"],
                         wait_units=group["wait_units"],
                         run_time=group["run_time"],
                         run_units=group["run_units"],
-                        pause_trigger=group["pause_trigger"],
                         wait_pulses=group["wait_pulses"],
                         run_pulses=group["run_pulses"],
                     )

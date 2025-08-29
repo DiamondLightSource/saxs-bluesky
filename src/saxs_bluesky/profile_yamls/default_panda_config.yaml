@@ -14,10 +14,10 @@ profile-0:
 
   group-0:
     frames: 1
+    trigger: "IMMEDIATE"
     wait_time: 100
     wait_units: "MS" #can be "MIN", "S", "MS", "US"
     run_time: 100
     run_units: "MS"
-    pause_trigger: "IMMEDIATE"
     wait_pulses: [0, 0, 0, 0]
     run_pulses: [1, 0, 0, 0]
