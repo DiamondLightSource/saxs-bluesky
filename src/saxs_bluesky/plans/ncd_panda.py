@@ -331,7 +331,7 @@ def configure_panda_triggering(
     number_of_events = profile.number_of_events
 
     if profile.multiplier is not None:
-        LOGGER.info(f"Multiplies are being used: {profile.active_pulses}")
+        LOGGER.info(f"Multipliers used: {profile.active_pulses}")
         # arm the panda pulses if the profile has multipliers
         yield from set_panda_pulses(
             panda=panda, pulses=profile.active_pulses, setting="arm"
