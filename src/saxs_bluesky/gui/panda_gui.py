@@ -291,7 +291,7 @@ class PandAGUI(tkinter.Tk):
         plans = self.client.get_plans().plans
 
         for plan in plans:
-            print(plan, "\n\n")
+            print(plan.name, "\n")
 
     def get_devices(self):
         devices = self.client.get_devices().devices
@@ -320,7 +320,6 @@ class PandAGUI(tkinter.Tk):
         # json_schema_profile = profile_to_upload.model_dump_json()
 
         params = {
-            "profile": profile_to_upload,
             "detectors": list(CONFIG.FAST_DETECTORS),
         }
 

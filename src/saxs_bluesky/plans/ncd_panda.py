@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from typing import Annotated
 
 import bluesky.plan_stubs as bps
@@ -194,7 +195,7 @@ def check_and_apply_panda_settings(panda: HDFPanda, panda_name: str) -> MsgGener
 
     # this is the directory where the yaml files are stored
     yaml_directory = os.path.join(
-        os.path.dirname(os.path.realpath(__file__)), "ophyd_panda_yamls"
+        os.path.dirname(Path(__file__).parent), "ophyd_panda_yamls"
     )
     yaml_file_name = f"{BL}_{CONFIG.CONFIG_NAME}_{panda_name}"
 
@@ -288,7 +289,7 @@ def configure_panda_triggering(
         "List of str of the detector names, eg. saxs, waxs, i0, it",
     ] = FAST_DETECTORS,
     panda: HDFPanda = DEFAULT_PANDA,
-    force_load: bool = True,
+    force_load: bool = False,
 ) -> MsgGenerator:
     """
 
@@ -378,8 +379,8 @@ def configure_panda_triggering(
     yield from bps.wait(group="stage_prepare", timeout=DEFAULT_TIMEOUT)
 
 
+@attach_data_session_metadata_decorator()
 @bpp.run_decorator()  #    # open/close run
-@attach_data_session_metadata_decorator
 @validate_call(config={"arbitrary_types_allowed": True})
 def run_panda_triggering(
     detectors: Annotated[
@@ -420,7 +421,7 @@ def run_panda_triggering(
 
 
 @bpp.run_decorator()  #    # open/close run
-@attach_data_session_metadata_decorator
+@attach_data_session_metadata_decorator()
 def configure_and_run_panda_triggering(
     profile: Annotated[
         Profile,
