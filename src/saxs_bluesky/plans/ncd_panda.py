@@ -341,6 +341,7 @@ def configure_panda_triggering(
         yield from set_panda_pulses(
             panda=panda, pulses=profile.active_pulses, setting="arm"
         )
+        LOGGER.info(f"Multipliers values: {profile.multiplier}")
 
     ############################################################
     # setup triggering of detectors
