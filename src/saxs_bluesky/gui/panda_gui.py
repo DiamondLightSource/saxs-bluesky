@@ -332,6 +332,9 @@ class PandAGUI(tkinter.Tk):
     def stop_plan(self):
         self.client.stop()
 
+    def reload_environment(self):
+        self.client.reload_environment()
+
     def pause_plan(self):
         self.client.pause()
 
@@ -372,6 +375,10 @@ class PandAGUI(tkinter.Tk):
         self.run_plan_button = ttk.Button(
             self.run_frame, text="Run Plan", command=self.run_plan
         ).grid(column=2, row=11, padx=5, pady=5, columnspan=1, sticky="news")
+
+        self.reload_env_button = ttk.Button(
+            self.run_frame, text="Run Plan", command=self.reload_environment
+        ).grid(column=2, row=12, padx=5, pady=5, columnspan=1, sticky="news")
 
     def build_global_settings_frame(self):
         self.global_settings_frame = ttk.Frame(
