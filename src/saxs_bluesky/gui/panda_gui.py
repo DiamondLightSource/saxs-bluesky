@@ -97,9 +97,9 @@ class PandAGUI(tkinter.Tk):
         self.notebook.pack(fill="both", side="top", expand=True)
 
         for i in range(self.configuration.n_profiles):
-            ProfileTab(self, self.notebook, self.configuration, i)
-            tab_names = self.notebook.tabs()
-            proftab_object: ProfileTab = self.notebook.nametowidget(tab_names[i])
+            proftab_object = ProfileTab(self, self.notebook, self.configuration, i)
+            # tab_names = self.notebook.tabs()
+            # proftab_object: ProfileTab = self.notebook.nametowidget(tab_names[i])
             self.delete_profile_button = ttk.Button(
                 proftab_object, text="Delete Profile", command=self.delete_profile_tab
             )
@@ -329,6 +329,15 @@ class PandAGUI(tkinter.Tk):
         except ConnectionError:
             print("Could not upload profile to panda")
 
+    def stop_plan(self):
+        self.client.stop()
+
+    def pause_plan(self):
+        self.client.pause()
+
+    def resume_plan(self):
+        self.client.resume()
+
     def build_exp_run_frame(self):
         self.run_frame = ttk.Frame(self.window, borderwidth=5, relief="raised")
 
@@ -342,15 +351,15 @@ class PandAGUI(tkinter.Tk):
         ).grid(column=2, row=3, padx=5, pady=5, columnspan=1, sticky="news")
 
         self.stop_plans_button = ttk.Button(
-            self.run_frame, text="Stop Plan", command=self.client.stop
+            self.run_frame, text="Stop Plan", command=self.stop_plan
         ).grid(column=2, row=5, padx=5, pady=5, columnspan=1, sticky="news")
 
         self.pause_plans_button = ttk.Button(
-            self.run_frame, text="Pause Plan", command=self.client.pause
+            self.run_frame, text="Pause Plan", command=self.pause_plan
         ).grid(column=2, row=7, padx=5, pady=5, columnspan=1, sticky="news")
 
         self.resume_plans_button = ttk.Button(
-            self.run_frame, text="Resume Plan", command=self.client.resume
+            self.run_frame, text="Resume Plan", command=self.resume_plan
         ).grid(
             column=2,
             row=9,

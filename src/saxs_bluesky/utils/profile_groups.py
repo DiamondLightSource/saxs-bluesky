@@ -6,7 +6,7 @@ from typing import Any
 import numpy as np
 import yaml
 from ophyd_async.core import in_micros
-from ophyd_async.fastcs.panda import SeqTable, SeqTrigger
+from ophyd_async.fastcs.panda import SeqTable, SeqTableInfo, SeqTrigger
 from pydantic import BaseModel
 from pydantic.dataclasses import dataclass as pydanticdataclass
 
@@ -129,6 +129,14 @@ class Profile(BaseModel):
         return duration
 
     @property
+    def seq_table_info(self) -> SeqTableInfo:
+        seq_table_info = SeqTableInfo(
+            sequence_table=self.seq_table, repeats=self.cycles
+        )
+
+        return seq_table_info
+
+    @property
     def active_pulses(self) -> list[int]:
         """
         Checks which outputs are active in the wait phase,
@@ -145,10 +153,19 @@ class Profile(BaseModel):
 
         return active_pulses
 
-    def append_group(self, Group: Group):
+    @property
+    def triggers(self) -> list[int]:
+        # [3, 1, 1, 1, 1] or something
+        return [group.frames for group in self.groups]
+
+    @property
+    def number_of_events(self) -> list[int]:
+        return self.triggers * self.cycles
+
+    def append_group(self, Group: Group) -> None:
         self.groups.append(Group)
 
-    def delete_group(self, n: int):
+    def delete_group(self, n: int) -> None:
         self.groups.pop(n)
 
     def insert_group(self, n: int, Group: Group):

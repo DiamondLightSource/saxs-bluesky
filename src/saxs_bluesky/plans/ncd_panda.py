@@ -10,6 +10,7 @@ from dodal.common import inject
 from dodal.log import LOGGER
 from dodal.plan_stubs.data_session import attach_data_session_metadata_decorator
 from ophyd_async.core import (
+    DEFAULT_TIMEOUT,
     DetectorTrigger,
     StandardDetector,
     StandardFlyer,
@@ -107,7 +108,7 @@ def set_panda_pulses(
             group=group,
         )
 
-    yield from bps.wait(group=group, timeout=CONFIG.GENERAL_TIMEOUT)
+    yield from bps.wait(group=group, timeout=DEFAULT_TIMEOUT)
 
 
 def stage_and_prepare_detectors(
@@ -128,7 +129,7 @@ def stage_and_prepare_detectors(
         ###this tells the detector how may triggers to expect and sets the CAN aquire on
         yield from bps.prepare(det, trigger_info, wait=False, group=group)
 
-    yield from bps.wait(group=group, timeout=CONFIG.GENERAL_TIMEOUT)
+    yield from bps.wait(group=group, timeout=DEFAULT_TIMEOUT)
 
 
 def return_deadtime(
@@ -270,7 +271,7 @@ def set_panda_output(
     )
     output_attr = getattr(panda, f"{output_type.lower()}out")[int(output)]
     yield from bps.abs_set(output_attr.val, state_value, group=group)
-    yield from bps.wait(group=group, timeout=CONFIG.GENERAL_TIMEOUT)
+    yield from bps.wait(group=group, timeout=DEFAULT_TIMEOUT)
 
 
 @validate_call(config={"arbitrary_types_allowed": True})
@@ -298,12 +299,6 @@ def configure_panda_triggering(
     settings.
 
     """
-    # visit_path = os.path.join(
-    #     f"/dls/{beamline}/data", str(datetime.now().year), experiment
-    # )
-    # LOGGER.info(f"Data will be saved in {visit_path}")
-    # print(f"Data will be saved in {visit_path}")
-    # yield from set_experiment_directory(beamline, Path(visit_path))
 
     try:
         yield from ensure_connected(panda)  # ensure the panda is connected
@@ -333,23 +328,27 @@ def configure_panda_triggering(
     if force_load is True:
         yield from check_and_apply_panda_settings(panda, panda.name)
 
-    n_cycles = profile.cycles
+    # n_cycles = profile.cycles
     # seq table should be grabbed from the panda and used instead,
     # in order to decouple run from setup panda
-    seq_table = profile.seq_table
-    n_triggers = [
-        group.frames for group in profile.groups
-    ]  # [3, 1, 1, 1, 1] or something
+    # seq_table = profile.seq_table
     duration = profile.duration
+    number_of_events = profile.number_of_events
+
+    if profile.multiplier is not None:
+        # arm the panda pulses if the profile has multipliers
+        yield from set_panda_pulses(
+            panda=panda, pulses=profile.active_pulses, setting="arm"
+        )
 
     ############################################################
-    # ###setup triggering of detectors
-    table_info = SeqTableInfo(sequence_table=seq_table, repeats=n_cycles)
+    # setup triggering of detectors
+    seq_table_info: SeqTableInfo = profile.seq_table_info
 
     # set up trigger info etc
     trigger_info = TriggerInfo(
-        number_of_events=n_triggers * n_cycles,
-        trigger=DetectorTrigger.CONSTANT_GATE,  # or maybe EDGE_TRIGGER
+        number_of_events=number_of_events,
+        trigger=DetectorTrigger.EDGE_TRIGGER,  # or maybe EDGE_TRIGGER
         deadtime=max_deadtime,
         livetime=np.amax(profile.duration_per_cycle),
         exposures_per_event=1,
@@ -361,27 +360,28 @@ def configure_panda_triggering(
     trigger_logic = StaticSeqTableTriggerLogic(panda.seq[CONFIG.DEFAULT_SEQ])
     flyer = StandardFlyer(trigger_logic)
 
-    # ####stage the detectors, the flyer, the panda
+    # stage the detectors, the flyer, the panda
     # setup triggering on panda - changes the sequence table
     # - wait otherwise risking _context missing error
-    yield from bps.prepare(flyer, table_info, wait=True)
-
+    yield from bps.prepare(flyer, seq_table_info, wait=True)
     ###change the sequence table
     # this is the last thing setting up the panda
-    yield from stage_and_prepare_detectors(list(detectors), flyer, trigger_info)
+
+    # yield from stage_and_prepare_detectors(list(detectors), flyer, trigger_info)
+
+    yield from bps.stage_all(*detectors, flyer, group="stage_prepare")
+
+    for det in detectors:
+        ###this tells the detector how may triggers to expect and sets the CAN aquire on
+        yield from bps.prepare(det, trigger_info, wait=False, group="stage_prepare")
+
+    yield from bps.wait(group="stage_prepare", timeout=DEFAULT_TIMEOUT)
 
 
-@attach_data_session_metadata_decorator
 @bpp.run_decorator()  #    # open/close run
+@attach_data_session_metadata_decorator
 @validate_call(config={"arbitrary_types_allowed": True})
 def run_panda_triggering(
-    profile: Annotated[
-        Profile,
-        (
-            "Profile or json of a Profile containing the infomation required to setup ",
-            "the panda, triggers, times etc",
-        ),
-    ],
     detectors: Annotated[
         set[StandardDetector] | list[StandardDetector],
         "List of str of the detector names, eg. saxs, waxs, i0, it",
@@ -395,24 +395,11 @@ def run_panda_triggering(
 
     """
 
+    # get the loaded seq table
     panda_seq_table = panda.seq[CONFIG.DEFAULT_SEQ]
-    active_pulses = profile.active_pulses
-
-    # if profile.seq_table != panda_seq_table:
-    #     raise ValueError(
-    #         "Profile to run is not the same as the one currently loaded on the panda."
-    #     )
-
-    yield from set_panda_pulses(panda=panda, pulses=active_pulses, setting="arm")
-
     # flyer and prepare fly, sets the sequencers table
     trigger_logic = StaticSeqTableTriggerLogic(panda_seq_table)
     flyer = StandardFlyer(trigger_logic)
-
-    ##########################
-    # arm the panda pulses
-
-    ###########################
 
     yield from fly_and_collect_with_wait(
         stream_name="primary",
@@ -421,15 +408,19 @@ def run_panda_triggering(
     )
     ##########################
     ###########################
-    ####start diabling and unstaging everything
     yield from wait_until_complete(panda_seq_table.active, False)
-    # start set to false because currently don't actually want to collect data
-    yield from set_panda_pulses(panda=panda, pulses=active_pulses, setting="disarm")
+
+    # turn off all pulses
+    yield from set_panda_pulses(
+        panda=panda, pulses=list(np.array(range(4)) + 1), setting="disarm"
+    )
+
+    # start diabling and unstaging everything
     yield from bps.unstage_all(*detectors, flyer)  # stops the hdf capture mode
 
 
-@attach_data_session_metadata_decorator
 @bpp.run_decorator()  #    # open/close run
+@attach_data_session_metadata_decorator
 def configure_and_run_panda_triggering(
     profile: Annotated[
         Profile,
@@ -462,7 +453,7 @@ def configure_and_run_panda_triggering(
         force_load=force_load,
     )
 
-    yield from run_panda_triggering(profile, detectors=detectors, panda=panda)
+    yield from run_panda_triggering(profile, detectors=detectors, panda=panda)  # type: ignore
 
 
 if __name__ == "__main__":

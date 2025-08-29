@@ -508,10 +508,12 @@ class ProfileTab(ttk.Frame):
         self.parent.commit_config()
         self.generate_info_boxes()
 
-        print(self.profile)
-
         for i in self.profile.groups:
             print(i)
+
+        print(self.profile)
+        print(self.profile.active_pulses)
+        print(self.profile.duration)
 
     # TODO: https://github.com/DiamondLightSource/saxs-bluesky/issues/23
     def build_multiplier_choices(self):
