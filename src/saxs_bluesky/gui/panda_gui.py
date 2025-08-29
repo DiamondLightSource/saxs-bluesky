@@ -362,7 +362,7 @@ class PandAGUI(tkinter.Tk):
         ).grid(column=2, row=7, padx=5, pady=5, columnspan=1, sticky="news")
 
         self.resume_plans_button = ttk.Button(
-            self.run_frame, text="Reload Env", command=self.resume_plan
+            self.run_frame, text="Resume Plan", command=self.resume_plan
         ).grid(
             column=2,
             row=9,
@@ -377,7 +377,7 @@ class PandAGUI(tkinter.Tk):
         ).grid(column=2, row=11, padx=5, pady=5, columnspan=1, sticky="news")
 
         self.reload_env_button = ttk.Button(
-            self.run_frame, text="Run Plan", command=self.reload_environment
+            self.run_frame, text="Reload Env", command=self.reload_environment
         ).grid(column=2, row=12, padx=5, pady=5, columnspan=1, sticky="news")
 
     def build_global_settings_frame(self):
