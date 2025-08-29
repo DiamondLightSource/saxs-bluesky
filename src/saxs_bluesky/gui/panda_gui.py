@@ -64,7 +64,7 @@ class PandAGUI(tkinter.Tk):
             askstring(
                 "Instrument Session",
                 "Enter an intrument session:",
-                initialvalue=configuration.instrument_session,
+                initialvalue=self.configuration.instrument_session,
             )
         )
 
