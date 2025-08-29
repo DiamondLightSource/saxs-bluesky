@@ -481,7 +481,7 @@ if __name__ == "__main__":
     configuration = ExperimentLoader.read_from_yaml(default_config_path)
     profile = configuration.profiles[1]
 
-    detectors: set[StandardDetector] = [inject("saxs"), inject("waxs")]
+    detectors: list[StandardDetector] = [inject("saxs"), inject("waxs")]
 
     RE(
         configure_panda_triggering(
