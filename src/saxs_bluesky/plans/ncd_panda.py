@@ -245,7 +245,6 @@ def show_deadtime(detector_deadtime, active_detector_names):
     """
 
     for dt, dn in zip(detector_deadtime, active_detector_names, strict=True):
-        print(f"deadtime for {dn} is {dt}")
         LOGGER.info(f"deadtime for {dn} is {dt}")
 
 
@@ -357,27 +356,17 @@ def configure_panda_triggering(
         exposure_timeout=duration,
     )
 
+    panda._trigger_info = trigger_info  # noqa
+
     ############################################################
     # flyer and prepare fly, sets the sequencers table
     trigger_logic = StaticSeqTableTriggerLogic(panda.seq[CONFIG.DEFAULT_SEQ])
     flyer = StandardFlyer(trigger_logic)
 
-    # STAGE SETS HDF WRITER TO ON
-    yield from bps.stage_all(*detectors, flyer, group="stage")
-    yield from bps.wait(group="stage", timeout=DEFAULT_TIMEOUT * len(detectors))
-
-    # stage the detectors, the flyer, the panda
     # setup triggering on panda - changes the sequence table
-    # - wait otherwise risking _context missing error
+    # !! wait otherwise risking _context missing error
+    # change the sequence table
     yield from bps.prepare(flyer, seq_table_info, wait=True)
-    ###change the sequence table
-    # this is the last thing setting up the panda
-
-    # yield from stage_and_prepare_detectors(list(detectors), flyer, trigger_info)
-
-    for det in detectors:
-        ###this tells the detector how may triggers to expect and sets the CAN aquire on
-        yield from bps.prepare(det, trigger_info, wait=False, group="prepare")
 
     # yield from bps.wait(group="prepare", timeout=DEFAULT_TIMEOUT * len(detectors))
 
@@ -404,6 +393,17 @@ def run_panda_triggering(
     # flyer and prepare fly, sets the sequencers table
     trigger_logic = StaticSeqTableTriggerLogic(panda_seq_table)
     flyer = StandardFlyer(trigger_logic)
+
+    trigger_info = panda._trigger_info  # noqa
+
+    # STAGE SETS HDF WRITER TO ON
+    yield from bps.stage_all(*detectors, flyer, group="stage")
+    yield from bps.wait(group="stage", timeout=DEFAULT_TIMEOUT * len(detectors))
+
+    # yield from stage_and_prepare_detectors(list(detectors), flyer, trigger_info)
+    for det in detectors:
+        ###this tells the detector how may triggers to expect and sets the CAN aquire on
+        yield from bps.prepare(det, trigger_info, wait=False, group="prepare")
 
     yield from fly_and_collect_with_wait(
         stream_name="primary",
