@@ -58,13 +58,18 @@ PULSE_CONNECTIONS = {
     4: [TTLOUT[8]],
 }
 
-
+"""
 # ncd plan parameters
+"""
 
 DEADTIME_BUFFER = 20e-6  # Buffer added to deadtime to handle minor discrepencies between detector and panda clocks #noqa
 DEFAULT_SEQ = 1  # default sequencer is this one, pandas can have 2
 CONFIG_NAME = "PandaTrigger"
 
+
+"""
+# DEFAULT PROFILES
+"""
 
 DEFAULT_GROUP = Group(
     frames=1,

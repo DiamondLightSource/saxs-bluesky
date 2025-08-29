@@ -52,7 +52,11 @@ PULSE_CONNECTIONS = {
 }
 
 
-# ncd plan parameters
+"""
+
+# Panda plan parameters
+
+"""
 
 # Buffer added to deadtime to handle minor discrepencies between detector
 # and panda clocks
@@ -62,6 +66,12 @@ DEFAULT_SEQ = 2
 
 CONFIG_NAME = "PandaTriggerWithCounterAndPCAP"
 
+
+"""
+
+# DEFAULT PROFILES
+
+"""
 
 DEFAULT_GROUP = Group(
     frames=1,
