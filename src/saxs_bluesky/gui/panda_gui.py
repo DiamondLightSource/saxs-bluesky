@@ -315,6 +315,8 @@ class PandAGUI(tkinter.Tk):
         profile_to_upload = self.configuration.profiles[index]
         # json_schema_profile = profile_to_upload.model_dump_json()
 
+        print(profile_to_upload)
+
         params = {"profile": profile_to_upload}
 
         try:
