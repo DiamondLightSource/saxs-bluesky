@@ -5,6 +5,8 @@ from .ncd_panda import (
     run_panda_triggering,
     set_detectors,
     set_panda_output,
+    step_rscan,
+    step_scan,
 )
 
 __all__ = [
@@ -14,4 +16,6 @@ __all__ = [
     "set_panda_output",
     "log_detectors",
     "set_detectors",
+    "step_scan",
+    "step_rscan",
 ]

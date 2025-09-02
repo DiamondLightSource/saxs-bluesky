@@ -5,8 +5,11 @@ from typing import Annotated
 import bluesky.plan_stubs as bps
 import bluesky.preprocessors as bpp
 import numpy as np
+from bluesky.plans import list_scan, rel_list_scan
+from bluesky.protocols import Readable
 from bluesky.utils import MsgGenerator
 from dodal.common import inject
+from dodal.devices.motors import Motor
 from dodal.log import LOGGER
 from dodal.plan_stubs.data_session import attach_data_session_metadata_decorator
 from ophyd_async.core import (
@@ -470,7 +473,51 @@ def set_detectors(bs_detectors: list[str]) -> MsgGenerator:
 @validate_call(config={"arbitrary_types_allowed": True})
 def log_detectors() -> MsgGenerator:
     LOGGER.info(detectors)
-    yield from bps.sleep(0.1)
+    yield from bps.sleep(0.0)
+
+
+def create_steps(start: float, stop: float | None, step: float | None):
+    if (stop is None) and (step is not None):
+        raise ValueError("If step is provided, stop must also be provided")
+    elif (step is None) and (stop is not None):
+        step = stop - start
+
+    if (step is None) and (stop is None):
+        step_list = [start]
+    else:
+        step_list = list(np.arange(start, stop, step))
+
+    LOGGER.info(f"Steps: {step_list}")
+
+    return step_list
+
+
+@validate_call(config={"arbitrary_types_allowed": True})
+def step_scan(
+    start: float,
+    stop: float | None,
+    step: float | None,
+    axis: Motor,
+    detectors: list[Readable],
+) -> MsgGenerator:
+    LOGGER.info(f"Running gda style step scan with detectors: {detectors}")
+
+    step_list = create_steps(start, stop, step)
+    yield from list_scan(detectors, (axis, step_list))
+
+
+@validate_call(config={"arbitrary_types_allowed": True})
+def step_rscan(
+    start: float,
+    stop: float | None,
+    step: float | None,
+    axis: Motor,
+    detectors: list[Readable],
+) -> MsgGenerator:
+    LOGGER.info(f"Running gda style rstep scan with detectors: {detectors}")
+
+    step_list = create_steps(start, stop, step)
+    yield from rel_list_scan(detectors, (axis, step_list))
 
 
 if __name__ == "__main__":
