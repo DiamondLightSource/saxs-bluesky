@@ -17,6 +17,13 @@ import matplotlib.pyplot as plt
 
 from saxs_bluesky._version import __version__
 from saxs_bluesky.gui.panda_gui_elements import ProfileTab
+from saxs_bluesky.gui.step_gui import StepWidget
+from saxs_bluesky.plans.ncd_panda import (
+    configure_panda_triggering,
+    log_detectors,
+    run_panda_triggering,
+    set_detectors,
+)
 from saxs_bluesky.utils.beamline_client import BlueAPIPythonClient
 from saxs_bluesky.utils.profile_groups import ExperimentLoader
 from saxs_bluesky.utils.utils import (
@@ -311,7 +318,7 @@ class PandAGUI(tkinter.Tk):
         params = {"profile": profile_to_upload}
 
         try:
-            self.client.run("configure_panda_triggering", params)
+            self.client.run(configure_panda_triggering.__name__, params)
         except ConnectionError:
             print("Could not upload profile to panda")
 
@@ -320,28 +327,38 @@ class PandAGUI(tkinter.Tk):
         # profile_to_upload = self.configuration.profiles[index]
         # json_schema_profile = profile_to_upload.model_dump_json()
 
+        # params = {
+        #     "detectors": list(CONFIG.FAST_DETECTORS),
+        # }
+
+        try:
+            self.client.run(run_panda_triggering.__name__, {})
+        except ConnectionError:
+            print("Could not upload profile to panda")
+
+    def set_detectors_plan(self):
         params = {
             "detectors": list(CONFIG.FAST_DETECTORS),
         }
 
         try:
-            self.client.run("run_panda_triggering", params)
+            self.client.run(set_detectors.__name__, params)
         except ConnectionError:
             print("Could not upload profile to panda")
 
-    def set_detectors(self):
+    def log_detectors_plan(self):
+        try:
+            self.client.run(log_detectors.__name__, {})
+        except ConnectionError:
+            print("Could not upload profile to panda")
+
+    def count_detectors(self):
         params = {
-            "bs_detectors": list(CONFIG.FAST_DETECTORS),
+            "detectors": list(CONFIG.FAST_DETECTORS),
         }
 
         try:
-            self.client.run("set_detectors", params)
-        except ConnectionError:
-            print("Could not upload profile to panda")
-
-    def log_detectors(self):
-        try:
-            self.client.run("log_detectors", {})
+            self.client.run("count", params)
         except ConnectionError:
             print("Could not upload profile to panda")
 
@@ -356,6 +373,9 @@ class PandAGUI(tkinter.Tk):
 
     def resume_plan(self):
         self.client.resume()
+
+    def open_step_widget(self):
+        StepWidget(self.instrument_session)
 
     def build_exp_run_frame(self):
         self.run_frame = ttk.Frame(self.window, borderwidth=5, relief="raised")
@@ -397,12 +417,20 @@ class PandAGUI(tkinter.Tk):
         ).grid(column=2, row=12, padx=5, pady=5, columnspan=1, sticky="news")
 
         self.set_det_button = ttk.Button(
-            self.run_frame, text="Set dets", command=self.set_detectors
+            self.run_frame, text="Set dets", command=self.set_detectors_plan
         ).grid(column=2, row=13, padx=5, pady=5, columnspan=1, sticky="news")
 
         self.show_det_button = ttk.Button(
-            self.run_frame, text="Log dets", command=self.log_detectors
+            self.run_frame, text="Log dets", command=self.log_detectors_plan
         ).grid(column=2, row=14, padx=5, pady=5, columnspan=1, sticky="news")
+
+        self.show_det_button = ttk.Button(
+            self.run_frame, text="Open Step Widget", command=self.open_step_widget
+        ).grid(column=2, row=15, padx=5, pady=5, columnspan=1, sticky="news")
+
+        self.show_det_button = ttk.Button(
+            self.run_frame, text="Count Detector", command=self.count_detectors
+        ).grid(column=2, row=16, padx=5, pady=5, columnspan=1, sticky="news")
 
     def build_global_settings_frame(self):
         self.global_settings_frame = ttk.Frame(

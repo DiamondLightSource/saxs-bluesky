@@ -3,6 +3,8 @@
 import tkinter
 from tkinter import ttk
 
+from dodal.common import inject
+
 # from tkinter import filedialog, messagebox, ttk
 # from tkinter.simpledialog import askstring
 # import matplotlib.pyplot as plt
@@ -30,10 +32,32 @@ class LabelEntryPair:
 
 class StepWidget:
     def step_action(self):
-        pass
+        params = {
+            "start": float(self.StartLabelEntry.get_value()),
+            "stop": float(self.StopLabelEntry.get_value()),
+            "num": float(self.StepLabelEntry.get_value()),
+            "axis": inject(self.ScanAxisLabelEntry.get_value()),
+            "detectors": list(CONFIG.FAST_DETECTORS),
+        }
+
+        try:
+            self.client.run("step_scan", params)
+        except ConnectionError:
+            print("Could not upload profile to panda")
 
     def rstep_action(self):
-        pass
+        params = {
+            "start": float(self.StartLabelEntry.get_value()),
+            "stop": float(self.StopLabelEntry.get_value()),
+            "num": float(self.StepLabelEntry.get_value()),
+            "axis": inject(self.ScanAxisLabelEntry.get_value()),
+            "detectors": list(CONFIG.FAST_DETECTORS),
+        }
+
+        try:
+            self.client.run("step_rscan", params)
+        except ConnectionError:
+            print("Could not upload profile to panda")
 
     def show(self):
         print(self.StartLabelEntry.get_value())
@@ -50,7 +74,7 @@ class StepWidget:
         )
 
         self.root = tkinter.Tk()
-        self.root.minsize(300, 150)
+        self.root.minsize(300, 160)
         self.root.title("Step Scan Control")
 
         # ttk.Label(self.root, text="Start").grid(
@@ -70,15 +94,27 @@ class StepWidget:
             master=self.root, label_text="Stop", row=1, column=1, initial_val="0"
         )
         self.StepLabelEntry = LabelEntryPair(
-            master=self.root, label_text="Step", row=2, column=1, initial_val="0"
+            master=self.root, label_text="Num", row=2, column=1, initial_val="0"
+        )
+
+        self.ScanAxisLabelEntry = LabelEntryPair(
+            master=self.root,
+            label_text="Scan Axis",
+            row=3,
+            column=1,
+            initial_val="base_top.x",
         )
 
         tkinter.Button(self.root, text="Run Step Scan", command=self.step_action).grid(
-            row=3, column=1, padx=5, pady=5, sticky="w"
+            row=4, column=1, padx=5, pady=5, sticky="w"
         )
 
         tkinter.Button(
             self.root, text="Run RStep Scan", command=self.rstep_action
-        ).grid(row=3, column=2, padx=5, pady=5, sticky="w")
+        ).grid(row=4, column=2, padx=5, pady=5, sticky="w")
 
         self.root.mainloop()
+
+
+if __name__ == "__main__":
+    StepWidget("None")

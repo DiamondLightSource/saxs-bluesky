@@ -5,7 +5,7 @@ from typing import Annotated
 import bluesky.plan_stubs as bps
 import bluesky.preprocessors as bpp
 import numpy as np
-from bluesky.plans import list_scan, rel_list_scan
+from bluesky.plans import rel_scan, scan
 from bluesky.protocols import Readable
 from bluesky.utils import MsgGenerator
 from dodal.common import inject
@@ -44,6 +44,10 @@ BL = get_saxs_beamline()
 CONFIG = load_beamline_config()
 DEFAULT_PANDA = CONFIG.DEFAULT_PANDA
 FAST_DETECTORS = CONFIG.FAST_DETECTORS
+
+
+STORED_DETECTORS = None
+STORED_PROFILE = None
 
 
 def wait_until_complete(pv_obj, waiting_value=0, timeout=None):
@@ -287,7 +291,7 @@ def configure_panda_triggering(
         ),
     ],
     detectors: Annotated[
-        set[StandardDetector] | list[StandardDetector],
+        list[StandardDetector],
         "List of str of the detector names, eg. saxs, waxs, i0, it",
     ] = FAST_DETECTORS,
     panda: HDFPanda = DEFAULT_PANDA,
@@ -338,7 +342,7 @@ def configure_panda_triggering(
     number_of_events = profile.number_of_events
 
     if profile.multiplier is not None:
-        LOGGER.info(f"Multipliers used: {profile.active_pulses}")
+        LOGGER.info(f"Pulses used: {profile.active_pulses}")
         # arm the panda pulses if the profile has multipliers
         yield from set_panda_pulses(
             panda=panda, pulses=profile.active_pulses, setting="arm"
@@ -359,8 +363,6 @@ def configure_panda_triggering(
         exposure_timeout=duration,
     )
 
-    panda._trigger_info = trigger_info  # noqa
-
     ############################################################
     # flyer and prepare fly, sets the sequencers table
     trigger_logic = StaticSeqTableTriggerLogic(panda.seq[CONFIG.DEFAULT_SEQ])
@@ -371,6 +373,10 @@ def configure_panda_triggering(
     # change the sequence table
     yield from bps.prepare(flyer, seq_table_info, wait=True)
 
+    yield from set_detectors(detectors=detectors)  # store the detectors globally
+    yield from set_profile(profile=profile)  # store the profile globally
+    yield from set_trigger_info(trigger_info=trigger_info)  # store the profile globally
+
     # yield from bps.wait(group="prepare", timeout=DEFAULT_TIMEOUT * len(detectors))
 
 
@@ -378,10 +384,6 @@ def configure_panda_triggering(
 @bpp.run_decorator()  #    # open/close run
 @validate_call(config={"arbitrary_types_allowed": True})
 def run_panda_triggering(
-    detectors: Annotated[
-        set[StandardDetector] | list[StandardDetector],
-        "List of str of the detector names, eg. saxs, waxs, i0, it",
-    ] = FAST_DETECTORS,
     panda: HDFPanda = DEFAULT_PANDA,
 ) -> MsgGenerator:
     """
@@ -391,13 +393,21 @@ def run_panda_triggering(
 
     """
 
+    if STORED_TRIGGER_INFO is None:
+        raise ValueError("No trigger info has been set, use set_trigger_info")
+    else:
+        trigger_info: TriggerInfo = STORED_TRIGGER_INFO  # type: ignore
+
+    if STORED_DETECTORS is None:
+        raise ValueError("No detectors have been set, use set_detectors")
+    else:
+        detectors: list[StandardDetector] = STORED_DETECTORS  # type: ignore
+
     # get the loaded seq table
     panda_seq_table = panda.seq[CONFIG.DEFAULT_SEQ]
     # flyer and prepare fly, sets the sequencers table
     trigger_logic = StaticSeqTableTriggerLogic(panda_seq_table)
     flyer = StandardFlyer(trigger_logic)
-
-    trigger_info = panda._trigger_info  # noqa
 
     # STAGE SETS HDF WRITER TO ON
     yield from bps.stage_all(*detectors, flyer, group="stage")
@@ -405,7 +415,7 @@ def run_panda_triggering(
 
     # yield from stage_and_prepare_detectors(list(detectors), flyer, trigger_info)
     for det in detectors:
-        ###this tells the detector how may triggers to expect and sets the CAN aquire on
+        ###this tells the detector how may triggers to expect and sets the CAN aquir
         yield from bps.prepare(det, trigger_info, wait=False, group="prepare")
 
     yield from fly_and_collect_with_wait(
@@ -417,7 +427,7 @@ def run_panda_triggering(
     ###########################
     yield from wait_until_complete(panda_seq_table.active, False)
 
-    # turn off all pulses
+    # turn off all pulses whether or not using
     yield from set_panda_pulses(
         panda=panda, pulses=list(np.array(range(4)) + 1), setting="disarm"
     )
@@ -437,7 +447,7 @@ def configure_and_run_panda_triggering(
         ),
     ],
     detectors: Annotated[
-        set[StandardDetector],
+        list[StandardDetector],
         "List of str of the detector names, eg. saxs, waxs, i0, it",
     ] = FAST_DETECTORS,
     panda: HDFPanda = DEFAULT_PANDA,
@@ -460,23 +470,52 @@ def configure_and_run_panda_triggering(
         force_load=force_load,
     )
 
-    yield from run_panda_triggering(profile, detectors=detectors, panda=panda)  # type: ignore
+    # yield from run_panda_triggering(profile,
+    # detectors=detectors, panda=panda)  # type: ignore
 
 
 @validate_call(config={"arbitrary_types_allowed": True})
-def set_detectors(bs_detectors: list[str]) -> MsgGenerator:
-    global detectors
-    detectors = [inject(f) for f in bs_detectors]
-    yield from bps.sleep(0.1)
+def set_detectors(
+    detectors: list[str] | list[StandardDetector],
+) -> MsgGenerator:
+    global STORED_DETECTORS
+
+    if isinstance(detectors[0], StandardDetector):
+        STORED_DETECTORS = detectors
+    else:
+        STORED_DETECTORS = [inject(f) for f in detectors]  # type: ignore
+
+    yield from bps.sleep(0.0)
 
 
 @validate_call(config={"arbitrary_types_allowed": True})
 def log_detectors() -> MsgGenerator:
-    LOGGER.info(detectors)
+    LOGGER.info(STORED_DETECTORS)
     yield from bps.sleep(0.0)
 
 
+@validate_call(config={"arbitrary_types_allowed": True})
+def set_profile(profile: Profile) -> MsgGenerator:
+    global STORED_PROFILE
+    STORED_PROFILE = profile
+    yield from bps.sleep(0.0)
+
+
+@validate_call(config={"arbitrary_types_allowed": True})
+def set_trigger_info(trigger_info: TriggerInfo) -> MsgGenerator:
+    global STORED_TRIGGER_INFO
+    STORED_TRIGGER_INFO = trigger_info
+    yield from bps.sleep(0.0)
+
+
+def get_trigger_info() -> TriggerInfo | None:
+    return STORED_TRIGGER_INFO
+
+
 def create_steps(start: float, stop: float | None, step: float | None):
+    if (step is not None) and (stop < start) and (step > 0):  # type: ignore
+        step = -step
+
     if (stop is None) and (step is not None):
         raise ValueError("If step is provided, stop must also be provided")
     elif (step is None) and (stop is not None):
@@ -486,38 +525,41 @@ def create_steps(start: float, stop: float | None, step: float | None):
         step_list = [start]
     else:
         step_list = list(np.arange(start, stop, step))
+        step_list = [i.item() for i in step_list]
 
-    LOGGER.info(f"Steps: {step_list}")
+    # LOGGER.info(f"Steps: {step_list}")
 
     return step_list
 
 
+@attach_data_session_metadata_decorator()
 @validate_call(config={"arbitrary_types_allowed": True})
 def step_scan(
     start: float,
-    stop: float | None,
-    step: float | None,
+    stop: float,
+    num: int,
     axis: Motor,
     detectors: list[Readable],
 ) -> MsgGenerator:
     LOGGER.info(f"Running gda style step scan with detectors: {detectors}")
 
-    step_list = create_steps(start, stop, step)
-    yield from list_scan(detectors, (axis, step_list))
+    # step_list = create_steps(start, stop, step)
+    yield from scan(detectors, axis, start, stop, num)
 
 
+@attach_data_session_metadata_decorator()
 @validate_call(config={"arbitrary_types_allowed": True})
 def step_rscan(
     start: float,
-    stop: float | None,
-    step: float | None,
+    stop: float,
+    num: int,
     axis: Motor,
     detectors: list[Readable],
 ) -> MsgGenerator:
     LOGGER.info(f"Running gda style rstep scan with detectors: {detectors}")
 
-    step_list = create_steps(start, stop, step)
-    yield from rel_list_scan(detectors, (axis, step_list))
+    # step_list = create_steps(start, stop, step)
+    yield from rel_scan(detectors, axis, start, stop, num)
 
 
 if __name__ == "__main__":

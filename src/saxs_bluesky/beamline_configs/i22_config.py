@@ -13,7 +13,7 @@ from saxs_bluesky.utils.profile_groups import ExperimentLoader, Group, Profile
 
 FAST_DETECTORS: list[StandardDetector] = [
     inject("saxs"),
-    inject("waxs"),
+    # inject("waxs"),
     # inject("i0"),
     # inject("it"),
 ]
