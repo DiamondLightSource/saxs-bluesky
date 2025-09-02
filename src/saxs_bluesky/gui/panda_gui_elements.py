@@ -306,7 +306,11 @@ class EntryPopup(ttk.Entry):
 
         vals[self.column] = selection  # type: ignore
 
-        self.selection = selection
+        try:
+            self.selection = self.entrytype(selection)
+        except ValueError:
+            messagebox.showinfo("Info", f"Must be of type {self.entrytype}")
+            raise TypeError(f"Must be of type {self.entrytype}")
 
         self.tableview.item(rowid, values=vals)
         self.destroy()
