@@ -3,9 +3,9 @@ from pathlib import Path
 from typing import Annotated
 
 import bluesky.plan_stubs as bps
+import bluesky.plans as bsp
 import bluesky.preprocessors as bpp
 import numpy as np
-from bluesky.plans import rel_scan, scan
 from bluesky.protocols import Readable
 from bluesky.utils import MsgGenerator
 from dodal.common import inject
@@ -280,7 +280,7 @@ def set_panda_output(
     yield from bps.wait(group=group, timeout=DEFAULT_TIMEOUT)
 
 
-@attach_data_session_metadata_decorator()
+# @attach_data_session_metadata_decorator()
 @validate_call(config={"arbitrary_types_allowed": True})
 def configure_panda_triggering(
     profile: Annotated[
@@ -393,8 +393,6 @@ def run_panda_triggering(
         raise ValueError("No detectors have been set, use set_detectors")
     else:
         detectors: list[StandardDetector] = STORED_DETECTORS  # type: ignore
-
-    yield from bps.sleep(0.5)
 
     # get the loaded seq table
     panda_seq_table = panda.seq[CONFIG.DEFAULT_SEQ]
@@ -537,7 +535,7 @@ def step_scan(
     LOGGER.info(f"Running gda style step scan with detectors: {detectors}")
 
     # step_list = create_steps(start, stop, step)
-    yield from scan(detectors, axis, start, stop, num)
+    yield from bsp.scan(detectors, axis, start, stop, num)
 
 
 @attach_data_session_metadata_decorator()
@@ -552,7 +550,7 @@ def step_rscan(
     LOGGER.info(f"Running gda style rstep scan with detectors: {detectors}")
 
     # step_list = create_steps(start, stop, step)
-    yield from rel_scan(detectors, axis, start, stop, num)
+    yield from bsp.rel_scan(detectors, axis, start, stop, num)
 
 
 if __name__ == "__main__":
