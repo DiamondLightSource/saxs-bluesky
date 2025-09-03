@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from dodal.utils import get_beamline_name
 
+import saxs_bluesky.beamline_configs
 from saxs_bluesky.utils.ncdcore import ncdcore
 from saxs_bluesky.utils.profile_groups import ExperimentLoader, Profile
 
@@ -25,7 +26,7 @@ BL = get_saxs_beamline()
 
 
 def load_beamline_config():
-    BL_CONFIG = import_module(f"saxs_bluesky.beamline_configs.{BL}_config")
+    BL_CONFIG = import_module(f"{saxs_bluesky.beamline_configs.__name__}.{BL}_config")
     return BL_CONFIG
 
 
