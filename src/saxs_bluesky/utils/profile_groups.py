@@ -5,7 +5,7 @@ from typing import Any
 
 import numpy as np
 import yaml
-from ophyd_async.core import in_micros
+from ophyd_async.core import DetectorTrigger, TriggerInfo, in_micros
 from ophyd_async.fastcs.panda import SeqTable, SeqTableInfo, SeqTrigger
 from pydantic import BaseModel
 from pydantic.dataclasses import dataclass as pydanticdataclass
@@ -124,6 +124,10 @@ class Profile(BaseModel):
         return duration_per_cycle
 
     @property
+    def max_livetime(self) -> float:
+        return np.amax([g.run_time_s for g in self.groups])
+
+    @property
     def duration(self) -> float:
         duration = self.duration_per_cycle * self.cycles
         return duration
@@ -157,6 +161,22 @@ class Profile(BaseModel):
     def triggers(self) -> list[int]:
         # [3, 1, 1, 1, 1] or something
         return [group.frames for group in self.groups]
+
+    def return_trigger_info(
+        self,
+        max_deadtime: float,
+        trigger_type=DetectorTrigger.VARIABLE_GATE,
+    ) -> TriggerInfo:
+        trigger_info = TriggerInfo(
+            number_of_events=self.number_of_events,
+            trigger=trigger_type,  # or maybe EDGE_TRIGGER or #VARIABLE_GATE
+            deadtime=max_deadtime,
+            livetime=self.max_livetime,
+            exposures_per_event=1,
+            exposure_timeout=self.duration + 1,
+        )
+
+        return trigger_info
 
     @property
     def number_of_events(self) -> list[int]:

@@ -338,8 +338,6 @@ def configure_panda_triggering(
     # seq table should be grabbed from the panda and used instead,
     # in order to decouple run from setup panda
     # seq_table = profile.seq_table
-    duration = profile.duration
-    number_of_events = profile.number_of_events
 
     if profile.multiplier is not None:
         LOGGER.info(f"Pulses used: {profile.active_pulses}")
@@ -354,14 +352,7 @@ def configure_panda_triggering(
     seq_table_info: SeqTableInfo = profile.seq_table_info
 
     # set up trigger info etc
-    trigger_info = TriggerInfo(
-        number_of_events=number_of_events,
-        trigger=DetectorTrigger.EDGE_TRIGGER,  # or maybe EDGE_TRIGGER
-        deadtime=max_deadtime,
-        livetime=np.amax(profile.duration_per_cycle),
-        exposures_per_event=1,
-        exposure_timeout=duration,
-    )
+    trigger_info: TriggerInfo = profile.return_trigger_info(max_deadtime)
 
     ############################################################
     # flyer and prepare fly, sets the sequencers table
@@ -402,6 +393,8 @@ def run_panda_triggering(
         raise ValueError("No detectors have been set, use set_detectors")
     else:
         detectors: list[StandardDetector] = STORED_DETECTORS  # type: ignore
+
+    yield from bps.sleep(0.5)
 
     # get the loaded seq table
     panda_seq_table = panda.seq[CONFIG.DEFAULT_SEQ]
