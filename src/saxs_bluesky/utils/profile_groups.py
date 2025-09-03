@@ -165,7 +165,7 @@ class Profile(BaseModel):
     def return_trigger_info(
         self,
         max_deadtime: float,
-        trigger_type=DetectorTrigger.CONSTANT_GATE,
+        trigger_type=DetectorTrigger.VARIABLE_GATE,
     ) -> TriggerInfo:
         trigger_info = TriggerInfo(
             number_of_events=self.number_of_events,
