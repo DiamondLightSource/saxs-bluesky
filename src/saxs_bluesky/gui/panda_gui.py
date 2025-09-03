@@ -499,7 +499,7 @@ class PandAGUI(tkinter.Tk):
         ).grid(column=0, row=1, padx=5, pady=5, sticky="w")
 
     def build_active_detectors_frame(self):
-        self.active_detectors_checkbuttons = []
+        self.active_detectors_variables = []
 
         for pulse in range(CONFIG.PULSEBLOCKS):
             active_detectors_frame_n = ttk.Frame(
@@ -523,19 +523,31 @@ class PandAGUI(tkinter.Tk):
             for n, det in enumerate(CONFIG.PULSE_CONNECTIONS[pulse + 1]):
                 # experiment_var=tkinter.StringVar(value=self.configuration.experiment)
 
+                var = tkinter.IntVar()
+
                 if (det.lower() == "fs") or ("shutter" in det.lower()):
                     ad_entry = tkinter.Checkbutton(
-                        active_detectors_frame_n, bd=1, text=det, state="disabled"
+                        active_detectors_frame_n,
+                        bd=1,
+                        text=det,
+                        state="disabled",
+                        variable=var,
                     )
                     ad_entry.select()
                 else:
                     ad_entry = tkinter.Checkbutton(
-                        active_detectors_frame_n, bd=1, text=det
+                        active_detectors_frame_n,
+                        bd=1,
+                        text=det,
+                        variable=var,
                     )
+
+                if det in self.configuration.detectors:
+                    ad_entry.select()
 
                 ad_entry.grid(column=n + 1, row=1, padx=5, pady=5, sticky="w")
 
-                self.active_detectors_checkbuttons.append(ad_entry)
+                self.active_detectors_variables.append(var)
 
     def build_pulse_frame(self):
         self.pulse_frame = ttk.Frame(self.window, borderwidth=5, relief="raised")
