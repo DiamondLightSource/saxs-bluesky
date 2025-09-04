@@ -16,6 +16,7 @@ from tkinter.simpledialog import askstring
 import matplotlib.pyplot as plt
 
 from saxs_bluesky._version import __version__
+from saxs_bluesky.beamline_configs import b21_config, i22_config
 from saxs_bluesky.gui.panda_gui_elements import ProfileTab
 from saxs_bluesky.gui.step_gui import StepWidget
 from saxs_bluesky.plans.ncd_panda import (
@@ -34,6 +35,8 @@ from saxs_bluesky.utils.utils import (
 ############################################################################################
 
 BL = get_saxs_beamline()
+
+
 CONFIG = load_beamline_config()
 DEFAULT_PROFILE = CONFIG.DEFAULT_PROFILE
 ############################################################################################
@@ -250,14 +253,11 @@ class PandAGUI(tkinter.Tk):
             with open(panda_config_yaml.name.replace("yaml", "json"), "w") as fpo:
                 json.dump(config_dict, fpo, indent=2)
 
-    def open_textedit(self):
-        if os.path.exists("/dls_sw/apps/atom/1.42.0/atom"):
-            os.system(f"/dls_sw/apps/atom/1.42.0/atom {self.panda_config_yaml} &")
-        else:
-            try:
-                os.system(f"subl {self.panda_config_yaml} &")
-            except FileNotFoundError:
-                os.system(f"gedit {self.panda_config_yaml} &")
+    def open_config(self):
+        try:
+            os.system(f"gedit {CONFIG.__file__} &")
+        except FileNotFoundError as e:
+            print(e)
 
     def show_wiring_config(self):
         fig, ax = plt.subplots(1, 1, figsize=(16, 8))
@@ -410,8 +410,10 @@ class PandAGUI(tkinter.Tk):
             sticky="news",
         )
 
-        self.run_plan_button = ttk.Button(
-            self.run_frame, text="Run Plan", command=self.run_plan
+        self.open_config_button = ttk.Button(
+            self.run_frame,
+            text="Open Config",
+            command=self.open_config,
         ).grid(column=2, row=11, padx=5, pady=5, columnspan=1, sticky="news")
 
         self.reload_env_button = ttk.Button(
@@ -462,17 +464,15 @@ class PandAGUI(tkinter.Tk):
             command=self.show_wiring_config,
         )
 
-        self.Opentextbutton = ttk.Button(
-            self.global_settings_frame,
-            text="Open Text Editor",
-            command=self.open_textedit,
+        self.run_plan_button = ttk.Button(
+            self.global_settings_frame, text="Run Plan", command=self.run_plan
         )
 
         self.load_button.pack(fill="both", expand=True, side="left")
         self.save_button.pack(fill="both", expand=True, side="left")
         self.configure_button.pack(fill="both", expand=True, side="left")
         self.show_wiring_config_button.pack(fill="both", expand=True, side="left")
-        self.Opentextbutton.pack(fill="both", expand=True, side="left")
+        self.run_plan_button.pack(fill="both", expand=True, side="left")
 
     def build_add_frame(self):
         self.add_frame = tkinter.Frame()
