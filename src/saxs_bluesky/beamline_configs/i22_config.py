@@ -33,12 +33,12 @@ THEME_NAME = "clam"  # --> ('clam', 'alt', 'default', 'classic')
 TTLIN = {1: "TFG Det", 2: "TFG FS", 3: None, 4: None, 5: None, 6: None}
 
 TTLOUT = {
-    1: "it",
+    1: "i0",
     2: "FS",
     3: "oav",
     4: "User Tet",
     5: "waxs",
-    6: "i0",
+    6: "it",
     7: "saxs",
     8: "Fluores",
     9: "User1",

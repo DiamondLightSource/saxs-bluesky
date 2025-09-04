@@ -401,19 +401,28 @@ def run_panda_triggering(
     flyer = StandardFlyer(trigger_logic)
 
     # STAGE SETS HDF WRITER TO ON
-    yield from bps.stage_all(*detectors, flyer, group="stage")
-    yield from bps.wait(group="stage", timeout=DEFAULT_TIMEOUT * len(detectors))
+    yield from bps.stage_all(*detectors, flyer, group="setup")
 
     # yield from stage_and_prepare_detectors(list(detectors), flyer, trigger_info)
     for det in detectors:
         ###this tells the detector how may triggers to expect and sets the CAN aquir
-        yield from bps.prepare(det, trigger_info, wait=False, group="prepare")
+        yield from bps.prepare(det, trigger_info, wait=True, group="setup")
+
+    yield from bps.wait(group="setup", timeout=DEFAULT_TIMEOUT * len(detectors))
 
     yield from fly_and_collect_with_wait(
         stream_name="primary",
         detectors=list(detectors),
         flyer=flyer,
     )
+
+    # name = "run"
+    # yield from bps.declare_stream(*detectors, name=name, collect=True)
+    # yield from bps.kickoff(flyer, wait=True)
+    # for detector in detectors:
+    #     yield from bps.kickoff(detector)
+    # yield from bps.collect_while_completing([flyer], detectors, stream_name=name)
+
     ##########################
     ###########################
     yield from wait_until_complete(panda_seq_table.active, False)
