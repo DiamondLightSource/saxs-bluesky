@@ -71,6 +71,7 @@ def fly_and_collect_with_wait(
     see also from ophyd_async.plan_stubs import fly_and_collect
 
     """
+
     yield from bps.declare_stream(*detectors, name=stream_name, collect=True)
     yield from bps.kickoff(flyer, wait=True)
     for detector in detectors:
@@ -86,7 +87,7 @@ def fly_and_collect_with_wait(
     done = False
     while not done:
         try:
-            yield from bps.wait(group=group, timeout=1)
+            yield from bps.wait(group=group, timeout=None)
         except TimeoutError:
             pass
         else:
