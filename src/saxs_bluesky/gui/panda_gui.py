@@ -16,7 +16,6 @@ from tkinter.simpledialog import askstring
 import matplotlib.pyplot as plt
 
 from saxs_bluesky._version import __version__
-from saxs_bluesky.beamline_configs import b21_config, i22_config
 from saxs_bluesky.gui.panda_gui_elements import ProfileTab
 from saxs_bluesky.gui.step_gui import StepWidget
 from saxs_bluesky.plans.ncd_panda import (
