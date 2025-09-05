@@ -15,6 +15,7 @@ from tkinter.simpledialog import askstring
 
 import matplotlib.pyplot as plt
 
+import saxs_bluesky.blueapi_configs
 from saxs_bluesky._version import __version__
 from saxs_bluesky.gui.panda_gui_elements import ProfileTab
 from saxs_bluesky.gui.step_gui import StepWidget
@@ -30,8 +31,6 @@ from saxs_bluesky.utils.utils import (
     get_saxs_beamline,
     load_beamline_config,
 )
-
-import saxs_bluesky.blueapi_configs
 
 ############################################################################################
 
@@ -132,9 +131,7 @@ class PandAGUI(tkinter.Tk):
 
         #################################################################
 
-        blueapi_config_path = (
-            f"{os.path.dirname(saxs_bluesky.blueapi_configs.__file__)}/{BL}_blueapi_config.yaml"
-        )
+        blueapi_config_path = f"{os.path.dirname(saxs_bluesky.blueapi_configs.__file__)}/{BL}_blueapi_config.yaml"  # noqa
 
         self.client = BlueAPIPythonClient(
             BL, blueapi_config_path, self.instrument_session
