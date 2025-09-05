@@ -80,6 +80,7 @@ class ProfilePlotter:
                 axes[n].step(trigger_time, signal)
                 axes[n].set_ylabel(f"{pulse_names[n]} Signal")
 
+        plt.suptitle("Panda Pulse Signals")
         plt.xlabel("Time (s)")
         plt.show()
 
