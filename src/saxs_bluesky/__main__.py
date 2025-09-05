@@ -10,12 +10,18 @@ from bluesky import RunEngine
 from saxs_bluesky.gui.panda_gui import PandAGUI
 from saxs_bluesky.stubs.panda_stubs import return_connected_device, save_device_to_yaml
 from saxs_bluesky.utils.utils import get_saxs_beamline, load_beamline_config
+import saxs_bluesky.blueapi_configs
 
 from . import __version__
 
 __all__ = ["main"]
 
 BL = get_saxs_beamline()
+
+
+blueapi_config_path = (
+    f"{os.path.dirname(saxs_bluesky.blueapi_configs.__file__)}/{BL}_blueapi_config.yaml"
+)
 
 
 @click.group(invoke_without_command=True)
@@ -35,7 +41,7 @@ def start_gui():
 @main.command(name="login")
 def login():
     os.system(
-        f"blueapi -c ./src/saxs_bluesky/blueapi_configs/{os.environ['BEAMLINE']}_blueapi_config.yaml login"  # noqa
+        f"blueapi -c {blueapi_config_path} login"  # noqa
     )
 
 
