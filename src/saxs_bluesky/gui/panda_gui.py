@@ -31,6 +31,8 @@ from saxs_bluesky.utils.utils import (
     load_beamline_config,
 )
 
+import saxs_bluesky.blueapi_configs
+
 ############################################################################################
 
 BL = get_saxs_beamline()
@@ -131,7 +133,7 @@ class PandAGUI(tkinter.Tk):
         #################################################################
 
         blueapi_config_path = (
-            f"./src/saxs_bluesky/blueapi_configs/{BL}_blueapi_config.yaml"
+            f"{os.path.dirname(saxs_bluesky.blueapi_configs.__file__)}/{BL}_blueapi_config.yaml"
         )
 
         self.client = BlueAPIPythonClient(
