@@ -286,6 +286,8 @@ class EntryPopup(ttk.Entry):
         self.focus_force()
         self.select_all()
         self.bind("<Return>", self.on_return)
+        self.bind("<KP_Enter>", self.on_return)
+        self.bind("<FocusOut>", self.on_return)
         self.bind("<Control-a>", self.select_all)
         self.bind("<Escape>", lambda *ignore: self.destroy())
 

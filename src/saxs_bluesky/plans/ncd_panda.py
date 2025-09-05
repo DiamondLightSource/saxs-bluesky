@@ -34,7 +34,7 @@ from saxs_bluesky.stubs.panda_stubs import (
     load_settings_from_yaml,
     upload_yaml_to_panda,
 )
-from saxs_bluesky.utils.profile_groups import ExperimentLoader, Profile
+from saxs_bluesky.utils.profile_groups import ExperimentLoader, Group, Profile
 from saxs_bluesky.utils.utils import (
     get_saxs_beamline,
     load_beamline_config,
@@ -46,8 +46,9 @@ DEFAULT_PANDA = CONFIG.DEFAULT_PANDA
 FAST_DETECTORS = CONFIG.FAST_DETECTORS
 
 
-STORED_DETECTORS = None
-STORED_PROFILE = None
+STORED_DETECTORS: list[StandardDetector] | list[str] | None = None
+STORED_PROFILE: Profile | None = None
+STORED_TRIGGER_INFO: TriggerInfo | None = None
 
 
 def wait_until_complete(pv_obj, waiting_value=0, timeout=None):
@@ -510,6 +511,68 @@ def set_trigger_info(trigger_info: TriggerInfo) -> MsgGenerator:
 
 def get_trigger_info() -> TriggerInfo | None:
     return STORED_TRIGGER_INFO
+
+
+def get_profile() -> Profile | None:
+    return STORED_PROFILE
+
+
+@validate_call(config={"arbitrary_types_allowed": True})
+def create_profile(
+    cycles: int = 1,
+    seq_trigger: str = "Immediate",
+    multiplier: list[int] | None = None,
+) -> MsgGenerator:
+    global STORED_PROFILE
+
+    STORED_PROFILE = Profile(
+        cycles=cycles, seq_trigger=seq_trigger, multiplier=multiplier
+    )
+
+    yield from bps.sleep(0.0)
+
+
+def append_group(
+    frames: int = 1,
+    trigger: str = "Immediate",
+    wait_time: int = 1,
+    wait_units: str = "S",
+    run_time: int = 1,
+    run_units: str = "S",
+    wait_pulses: list[int] = [0, 0, 0, 0],  # noqa
+    run_pulses: list[int] = [1, 1, 1, 1],  # noqa
+) -> MsgGenerator:
+    STORED_PROFILE = get_profile()
+
+    if STORED_PROFILE is None:
+        LOGGER.info("No profile has been set, a blank profiles has been created")
+        STORED_PROFILE = Profile()
+
+    STORED_PROFILE.append_group(
+        Group(
+            frames=frames,
+            trigger=trigger,
+            wait_time=wait_time,
+            wait_units=wait_units,
+            run_time=run_time,
+            run_units=run_units,
+            wait_pulses=wait_pulses,
+            run_pulses=run_pulses,
+        )
+    )
+
+    yield from bps.sleep(0.0)
+
+
+def delete_group(n: int = 1) -> MsgGenerator:
+    STORED_PROFILE = get_profile()
+
+    if STORED_PROFILE is None:
+        raise ValueError("No profile has been set, use set_profile")
+
+    STORED_PROFILE.delete_group(n)
+
+    yield from bps.sleep(0.0)
 
 
 def create_steps(start: float, stop: float | None, step: float | None):
