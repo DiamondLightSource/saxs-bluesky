@@ -7,12 +7,11 @@ from pathlib import Path
 import click
 from bluesky import RunEngine
 
+import saxs_bluesky.blueapi_configs
+from saxs_bluesky._version import __version__
 from saxs_bluesky.gui.panda_gui import PandAGUI
 from saxs_bluesky.stubs.panda_stubs import return_connected_device, save_device_to_yaml
 from saxs_bluesky.utils.utils import get_saxs_beamline, load_beamline_config
-import saxs_bluesky.blueapi_configs
-
-from . import __version__
 
 __all__ = ["main"]
 
