@@ -304,9 +304,6 @@ class PandAGUI(tkinter.Tk):
         index = self.get_profile_index()
 
         profile_to_upload = self.configuration.profiles[index]
-        # json_schema_profile = profile_to_upload.model_dump_json()
-
-        print(profile_to_upload)
 
         active_detectors = []
 
@@ -314,6 +311,7 @@ class PandAGUI(tkinter.Tk):
             if self.active_detectors_dict[det].get() == 1:
                 active_detectors.append(inject(det))
 
+        print(profile_to_upload)
         print(active_detectors)
 
         params = {"profile": profile_to_upload, "detectors": active_detectors}
