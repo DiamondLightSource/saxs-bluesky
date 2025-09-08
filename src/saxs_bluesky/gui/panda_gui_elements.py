@@ -625,7 +625,6 @@ class ProfileTab(ttk.Frame):
         ##### input trigger select
 
         self.seq_triggers = self.profile.seq_triggers()
-        # self.seq_triggers = [f.lower() for f in self.seq_triggers]
 
         ttk.Label(self, text="Seq Trigger").grid(
             column=0, row=0, padx=5, pady=5, sticky="e"
@@ -667,46 +666,6 @@ class ProfileTab(ttk.Frame):
             self, text="Plot Profile", command=self.commit_and_plot
         )
 
-        self.insertrow_button = ttk.Button(
-            self, text="Insert group", command=self.insert_group_button_action
-        )
-
-        self.deleterow_button = ttk.Button(
-            self, text="Delete group", command=self.delete_group_button_action
-        )
-
-        self.appendrow_button = ttk.Button(
-            self, text="Add group", command=self.append_group_button_action
-        )
-
-        self.deletefinalrow_button = ttk.Button(
-            self, text="Discard group", command=self.delete_last_groups_button_action
-        )
-
-        self.print_profile_button = ttk.Button(
-            self, text="Print Profile", command=self.print_profile_button_action
-        )
-
         self.plot_profile_button.grid(
             column=8, row=0, padx=5, pady=5, columnspan=1, sticky="nes"
-        )
-
-        self.insertrow_button.grid(
-            column=0, row=10, padx=5, pady=5, columnspan=1, sticky="news"
-        )
-
-        self.deleterow_button.grid(
-            column=1, row=10, padx=5, pady=5, columnspan=1, sticky="news"
-        )
-
-        self.appendrow_button.grid(
-            column=3, row=10, padx=5, pady=5, columnspan=1, sticky="news"
-        )
-
-        self.deletefinalrow_button.grid(
-            column=4, row=10, padx=5, pady=5, columnspan=1, sticky="news"
-        )
-
-        self.print_profile_button.grid(
-            column=3, row=1, padx=5, pady=5, columnspan=1, sticky="nes"
         )

@@ -172,13 +172,6 @@ class PandAGUI(tkinter.Tk):
             for n, _tab in enumerate(self.notebook.tabs()[0:-1]):
                 self.notebook.tab(n, text="Profile " + str(n))
 
-            self.delete_profile_button = ttk.Button(
-                new_profile_tab, text="Delete Profile", command=self.delete_profile_tab
-            )
-            self.delete_profile_button.grid(
-                column=7, row=10, padx=5, pady=5, columnspan=1, sticky="news"
-            )
-
             self.notebook.select(self.notebook.tabs()[-2])
 
     def delete_profile_tab(self):
@@ -322,14 +315,6 @@ class PandAGUI(tkinter.Tk):
             print("Could not upload profile to panda")
 
     def run_plan(self):
-        # index = int(self.notebook.index("current"))
-        # profile_to_upload = self.configuration.profiles[index]
-        # json_schema_profile = profile_to_upload.model_dump_json()
-
-        # params = {
-        #     "detectors": list(CONFIG.FAST_DETECTORS),
-        # }
-
         try:
             self.client.run(run_panda_triggering.__name__, {})
         except ConnectionError:
@@ -380,25 +365,38 @@ class PandAGUI(tkinter.Tk):
         self.run_frame = ttk.Frame(self.window, borderwidth=5, relief="raised")
 
         self.run_frame.pack(fill="both", expand=True, side="right")
-        self.get_plans_button = ttk.Button(
+        get_plans_button = ttk.Button(
             self.run_frame, text="Get Plans", command=self.get_plans
-        ).grid(column=2, row=1, padx=5, pady=5, columnspan=1, sticky="news")
+        )
+        get_plans_button.grid(
+            column=2, row=1, padx=5, pady=5, columnspan=1, sticky="news"
+        )
 
-        self.get_devices_button = ttk.Button(
+        get_devices_button = ttk.Button(
             self.run_frame, text="Get Devices", command=self.get_devices
-        ).grid(column=2, row=3, padx=5, pady=5, columnspan=1, sticky="news")
+        )
+        get_devices_button.grid(
+            column=2, row=3, padx=5, pady=5, columnspan=1, sticky="news"
+        )
 
-        self.stop_plans_button = ttk.Button(
+        stop_plans_button = ttk.Button(
             self.run_frame, text="Stop Plan", command=self.stop_plan
-        ).grid(column=2, row=5, padx=5, pady=5, columnspan=1, sticky="news")
+        )
+        stop_plans_button.grid(
+            column=2, row=5, padx=5, pady=5, columnspan=1, sticky="news"
+        )
 
-        self.pause_plans_button = ttk.Button(
+        pause_plans_button = ttk.Button(
             self.run_frame, text="Pause Plan", command=self.pause_plan
-        ).grid(column=2, row=7, padx=5, pady=5, columnspan=1, sticky="news")
+        )
+        pause_plans_button.grid(
+            column=2, row=7, padx=5, pady=5, columnspan=1, sticky="news"
+        )
 
-        self.resume_plans_button = ttk.Button(
+        resume_plans_button = ttk.Button(
             self.run_frame, text="Resume Plan", command=self.resume_plan
-        ).grid(
+        )
+        resume_plans_button.grid(
             column=2,
             row=9,
             padx=5,
@@ -407,31 +405,49 @@ class PandAGUI(tkinter.Tk):
             sticky="news",
         )
 
-        self.open_config_button = ttk.Button(
+        open_config_button = ttk.Button(
             self.run_frame,
             text="Open Config",
             command=self.open_config,
-        ).grid(column=2, row=11, padx=5, pady=5, columnspan=1, sticky="news")
+        )
+        open_config_button.grid(
+            column=2, row=11, padx=5, pady=5, columnspan=1, sticky="news"
+        )
 
-        self.reload_env_button = ttk.Button(
+        reload_env_button = ttk.Button(
             self.run_frame, text="Reload Env", command=self.reload_environment
-        ).grid(column=2, row=12, padx=5, pady=5, columnspan=1, sticky="news")
+        )
+        reload_env_button.grid(
+            column=2, row=12, padx=5, pady=5, columnspan=1, sticky="news"
+        )
 
-        self.set_det_button = ttk.Button(
+        set_det_button = ttk.Button(
             self.run_frame, text="Set dets", command=self.set_detectors_plan
-        ).grid(column=2, row=13, padx=5, pady=5, columnspan=1, sticky="news")
+        )
+        set_det_button.grid(
+            column=2, row=13, padx=5, pady=5, columnspan=1, sticky="news"
+        )
 
-        self.show_det_button = ttk.Button(
+        show_det_button = ttk.Button(
             self.run_frame, text="Log dets", command=self.log_detectors_plan
-        ).grid(column=2, row=14, padx=5, pady=5, columnspan=1, sticky="news")
+        )
+        show_det_button.grid(
+            column=2, row=14, padx=5, pady=5, columnspan=1, sticky="news"
+        )
 
-        self.show_det_button = ttk.Button(
+        step_widget_button = ttk.Button(
             self.run_frame, text="Open Step Widget", command=self.open_step_widget
-        ).grid(column=2, row=15, padx=5, pady=5, columnspan=1, sticky="news")
+        )
+        step_widget_button.grid(
+            column=2, row=15, padx=5, pady=5, columnspan=1, sticky="news"
+        )
 
-        self.show_det_button = ttk.Button(
+        count_det_button = ttk.Button(
             self.run_frame, text="Count Detector", command=self.count_detectors
-        ).grid(column=2, row=16, padx=5, pady=5, columnspan=1, sticky="news")
+        )
+        count_det_button.grid(
+            column=2, row=16, padx=5, pady=5, columnspan=1, sticky="news"
+        )
 
     def build_global_settings_frame(self):
         self.global_settings_frame = ttk.Frame(
@@ -441,35 +457,35 @@ class PandAGUI(tkinter.Tk):
         self.global_settings_frame.pack(fill="both", expand=True, side="bottom")
 
         # add a load/save/configure button
-        self.load_button = ttk.Button(
+        load_button = ttk.Button(
             self.global_settings_frame, text="Load", command=self.load_config
         )
 
-        self.save_button = ttk.Button(
+        save_button = ttk.Button(
             self.global_settings_frame, text="Save", command=self.save_config
         )
 
-        self.configure_button = ttk.Button(
+        configure_button = ttk.Button(
             self.global_settings_frame,
             text="Upload to PandA",
             command=self.configure_panda,
         )
 
-        self.show_wiring_config_button = ttk.Button(
+        show_wiring_config_button = ttk.Button(
             self.global_settings_frame,
             text="Wiring config",
             command=self.show_wiring_config,
         )
 
-        self.run_plan_button = ttk.Button(
+        run_plan_button = ttk.Button(
             self.global_settings_frame, text="Run Plan", command=self.run_plan
         )
 
-        self.load_button.pack(fill="both", expand=True, side="left")
-        self.save_button.pack(fill="both", expand=True, side="left")
-        self.configure_button.pack(fill="both", expand=True, side="left")
-        self.show_wiring_config_button.pack(fill="both", expand=True, side="left")
-        self.run_plan_button.pack(fill="both", expand=True, side="left")
+        load_button.pack(fill="both", expand=True, side="left")
+        save_button.pack(fill="both", expand=True, side="left")
+        configure_button.pack(fill="both", expand=True, side="left")
+        show_wiring_config_button.pack(fill="both", expand=True, side="left")
+        run_plan_button.pack(fill="both", expand=True, side="left")
 
     def return_profile_tab(self) -> ProfileTab:
         index = self.get_profile_index()
@@ -479,7 +495,7 @@ class PandAGUI(tkinter.Tk):
 
     def build_profile_edit_frame(self):
         self.profile_edit_frame = ttk.Frame(self.window, borderwidth=5, relief="raised")
-        self.profile_edit_frame.pack(fill="both", expand=True, side="bottom")
+        self.profile_edit_frame.pack(fill="both", expand=True, side="top")
 
         self.proftab = self.return_profile_tab()
 
