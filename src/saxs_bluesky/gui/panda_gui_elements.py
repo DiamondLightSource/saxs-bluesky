@@ -134,8 +134,8 @@ class DropdownPopup(ttk.Combobox):
         # self.event_generate('<Button-1>')
 
         self.bind("<Return>", self.on_return)
-        self.bind("<Escape>", lambda *ignore: self.destroy())
         self.bind("<<ComboboxSelected>>", self.on_return)
+        self.bind("<Escape>", lambda *ignore: self.destroy())
         self.focus_force()
 
     def on_return(self, event):
