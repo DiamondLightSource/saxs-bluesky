@@ -64,7 +64,6 @@ class ProfilePlotter:
         if len(self.profile.active_pulses) != len(self.axes):
             plt.close()
             self.setup_figure()
-            self.show()
 
         if len(self.profile.active_pulses) > 0:
             for n, i in enumerate(self.profile.active_pulses):
@@ -78,12 +77,22 @@ class ProfilePlotter:
                 self.axes[n].step(trigger_time, signal)
                 self.axes[n].set_ylabel(f"{self.pulse_names[n]} Signal")  # type: ignore
 
-        plt.draw()
-        plt.xlabel("Time (s)")
+        self.fig.canvas.draw()
 
-    def show(self):
+        # if not self.open:
+        #     self.show()
+
+    def on_close(self, event):
+        print("Figure Closed")
+        plt.clf()
+        plt.close()
+        self.open = False
+
+    def show(self, block=False):
         # plt.tight_layout(pad=1.15)
-        plt.show()
+        self.open = True
+        plt.xlabel("Time (s)")
+        plt.show(block=block)
 
     def setup_figure(self):
         self.fig, self.axes = plt.subplots(
@@ -91,12 +100,16 @@ class ProfilePlotter:
             1,
             sharex=True,
             figsize=(8, len(self.profile.active_pulses) * 3),
-            num="Panda Pulse Signals",
+            num=self.name,
         )
+
+        self.fig.canvas.mpl_connect("close_event", self.on_close)
 
     def __init__(self, profile: Profile, pulse_names: list[str] | None = None):
         self.profile = profile
         self.pulse_names = pulse_names
+        self.name = "Panda Pulse Signals"
+        self.open = False
 
         if self.pulse_names is None:
             self.pulse_names = [
