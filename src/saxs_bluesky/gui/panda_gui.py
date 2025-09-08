@@ -509,7 +509,7 @@ class PandAGUI(tkinter.Tk):
             )
 
             Pulselabel = ttk.Label(
-                active_detectors_frame_n, text=f"Pulse Group: {pulse + 1}"
+                active_detectors_frame_n, text=f"Pulse Group: {pulse}"
             )
 
             Pulselabel.grid(column=0, row=0, padx=5, pady=5, sticky="w")
