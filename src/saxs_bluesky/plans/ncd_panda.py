@@ -7,7 +7,7 @@ import bluesky.plans as bsp
 import bluesky.preprocessors as bpp
 import numpy as np
 from bluesky.protocols import Readable
-from bluesky.utils import MsgGenerator
+from bluesky.utils import Msg, MsgGenerator
 from dodal.common import inject
 from dodal.devices.motors import Motor
 from dodal.log import LOGGER
@@ -486,27 +486,27 @@ def set_detectors(
     else:
         STORED_DETECTORS = [inject(f) for f in detectors]  # type: ignore
 
-    yield from bps.sleep(0.0)
+    return (yield Msg("detectors_set"))
 
 
 @validate_call(config={"arbitrary_types_allowed": True})
 def log_detectors() -> MsgGenerator:
     LOGGER.info(STORED_DETECTORS)
-    yield from bps.sleep(0.0)
+    return (yield Msg("detectors_logged"))
 
 
 @validate_call(config={"arbitrary_types_allowed": True})
 def set_profile(profile: Profile) -> MsgGenerator:
     global STORED_PROFILE
     STORED_PROFILE = profile
-    yield from bps.sleep(0.0)
+    return (yield Msg("profile_logged"))
 
 
 @validate_call(config={"arbitrary_types_allowed": True})
 def set_trigger_info(trigger_info: TriggerInfo) -> MsgGenerator:
     global STORED_TRIGGER_INFO
     STORED_TRIGGER_INFO = trigger_info
-    yield from bps.sleep(0.0)
+    return (yield Msg("profile_set"))
 
 
 def get_trigger_info() -> TriggerInfo | None:
@@ -529,7 +529,7 @@ def create_profile(
         cycles=cycles, seq_trigger=seq_trigger, multiplier=multiplier
     )
 
-    yield from bps.sleep(0.0)
+    return (yield Msg("profile_created"))
 
 
 def append_group(
@@ -561,7 +561,7 @@ def append_group(
         )
     )
 
-    yield from bps.sleep(0.0)
+    return (yield Msg("profile_appended"))
 
 
 def delete_group(n: int = 1) -> MsgGenerator:
@@ -572,7 +572,7 @@ def delete_group(n: int = 1) -> MsgGenerator:
 
     STORED_PROFILE.delete_group(n)
 
-    yield from bps.sleep(0.0)
+    return (yield Msg("group_deleted"))
 
 
 def create_steps(start: float, stop: float | None, step: float | None):
