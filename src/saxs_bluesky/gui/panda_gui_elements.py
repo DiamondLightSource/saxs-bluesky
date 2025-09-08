@@ -571,8 +571,13 @@ class ProfileTab(ttk.Frame):
             self.plotter = ProfilePlotter(self.profile, CONFIG.PULSE_BLOCK_NAMES)
             self.plotter.plot_pulses()
             self.plotter.show()
-
-        else:
+        elif hasattr(self, "plotter") and not self.plotter.open:
+            del self.plotter
+            self.plotter = ProfilePlotter(self.profile, CONFIG.PULSE_BLOCK_NAMES)
+            self.plotter.profile = self.profile
+            self.plotter.plot_pulses()
+            self.plotter.show()
+        elif hasattr(self, "plotter") and self.plotter.open:
             self.plotter.profile = self.profile
             self.plotter.plot_pulses()
 
