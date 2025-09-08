@@ -608,9 +608,9 @@ class ProfileTab(ttk.Frame):
         self.columnconfigure(tuple(range(60)), weight=1)
         self.rowconfigure(tuple(range(30)), weight=1)
 
-        ttk.Label(self, text="Profile " + str(n_profile)).grid(
-            column=0, row=0, padx=5, pady=5, sticky="w"
-        )
+        # ttk.Label(self, text="Profile " + str(n_profile)).grid(
+        #     column=0, row=0, padx=5, pady=5, sticky="w"
+        # )
 
         self.outputs = self.profile.outputs()
         self.inputs = self.profile.inputs()
