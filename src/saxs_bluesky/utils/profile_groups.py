@@ -56,6 +56,13 @@ class Group(BaseModel):
     def group_duration(self) -> float:
         return (self.wait_time_s + self.run_time_s) * self.frames
 
+    @property
+    def active(self) -> bool:
+        if (sum(self.wait_pulses) + sum(self.run_pulses)) > 0:
+            return True
+        else:
+            return False
+
     def seq_row(self) -> SeqTable:
         if not self.trigger:
             trigger = SeqTrigger.IMMEDIATE
@@ -160,7 +167,7 @@ class Profile(BaseModel):
     @property
     def triggers(self) -> list[int]:
         # [3, 1, 1, 1, 1] or something
-        return [group.frames for group in self.groups]
+        return [group.frames for group in self.groups if group.active]
 
     def return_trigger_info(
         self,
