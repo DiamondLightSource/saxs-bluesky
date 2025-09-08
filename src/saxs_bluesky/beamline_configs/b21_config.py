@@ -1,3 +1,4 @@
+from bluesky.protocols import Readable
 from dodal.beamlines import b21
 from dodal.common import inject
 from ophyd_async.core import StandardDetector
@@ -102,3 +103,12 @@ DEFAULT_EXPERIMENT = ExperimentLoader(
 
 FAST_DETECTORS: list[StandardDetector] = [inject("saxs"), inject("waxs")]
 DEFAULT_PANDA: HDFPanda = inject("panda2")
+
+DEFAULT_BASELINE: list[Readable] = [
+    inject("slits_1"),
+    inject("slits_2"),
+    inject("slits_3"),
+    inject("slits_5"),
+    inject("slits_6"),
+    inject("synchrotron"),
+]

@@ -23,9 +23,17 @@ from saxs_bluesky.utils.utils import (
     load_beamline_config,
 )
 
-CONFIG = load_beamline_config()
-DEFAULT_GROUP = CONFIG.DEFAULT_GROUP
 BL = get_saxs_beamline()
+CONFIG = load_beamline_config(BL=BL)
+DEFAULT_GROUP = CONFIG.DEFAULT_GROUP
+
+
+def recursive_destroy(frame):
+    for child in frame.winfo_children():
+        child.destroy()
+
+        if child.winfo_children():
+            recursive_destroy(child)
 
 
 class EditableTableview(ttk.Treeview):
@@ -34,6 +42,12 @@ class EditableTableview(ttk.Treeview):
         super().__init__(self.proftab, *args, **kwargs)
         self.bind("<Double-1>", lambda event: self.onDoubleClick(event))
         self.kwargs = kwargs
+
+    def close_popups(self):
+        if hasattr(self, "pulse_popup"):
+            self.pulse_popup.on_return(None)  # close previous popup
+        if hasattr(self, "Popup"):
+            self.Popup.on_return(None)  # close previous popup
 
     def onDoubleClick(self, event):
         """Executed, when a row is double-clicked. Opens
@@ -88,8 +102,11 @@ class EditableTableview(ttk.Treeview):
             self.Popup.place(x=x, y=y + pady, width=width, height=height, anchor="w")
 
         elif column in ["#8", "#9"]:
+            if hasattr(self, "pulse_popup"):
+                self.pulse_popup.on_return(None)  # close previous popup
+
             if not CONFIG.PULSEBLOCKASENTRYBOX:
-                self.Popup = CheckButtonPopup(
+                self.pulse_popup = CheckButtonPopup(
                     self,
                     rowid,
                     int(column[1:]) - 1,
@@ -98,8 +115,8 @@ class EditableTableview(ttk.Treeview):
                     columns=self.kwargs["columns"],
                 )
             if CONFIG.PULSEBLOCKASENTRYBOX:
-                self.Popup = EntryPopup(self, rowid, int(column[1:]) - 1, text)
-                self.Popup.place(
+                self.pulse_popup = EntryPopup(self, rowid, int(column[1:]) - 1, text)
+                self.pulse_popup.place(
                     x=x, y=y + pady, width=width, height=height, anchor="w"
                 )
 
@@ -134,8 +151,8 @@ class DropdownPopup(ttk.Combobox):
         # self.event_generate('<Button-1>')
 
         self.bind("<Return>", self.on_return)
-        self.bind("<Escape>", lambda *ignore: self.destroy())
         self.bind("<<ComboboxSelected>>", self.on_return)
+        self.bind("<Escape>", lambda *ignore: self.destroy())
         self.focus_force()
 
     def on_return(self, event):
@@ -168,7 +185,7 @@ class CheckButtonPopup(ttk.Checkbutton):
 
         self.row_num = int(rowid[-2::], 16) - 1
 
-        w = ((CONFIG.PULSEBLOCKS) * 100) + 50
+        w = ((CONFIG.PULSEBLOCKS) * 105) + 50
         h = 50  # height for the Tk root
 
         self.root = tkinter.Toplevel()  ##HOLY MOLY
@@ -249,7 +266,7 @@ class CheckButtonPopup(ttk.Checkbutton):
         self.root.destroy()
         del self
 
-    def on_return(self):
+    def on_return(self, event=None):
         for pulse in range(CONFIG.PULSEBLOCKS):
             val = str(self.option_var[pulse].get())
             self.pulse_vals[pulse] = val
@@ -286,6 +303,8 @@ class EntryPopup(ttk.Entry):
         self.focus_force()
         self.select_all()
         self.bind("<Return>", self.on_return)
+        self.bind("<KP_Enter>", self.on_return)
+        self.bind("<FocusOut>", self.on_return)
         self.bind("<Control-a>", self.select_all)
         self.bind("<Escape>", lambda *ignore: self.destroy())
 
@@ -362,7 +381,7 @@ class ProfileTab(ttk.Frame):
             return
 
         row_str = "0X" + (row.replace("I", ""))
-        row_int = (int(row_str, 16)) - 1
+        row_int = int(row_str, 16)  # - 1
         self.profile.insert_group(n=row_int, Group=DEFAULT_GROUP)
         self.build_profile_tree()
         self.generate_info_boxes()
@@ -382,7 +401,8 @@ class ProfileTab(ttk.Frame):
                 self, columns=COLUMN_NAMES, show="headings"
             )
         else:
-            del self.profile_config_tree
+            self.profile_config_tree.close_popups()
+            self.profile_config_tree.destroy()
             self.profile_config_tree = EditableTableview(
                 self, columns=COLUMN_NAMES, show="headings"
             )
@@ -547,7 +567,14 @@ class ProfileTab(ttk.Frame):
         # self.edit_config_for_profile()
         self.parent.commit_config()
 
-        ProfilePlotter(self.profile, CONFIG.PULSE_BLOCK_NAMES)
+        if not hasattr(self, "plotter"):
+            self.plotter = ProfilePlotter(self.profile, CONFIG.PULSE_BLOCK_NAMES)
+            self.plotter.plot_pulses()
+            self.plotter.show()
+
+        else:
+            self.plotter.profile = self.profile
+            self.plotter.plot_pulses()
 
     # Fucntion that will be called when entry is changed
     def entry_changed(self, *args):

@@ -25,7 +25,7 @@ def get_saxs_beamline() -> str:
 BL = get_saxs_beamline()
 
 
-def load_beamline_config():
+def load_beamline_config(BL: str):
     BL_CONFIG = import_module(f"{saxs_bluesky.beamline_configs.__name__}.{BL}_config")
     return BL_CONFIG
 
@@ -60,31 +60,50 @@ class ProfilePlotter:
 
         return trigger_time, signal
 
-    def plot_pulses(self, profile, pulse_names=None):
-        if pulse_names is None:
-            pulse_names = [f"Seq Pulse {f}" for f in range(len(profile.active_pulses))]
+    def plot_pulses(self):
+        if len(self.profile.active_pulses) != len(self.axes):
+            plt.close()
+            self.setup_figure()
+            self.show()
 
-        _, axes = plt.subplots(
-            len(profile.active_pulses),
-            1,
-            sharex=True,
-            figsize=(10, len(profile.active_pulses) * 4),
-        )  # noqa
-
-        if len(profile.active_pulses) > 0:
-            for n, i in enumerate(profile.active_pulses):
+        if len(self.profile.active_pulses) > 0:
+            for n, i in enumerate(self.profile.active_pulses):
                 trigger_time, signal = ProfilePlotter.generate_pulse_signal(
-                    profile, i - 1
+                    self.profile, i - 1
                 )
 
-                axes[n].step(trigger_time, signal)
-                axes[n].set_ylabel(f"{pulse_names[n]} Signal")
+                if self.axes[n].has_data():
+                    self.axes[n].clear()
 
+                self.axes[n].step(trigger_time, signal)
+                self.axes[n].set_ylabel(f"{self.pulse_names[n]} Signal")  # type: ignore
+
+        plt.draw()
         plt.xlabel("Time (s)")
+
+    def show(self):
+        # plt.tight_layout(pad=1.15)
         plt.show()
 
-    def __init__(self, profile, pulse_names=None):
-        self.plot_pulses(profile, pulse_names)
+    def setup_figure(self):
+        self.fig, self.axes = plt.subplots(
+            len(self.profile.active_pulses),
+            1,
+            sharex=True,
+            figsize=(8, len(self.profile.active_pulses) * 3),
+            num="Panda Pulse Signals",
+        )
+
+    def __init__(self, profile: Profile, pulse_names: list[str] | None = None):
+        self.profile = profile
+        self.pulse_names = pulse_names
+
+        if self.pulse_names is None:
+            self.pulse_names = [
+                f"Seq Pulse {f}" for f in range(len(self.profile.active_pulses))
+            ]
+
+        self.setup_figure()
 
 
 if __name__ == "__main__":
@@ -97,4 +116,5 @@ if __name__ == "__main__":
     experimental_profiles = ExperimentLoader.read_from_yaml(default_config_path)
     profile = experimental_profiles.profiles[0]
 
-    ProfilePlotter(profile)
+    plotter = ProfilePlotter(profile)
+    plotter.plot_pulses()

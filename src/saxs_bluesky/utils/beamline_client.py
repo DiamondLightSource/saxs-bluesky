@@ -1,11 +1,16 @@
 from pathlib import Path
 
+from blueapi.cli.updates import CliEventRenderer
 from blueapi.client.client import BlueapiClient
+from blueapi.client.event_bus import AnyEvent
 from blueapi.config import (
     ApplicationConfig,
     ConfigLoader,
 )
+from blueapi.core import DataEvent
 from blueapi.service.model import TaskRequest
+from blueapi.worker import ProgressEvent
+from bluesky.callbacks.best_effort import BestEffortCallback
 
 
 class BlueAPIPythonClient(BlueapiClient):
@@ -30,5 +35,17 @@ class BlueAPIPythonClient(BlueapiClient):
             instrument_session=self.instrument_session,
         )
 
-        response = self.create_and_start_task(task)
+        progress_bar = CliEventRenderer()
+        callback = BestEffortCallback()
+
+        def on_event(event: AnyEvent) -> None:
+            if isinstance(event, ProgressEvent):
+                progress_bar.on_progress_event(event)
+            elif isinstance(event, DataEvent):
+                callback(event.name, event.doc)
+
+        # response = self.create_and_start_task(task)
+        response = self.run_task(task, on_event=on_event, timeout=10)
         print(response)
+        if response.task_status is not None and not response.task_status.task_failed:
+            print("Plan Succeeded")

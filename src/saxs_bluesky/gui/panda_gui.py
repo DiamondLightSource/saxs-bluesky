@@ -37,7 +37,7 @@ from saxs_bluesky.utils.utils import (
 BL = get_saxs_beamline()
 
 
-CONFIG = load_beamline_config()
+CONFIG = load_beamline_config(BL)
 DEFAULT_PROFILE = CONFIG.DEFAULT_PROFILE
 ############################################################################################
 
@@ -509,7 +509,7 @@ class PandAGUI(tkinter.Tk):
             )
 
             Pulselabel = ttk.Label(
-                active_detectors_frame_n, text=f"Pulse Group: {pulse + 1}"
+                active_detectors_frame_n, text=f"Pulse Group: {pulse}"
             )
 
             Pulselabel.grid(column=0, row=0, padx=5, pady=5, sticky="w")
