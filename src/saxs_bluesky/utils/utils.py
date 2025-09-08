@@ -82,7 +82,7 @@ class ProfilePlotter:
         plt.xlabel("Time (s)")
 
     def show(self):
-        plt.tight_layout(pad=1.15)
+        # plt.tight_layout(pad=1.15)
         plt.show()
 
     def setup_figure(self):
