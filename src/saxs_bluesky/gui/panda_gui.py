@@ -14,6 +14,7 @@ from tkinter import filedialog, messagebox, ttk
 from tkinter.simpledialog import askstring
 
 import matplotlib.pyplot as plt
+from dodal.common import inject
 
 import saxs_bluesky.blueapi_configs
 from saxs_bluesky._version import __version__
@@ -307,7 +308,15 @@ class PandAGUI(tkinter.Tk):
 
         print(profile_to_upload)
 
-        params = {"profile": profile_to_upload}
+        active_detectors = []
+
+        for det in self.active_detectors_dict.keys():
+            if self.active_detectors_dict[det].get() == 1:
+                active_detectors.append(inject(det))
+
+        print(active_detectors)
+
+        params = {"profile": profile_to_upload, "detectors": active_detectors}
 
         try:
             self.client.run(configure_panda_triggering.__name__, params)
@@ -560,7 +569,7 @@ class PandAGUI(tkinter.Tk):
         ).grid(column=0, row=1, padx=5, pady=5, sticky="w")
 
     def build_active_detectors_frame(self):
-        self.active_detectors_variables = []
+        self.active_detectors_dict = {}
 
         for pulse in range(CONFIG.PULSEBLOCKS):
             active_detectors_frame_n = ttk.Frame(
@@ -608,7 +617,8 @@ class PandAGUI(tkinter.Tk):
 
                 ad_entry.grid(column=n + 1, row=1, padx=5, pady=5, sticky="w")
 
-                self.active_detectors_variables.append(var)
+                if det.lower() != "fs":
+                    self.active_detectors_dict[det] = var
 
     def build_pulse_frame(self):
         self.pulse_frame = ttk.Frame(self.window, borderwidth=5, relief="raised")
