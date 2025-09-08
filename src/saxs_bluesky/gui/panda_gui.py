@@ -108,16 +108,11 @@ class PandAGUI(tkinter.Tk):
         self.notebook.pack(fill="both", side="top", expand=True)
 
         for i in range(self.configuration.n_profiles):
-            proftab_object = ProfileTab(self, self.notebook, self.configuration, i)
+            ProfileTab(self, self.notebook, self.configuration, i)
             # tab_names = self.notebook.tabs()
             # proftab_object: ProfileTab = self.notebook.nametowidget(tab_names[i])
-            self.delete_profile_button = ttk.Button(
-                proftab_object, text="Delete Profile", command=self.delete_profile_tab
-            )
 
-            self.delete_profile_button.grid(
-                column=7, row=10, padx=5, pady=5, columnspan=1, sticky="news"
-            )
+        self.build_profile_edit_frame()
 
         ########################################################
         self.build_exp_info_frame()
@@ -192,7 +187,7 @@ class PandAGUI(tkinter.Tk):
         )
 
         if answer and (self.configuration.n_profiles >= 2):
-            index_to_del = self.notebook.index("current")
+            index_to_del = self.get_profile_index()
 
             if index_to_del == 0:
                 select_tab_index = 1
@@ -305,10 +300,14 @@ class PandAGUI(tkinter.Tk):
         for dev in devices:
             print(dev, "\n\n")
 
+    def get_profile_index(self):
+        index = int(self.notebook.index("current"))
+        return index
+
     def configure_panda(self):
         self.commit_config()
 
-        index = int(self.notebook.index("current"))
+        index = self.get_profile_index()
 
         profile_to_upload = self.configuration.profiles[index]
         # json_schema_profile = profile_to_upload.model_dump_json()
@@ -471,6 +470,54 @@ class PandAGUI(tkinter.Tk):
         self.configure_button.pack(fill="both", expand=True, side="left")
         self.show_wiring_config_button.pack(fill="both", expand=True, side="left")
         self.run_plan_button.pack(fill="both", expand=True, side="left")
+
+    def return_profile_tab(self) -> ProfileTab:
+        index = self.get_profile_index()
+        tab_names = self.notebook.tabs()
+        proftab_object: ProfileTab = self.notebook.nametowidget(tab_names[index])
+        return proftab_object
+
+    def build_profile_edit_frame(self):
+        self.profile_edit_frame = ttk.Frame(self.window, borderwidth=5, relief="raised")
+        self.profile_edit_frame.pack(fill="both", expand=True, side="bottom")
+
+        self.proftab = self.return_profile_tab()
+
+        self.insertrow_button = ttk.Button(
+            self.profile_edit_frame,
+            text="Insert Group",
+            command=self.proftab.insert_group_button_action,
+        )
+
+        self.deleterow_button = ttk.Button(
+            self.profile_edit_frame,
+            text="Delete Group",
+            command=self.proftab.delete_group_button_action,
+        )
+
+        self.appendrow_button = ttk.Button(
+            self.profile_edit_frame,
+            text="Add Group",
+            command=self.proftab.append_group_button_action,
+        )
+
+        self.deletefinalrow_button = ttk.Button(
+            self.profile_edit_frame,
+            text="Discard Group",
+            command=self.proftab.delete_last_groups_button_action,
+        )
+
+        self.delete_profile_button = ttk.Button(
+            self.profile_edit_frame,
+            text="Delete Profile",
+            command=self.delete_profile_tab,
+        )
+
+        self.insertrow_button.pack(fill="both", expand=True, side="left")
+        self.deleterow_button.pack(fill="both", expand=True, side="left")
+        self.appendrow_button.pack(fill="both", expand=True, side="left")
+        self.deletefinalrow_button.pack(fill="both", expand=True, side="left")
+        self.delete_profile_button.pack(fill="both", expand=True, side="left")
 
     def build_add_frame(self):
         self.add_frame = tkinter.Frame()
