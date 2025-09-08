@@ -353,6 +353,9 @@ class ProfileTab(ttk.Frame):
         return int(self.n_cycles_entry_value.get())
 
     def delete_last_groups_button_action(self):
+        if len(self.profile.groups) == 1:
+            return
+
         row_int = len(self.profile.groups) - 1
         self.profile.delete_group(n=row_int)
         self.build_profile_tree()
