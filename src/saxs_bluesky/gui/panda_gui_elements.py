@@ -168,7 +168,7 @@ class CheckButtonPopup(ttk.Checkbutton):
 
         self.row_num = int(rowid[-2::], 16) - 1
 
-        w = ((CONFIG.PULSEBLOCKS) * 100) + 50
+        w = ((CONFIG.PULSEBLOCKS) * 105) + 50
         h = 50  # height for the Tk root
 
         self.root = tkinter.Toplevel()  ##HOLY MOLY
@@ -549,7 +549,14 @@ class ProfileTab(ttk.Frame):
         # self.edit_config_for_profile()
         self.parent.commit_config()
 
-        ProfilePlotter(self.profile, CONFIG.PULSE_BLOCK_NAMES)
+        if not hasattr(self, "plotter"):
+            self.plotter = ProfilePlotter(self.profile, CONFIG.PULSE_BLOCK_NAMES)
+            self.plotter.plot_pulses()
+            self.plotter.show()
+
+        else:
+            self.plotter.profile = self.profile
+            self.plotter.plot_pulses()
 
     # Fucntion that will be called when entry is changed
     def entry_changed(self, *args):
