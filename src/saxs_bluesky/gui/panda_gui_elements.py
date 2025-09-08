@@ -28,12 +28,26 @@ CONFIG = load_beamline_config(BL=BL)
 DEFAULT_GROUP = CONFIG.DEFAULT_GROUP
 
 
+def recursive_destroy(frame):
+    for child in frame.winfo_children():
+        child.destroy()
+
+        if child.winfo_children():
+            recursive_destroy(child)
+
+
 class EditableTableview(ttk.Treeview):
     def __init__(self, proftab, *args, **kwargs):
         self.proftab = proftab
         super().__init__(self.proftab, *args, **kwargs)
         self.bind("<Double-1>", lambda event: self.onDoubleClick(event))
         self.kwargs = kwargs
+
+    def close_popups(self):
+        if hasattr(self, "pulse_popup"):
+            self.pulse_popup.on_return(None)  # close previous popup
+        if hasattr(self, "Popup"):
+            self.Popup.on_return(None)  # close previous popup
 
     def onDoubleClick(self, event):
         """Executed, when a row is double-clicked. Opens
@@ -88,8 +102,11 @@ class EditableTableview(ttk.Treeview):
             self.Popup.place(x=x, y=y + pady, width=width, height=height, anchor="w")
 
         elif column in ["#8", "#9"]:
+            if hasattr(self, "pulse_popup"):
+                self.pulse_popup.on_return(None)  # close previous popup
+
             if not CONFIG.PULSEBLOCKASENTRYBOX:
-                self.Popup = CheckButtonPopup(
+                self.pulse_popup = CheckButtonPopup(
                     self,
                     rowid,
                     int(column[1:]) - 1,
@@ -98,8 +115,8 @@ class EditableTableview(ttk.Treeview):
                     columns=self.kwargs["columns"],
                 )
             if CONFIG.PULSEBLOCKASENTRYBOX:
-                self.Popup = EntryPopup(self, rowid, int(column[1:]) - 1, text)
-                self.Popup.place(
+                self.pulse_popup = EntryPopup(self, rowid, int(column[1:]) - 1, text)
+                self.pulse_popup.place(
                     x=x, y=y + pady, width=width, height=height, anchor="w"
                 )
 
@@ -249,7 +266,7 @@ class CheckButtonPopup(ttk.Checkbutton):
         self.root.destroy()
         del self
 
-    def on_return(self):
+    def on_return(self, event=None):
         for pulse in range(CONFIG.PULSEBLOCKS):
             val = str(self.option_var[pulse].get())
             self.pulse_vals[pulse] = val
@@ -384,7 +401,8 @@ class ProfileTab(ttk.Frame):
                 self, columns=COLUMN_NAMES, show="headings"
             )
         else:
-            del self.profile_config_tree
+            self.profile_config_tree.close_popups()
+            self.profile_config_tree.destroy()
             self.profile_config_tree = EditableTableview(
                 self, columns=COLUMN_NAMES, show="headings"
             )
