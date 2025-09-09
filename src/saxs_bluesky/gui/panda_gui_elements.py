@@ -23,9 +23,9 @@ from saxs_bluesky.utils.utils import (
     load_beamline_config,
 )
 
-BL = get_saxs_beamline()
-CONFIG = load_beamline_config(BL=BL)
+CONFIG = load_beamline_config()
 DEFAULT_GROUP = CONFIG.DEFAULT_GROUP
+BL = get_saxs_beamline()
 
 
 def recursive_destroy(frame):

@@ -25,7 +25,7 @@ def get_saxs_beamline() -> str:
 BL = get_saxs_beamline()
 
 
-def load_beamline_config(BL: str):
+def load_beamline_config():
     BL_CONFIG = import_module(f"{saxs_bluesky.beamline_configs.__name__}.{BL}_config")
     return BL_CONFIG
 

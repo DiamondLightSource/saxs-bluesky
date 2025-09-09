@@ -41,7 +41,7 @@ from saxs_bluesky.utils.utils import (
 )
 
 BL = get_saxs_beamline()
-CONFIG = load_beamline_config(BL)
+CONFIG = load_beamline_config()
 DEFAULT_PANDA = CONFIG.DEFAULT_PANDA
 FAST_DETECTORS = CONFIG.FAST_DETECTORS
 

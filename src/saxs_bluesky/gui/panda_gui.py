@@ -38,7 +38,7 @@ from saxs_bluesky.utils.utils import (
 BL = get_saxs_beamline()
 
 
-CONFIG = load_beamline_config(BL)
+CONFIG = load_beamline_config()
 DEFAULT_PROFILE = CONFIG.DEFAULT_PROFILE
 ############################################################################################
 

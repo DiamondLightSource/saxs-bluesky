@@ -10,7 +10,7 @@ from saxs_bluesky.utils.utils import (
 )
 
 BL = get_saxs_beamline()
-CONFIG = load_beamline_config(BL)
+CONFIG = load_beamline_config()
 
 
 class StepWidget:
