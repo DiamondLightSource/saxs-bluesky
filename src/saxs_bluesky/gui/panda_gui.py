@@ -517,6 +517,9 @@ class PandAGUI(tkinter.Tk):
         proftab_object: ProfileTab = self.notebook.nametowidget(tab_names[index])
         return proftab_object
 
+    def set_profile_tab(self):
+        self.proftab = self.return_profile_tab()
+
     def build_profile_edit_frame(self):
         self.profile_edit_frame = ttk.Frame(self.window, borderwidth=5, relief="raised")
         self.profile_edit_frame.pack(fill="both", expand=True, side="top")
@@ -558,6 +561,8 @@ class PandAGUI(tkinter.Tk):
         self.appendrow_button.pack(fill="both", expand=True, side="left")
         self.deletefinalrow_button.pack(fill="both", expand=True, side="left")
         self.delete_profile_button.pack(fill="both", expand=True, side="left")
+
+        self.window.bind("<<NotebookTabChanged>>", self.set_profile_tab)
 
     def build_add_frame(self):
         self.add_frame = tkinter.Frame()

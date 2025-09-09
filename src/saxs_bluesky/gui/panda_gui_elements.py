@@ -516,16 +516,13 @@ class ProfileTab(ttk.Frame):
         cycles = self.get_n_cycles_value()
         profile_trigger = self.get_start_value()
 
-        if self.multiplier_var_options:
-            multiplier = [int(f.get()) for f in self.multiplier_var_options]
-        else:
-            multiplier = None
+        multipliers = self.get_multipliers()
 
         new_profile = Profile(
             cycles=cycles,
             seq_trigger=profile_trigger,
             groups=group_list,
-            multiplier=multiplier,
+            multiplier=multipliers,
         )
 
         self.profile = new_profile
