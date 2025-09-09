@@ -542,6 +542,21 @@ class ProfileTab(ttk.Frame):
         print(self.profile.active_pulses)
         print(self.profile.duration)
 
+    def get_multipliers(self):
+        """Returns the give multiplier values"""
+
+        if (self.profile.multiplier is None) and (self.multiplier_var_options is None):
+            return None
+
+        elif self.multiplier_var_options is not None:
+            mulitpliers = []
+
+            for mul in self.multiplier_var_options:
+                multi_val = int(mul.get())
+                mulitpliers.append(multi_val)
+
+            return mulitpliers
+
     # TODO: https://github.com/DiamondLightSource/saxs-bluesky/issues/23
     def build_multiplier_choices(self):
         self.multiplier_var_options = []

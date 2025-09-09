@@ -298,18 +298,22 @@ class PandAGUI(tkinter.Tk):
         index = int(self.notebook.index("current"))
         return index
 
+    def get_active_detectors(self):
+        active_detectors = []
+
+        for det in self.active_detectors_dict.keys():
+            if self.active_detectors_dict[det].get() == 1:
+                active_detectors.append(inject(det))
+
+        return active_detectors
+
     def configure_panda(self):
         self.commit_config()
 
         index = self.get_profile_index()
 
         profile_to_upload = self.configuration.profiles[index]
-
-        active_detectors = []
-
-        for det in self.active_detectors_dict.keys():
-            if self.active_detectors_dict[det].get() == 1:
-                active_detectors.append(inject(det))
+        active_detectors = self.get_active_detectors()
 
         print(profile_to_upload)
         print(active_detectors)
@@ -367,6 +371,10 @@ class PandAGUI(tkinter.Tk):
 
     def open_step_widget(self):
         StepWidget(self.instrument_session)
+
+    def show_active_detectors(self):
+        active_detectors = self.get_active_detectors()
+        print(active_detectors)
 
     def build_exp_run_frame(self):
         self.run_frame = ttk.Frame(self.window, borderwidth=5, relief="raised")
@@ -454,6 +462,15 @@ class PandAGUI(tkinter.Tk):
         )
         count_det_button.grid(
             column=2, row=16, padx=5, pady=5, columnspan=1, sticky="news"
+        )
+
+        active_det_button = ttk.Button(
+            self.run_frame,
+            text="Show Active Detectors",
+            command=self.show_active_detectors,
+        )
+        active_det_button.grid(
+            column=2, row=17, padx=5, pady=5, columnspan=1, sticky="news"
         )
 
     def build_global_settings_frame(self):

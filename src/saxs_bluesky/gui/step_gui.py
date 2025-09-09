@@ -1,13 +1,8 @@
-# import json
-# import os
 import tkinter
-from tkinter import ttk
 
 from dodal.common import inject
 
-# from tkinter import filedialog, messagebox, ttk
-# from tkinter.simpledialog import askstring
-# import matplotlib.pyplot as plt
+from saxs_bluesky.gui.gui_utils import LabelEntryPair
 from saxs_bluesky.utils.beamline_client import BlueAPIPythonClient
 from saxs_bluesky.utils.utils import (
     get_saxs_beamline,
@@ -16,18 +11,6 @@ from saxs_bluesky.utils.utils import (
 
 BL = get_saxs_beamline()
 CONFIG = load_beamline_config(BL)
-
-
-class LabelEntryPair:
-    def get_value(self):
-        return self.entry.get()
-
-    def __init__(self, master, label_text, row, column, initial_val):
-        self.var = tkinter.StringVar(value=initial_val)
-        self.label = ttk.Label(master, text=label_text)
-        self.label.grid(row=row, column=column, padx=5, pady=5, sticky="w")
-        self.entry = ttk.Entry(master, textvariable=self.var)
-        self.entry.grid(row=row, column=column + 1, padx=5, pady=5, sticky="w")
 
 
 class StepWidget:
