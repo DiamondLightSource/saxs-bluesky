@@ -562,8 +562,6 @@ class PandAGUI(tkinter.Tk):
         self.deletefinalrow_button.pack(fill="both", expand=True, side="left")
         self.delete_profile_button.pack(fill="both", expand=True, side="left")
 
-        self.window.bind("<<NotebookTabChanged>>", self.set_profile_tab)
-
     def build_add_frame(self):
         self.add_frame = tkinter.Frame()
         self.notebook.add(self.add_frame, text="+")

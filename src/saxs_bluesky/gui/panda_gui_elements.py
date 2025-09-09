@@ -173,7 +173,7 @@ class DropdownPopup(ttk.Combobox):
         self.tableview.item(rowid, values=vals)
         self.destroy()
 
-        self.tableview.proftab.parent.commit_config()
+        self.tableview.proftab.edit_config_for_profile()
         self.tableview.proftab.generate_info_boxes()
 
 
@@ -529,7 +529,7 @@ class ProfileTab(ttk.Frame):
         self.configuration.profiles[self.n_profile] = new_profile
 
     def print_profile_button_action(self):
-        self.parent.commit_config()
+        self.edit_config_for_profile()
         self.generate_info_boxes()
 
         for i in self.profile.groups:
@@ -580,7 +580,7 @@ class ProfileTab(ttk.Frame):
 
     def commit_and_plot(self):
         # self.edit_config_for_profile()
-        self.parent.commit_config()
+        self.edit_config_for_profile()
 
         if not hasattr(self, "plotter"):
             self.plotter = ProfilePlotter(self.profile, CONFIG.PULSE_BLOCK_NAMES)
@@ -598,7 +598,7 @@ class ProfileTab(ttk.Frame):
 
     # Fucntion that will be called when entry is changed
     def entry_changed(self, *args):
-        self.parent.commit_config()
+        self.edit_config_for_profile()
         self.generate_info_boxes()
 
     def __init__(
