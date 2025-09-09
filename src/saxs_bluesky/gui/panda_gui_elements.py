@@ -45,9 +45,13 @@ class EditableTableview(ttk.Treeview):
 
     def close_popups(self):
         if hasattr(self, "pulse_popup"):
-            self.pulse_popup.on_return(None)  # close previous popup
+            # self.pulse_popup.on_return(None)  # close previous popup
+            self.pulse_popup.destroy()
+            del self.pulse_popup
         if hasattr(self, "Popup"):
-            self.Popup.on_return(None)  # close previous popup
+            # self.Popup.on_return(None)  # close previous popup
+            self.Popup.destroy()
+            del self.Popup
 
     def onDoubleClick(self, event):
         """Executed, when a row is double-clicked. Opens
@@ -332,10 +336,11 @@ class EntryPopup(ttk.Entry):
         vals[self.column] = selection  # type: ignore
 
         self.tableview.item(rowid, values=vals)
-        self.destroy()
 
         self.tableview.proftab.parent.commit_config()
         self.tableview.proftab.generate_info_boxes()
+
+        self.destroy()
 
     def select_all(self, *ignore):
         """Set selection on the whole text"""
@@ -406,6 +411,7 @@ class ProfileTab(ttk.Frame):
         else:
             self.profile_config_tree.close_popups()
             self.profile_config_tree.destroy()
+            del self.profile_config_tree
             self.profile_config_tree = EditableTableview(
                 self, columns=COLUMN_NAMES, show="headings"
             )
