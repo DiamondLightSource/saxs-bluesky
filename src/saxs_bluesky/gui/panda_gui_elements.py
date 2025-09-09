@@ -607,6 +607,47 @@ class ProfileTab(ttk.Frame):
         self.edit_config_for_profile()
         self.generate_info_boxes()
 
+    def build_profile_edit_frame(self, proftab):
+        # self.profile_edit_frame = ttk.Frame(self.window,
+        # borderwidth=5, relief="raised")
+        # self.profile_edit_frame.pack(fill="both", expand=True, side="top")
+
+        self.insertrow_button = ttk.Button(
+            proftab,
+            text="Insert Group",
+            command=proftab.insert_group_button_action,
+        )
+
+        self.deleterow_button = ttk.Button(
+            proftab,
+            text="Delete Group",
+            command=proftab.delete_group_button_action,
+        )
+
+        self.appendrow_button = ttk.Button(
+            proftab,
+            text="Add Group",
+            command=proftab.append_group_button_action,
+        )
+
+        self.deletefinalrow_button = ttk.Button(
+            proftab,
+            text="Discard Group",
+            command=proftab.delete_last_groups_button_action,
+        )
+
+        self.delete_profile_button = ttk.Button(
+            proftab,
+            text="Delete Profile",
+            command=self.parent.delete_profile_tab,
+        )
+
+        self.insertrow_button.pack(fill="both", expand=True, side="left")
+        self.deleterow_button.pack(fill="both", expand=True, side="left")
+        self.appendrow_button.pack(fill="both", expand=True, side="left")
+        self.deletefinalrow_button.pack(fill="both", expand=True, side="left")
+        self.delete_profile_button.pack(fill="both", expand=True, side="left")
+
     def __init__(
         self, parent, notebook, configuration: ExperimentLoader, n_profile: int
     ):
@@ -690,3 +731,5 @@ class ProfileTab(ttk.Frame):
         self.plot_profile_button.grid(
             column=8, row=0, padx=5, pady=5, columnspan=1, sticky="nes"
         )
+
+        self.build_profile_edit_frame(self)

@@ -113,7 +113,7 @@ class PandAGUI(tkinter.Tk):
             # tab_names = self.notebook.tabs()
             # proftab_object: ProfileTab = self.notebook.nametowidget(tab_names[i])
 
-        self.build_profile_edit_frame()
+            # self.build_profile_edit_frame(proftab)
 
         ########################################################
         self.build_exp_info_frame()
@@ -202,6 +202,7 @@ class PandAGUI(tkinter.Tk):
             ttk.Label(proftab_object, text="Profile " + str(n)).grid(
                 column=0, row=0, padx=5, pady=5, sticky="w"
             )
+            # self.build_profile_edit_frame(proftab_object)
 
         return None
 
@@ -519,48 +520,6 @@ class PandAGUI(tkinter.Tk):
 
     def set_profile_tab(self):
         self.proftab = self.return_profile_tab()
-
-    def build_profile_edit_frame(self):
-        self.profile_edit_frame = ttk.Frame(self.window, borderwidth=5, relief="raised")
-        self.profile_edit_frame.pack(fill="both", expand=True, side="top")
-
-        self.proftab = self.return_profile_tab()
-
-        self.insertrow_button = ttk.Button(
-            self.profile_edit_frame,
-            text="Insert Group",
-            command=self.proftab.insert_group_button_action,
-        )
-
-        self.deleterow_button = ttk.Button(
-            self.profile_edit_frame,
-            text="Delete Group",
-            command=self.proftab.delete_group_button_action,
-        )
-
-        self.appendrow_button = ttk.Button(
-            self.profile_edit_frame,
-            text="Add Group",
-            command=self.proftab.append_group_button_action,
-        )
-
-        self.deletefinalrow_button = ttk.Button(
-            self.profile_edit_frame,
-            text="Discard Group",
-            command=self.proftab.delete_last_groups_button_action,
-        )
-
-        self.delete_profile_button = ttk.Button(
-            self.profile_edit_frame,
-            text="Delete Profile",
-            command=self.delete_profile_tab,
-        )
-
-        self.insertrow_button.pack(fill="both", expand=True, side="left")
-        self.deleterow_button.pack(fill="both", expand=True, side="left")
-        self.appendrow_button.pack(fill="both", expand=True, side="left")
-        self.deletefinalrow_button.pack(fill="both", expand=True, side="left")
-        self.delete_profile_button.pack(fill="both", expand=True, side="left")
 
     def build_add_frame(self):
         self.add_frame = tkinter.Frame()
