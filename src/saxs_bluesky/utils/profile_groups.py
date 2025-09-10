@@ -239,8 +239,9 @@ class ExperimentLoader:
     detectors: list[str]
     instrument_session: str = ""
 
-    def __post_init__(self):
-        self.n_profiles = len(self.profiles)
+    @property
+    def n_profiles(self):
+        return len(self.profiles)
 
     @staticmethod
     def read_from_yaml(config_filepath: str | Path):
@@ -335,8 +336,6 @@ class ExperimentLoader:
     def delete_profile(self, n: int):
         """Deletes the nth profile from the object"""
         self.profiles.pop(n)
-        self.__post_init__()
 
     def append_profile(self, Profile: Profile):
         self.profiles.append(Profile)
-        self.__post_init__()

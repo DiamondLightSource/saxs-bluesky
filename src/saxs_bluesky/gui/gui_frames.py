@@ -47,7 +47,7 @@ class ActiveDetectorsFrame(ttk.Frame):
             for n, det in enumerate(self.PULSE_CONNECTIONS[pulse + 1]):
                 # experiment_var=tkinter.StringVar(value=self.configuration.experiment)
 
-                var = tkinter.IntVar()
+                var = tkinter.IntVar(value=1)
 
                 if (det.lower() == "fs") or ("shutter" in det.lower()):
                     ad_entry = tkinter.Checkbutton(
@@ -57,7 +57,6 @@ class ActiveDetectorsFrame(ttk.Frame):
                         state="disabled",
                         variable=var,
                     )
-                    ad_entry.select()
                 else:
                     ad_entry = tkinter.Checkbutton(
                         active_detectors_frame_n,

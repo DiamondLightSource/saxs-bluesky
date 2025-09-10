@@ -129,35 +129,11 @@ class PandAGUI:
 
         #################
 
-        self.profile_tabs: list[ProfileTab] = []
-
         for n, profile in enumerate(self.configuration.profiles):
             profile_tab = ProfileTab(self.notebook, profile)
             profile_tab.pack(fill="y", expand=False, side="left")
 
             self.notebook.add(profile_tab, text="Profile " + str(n))
-            self.profile_tabs.append(profile_tab)
-
-        def print_prof():
-            self.get_profile_tab().print_profile_button_action()
-
-        print_profile_button = ttk.Button(
-            self.run_frame,
-            text="Print Profile",
-            command=print_prof,
-        )
-        print_profile_button.grid(
-            column=2, row=11, padx=5, pady=5, columnspan=1, sticky="news"
-        )
-
-        # x = ttk.Button(
-        #     self.run_frame,
-        #     text="Print Profile",
-        #     command=self.get_profile_tab.print_profile_button_action,
-        # )
-        # x.grid(column=2, row=20, padx=5, pady=5, columnspan=1, sticky="news")
-
-        # print(self.get_profile_index())
 
         ########################################################
 
@@ -205,12 +181,14 @@ class PandAGUI:
 
             self.notebook.forget(self.add_frame)
 
-            print(self.configuration.profiles)
+            # for profile in self.configuration.profiles:
+            #     print(profile)
 
             self.configuration.append_profile(DEFAULT_PROFILE)
             index = len(self.configuration.profiles) - 1
 
-            print(self.configuration.profiles)
+            # for profile in self.configuration.profiles:
+            #     print(profile)
 
             new_profile_tab = ProfileTab(
                 self.notebook,
@@ -218,11 +196,8 @@ class PandAGUI:
             )
 
             self.notebook.add(new_profile_tab, text=f"Profile {index}")
-            self.profile_tabs.append(new_profile_tab)
 
-            self.add_frame = tkinter.Frame()
-            self.notebook.add(self.add_frame, text="+")
-            self.window.bind("<<NotebookTabChanged>>", self.add_profile_tab)
+            self.build_add_tab()  # re add tab +
 
             for n, _tab in enumerate(self.notebook.tabs()[0:-1]):
                 self.notebook.tab(n, text="Profile " + str(n))
@@ -245,12 +220,13 @@ class PandAGUI:
             else:
                 select_tab_index = index_to_del - 1
 
+            all_profile_tabs = self.return_all_profile_tabs()
+
             self.notebook.select(
-                self.profile_tabs[select_tab_index]
+                all_profile_tabs[select_tab_index]
             )  # select the one before
             self.configuration.delete_profile(index_to_del)
-            self.notebook.forget(self.profile_tabs[index_to_del])
-            self.profile_tabs.pop(index_to_del)
+            self.notebook.forget(all_profile_tabs[index_to_del])
 
         elif answer and (self.configuration.n_profiles == 1):
             messagebox.showinfo("Info", "Must have atleast one profile")
@@ -268,9 +244,10 @@ class PandAGUI:
     def commit_config(self):
         # tab_names = self.notebook.tabs()
 
-        for i in range(self.configuration.n_profiles):
-            proftab_object: ProfileTab = self.profile_tabs[i]
-            proftab_object.edit_config_for_profile()
+        profile_tabs = self.return_all_profile_tabs()
+
+        for profile_tab in profile_tabs:
+            profile_tab.edit_config_for_profile()
 
     def load_config(self):
         panda_config_yaml = filedialog.askopenfilename()
@@ -357,10 +334,6 @@ class PandAGUI:
     def get_profile_index(self):
         index = int(self.notebook.index("current"))
         return index
-
-    def get_profile_tab(self) -> ProfileTab:
-        profile_tab = self.profile_tabs[self.get_profile_index()]
-        return profile_tab
 
     def configure_panda(self):
         self.commit_config()
@@ -519,6 +492,18 @@ class PandAGUI:
             column=2, row=17, padx=5, pady=5, columnspan=1, sticky="news"
         )
 
+        def print_prof():
+            self.get_profile_tab().print_profile_button_action()
+
+        profile_print = ttk.Button(
+            self.run_frame,
+            text="Print Profile",
+            command=print_prof,
+        )
+        profile_print.grid(
+            column=2, row=18, padx=5, pady=5, columnspan=1, sticky="news"
+        )
+
         return None
 
     def build_global_settings_frame(self, side: str = "left"):
@@ -552,14 +537,24 @@ class PandAGUI:
 
         return None
 
-    def return_profile_tab(self) -> ProfileTab:
+    def return_all_profile_tabs(self):
+        tab_names = self.notebook.tabs()[:-1]  # miss last one because it the + tab
+
+        print(tab_names)
+
+        all_profile_tabs = [
+            self.notebook.nametowidget(tab_names[p]) for p in range(len(tab_names))
+        ]
+        return all_profile_tabs
+
+    def get_profile_tab(self) -> ProfileTab:
         index = self.get_profile_index()
         tab_names = self.notebook.tabs()
         proftab_object: ProfileTab = self.notebook.nametowidget(tab_names[index])
         return proftab_object
 
     def set_profile_tab(self):
-        self.proftab = self.return_profile_tab()
+        self.proftab = self.get_profile_tab()
 
     def build_add_tab(self):
         self.add_frame = tkinter.Frame()
