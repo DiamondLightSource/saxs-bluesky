@@ -79,14 +79,7 @@ class PandAGUI:
             quit()
 
         if ask_instrument_session and self.configuration.instrument_session is not None:
-            self.instrument_session = str(
-                askstring(
-                    "Instrument Session",
-                    "Enter an intrument session:",
-                    initialvalue=self.configuration.instrument_session,
-                )
-            )
-
+            self.instrument_session = self.request_instrument_session()
         else:
             self.instrument_session = self.configuration.instrument_session
 
@@ -171,6 +164,17 @@ class PandAGUI:
 
         if start:
             self.window.mainloop()
+
+    def request_instrument_session(self):
+        instrument_session = str(
+            askstring(
+                "Instrument Session",
+                "Enter an intrument session:",
+                initialvalue=self.configuration.instrument_session,
+            )
+        )
+
+        return instrument_session
 
     def open_new_window(self):
         PandAGUI()
