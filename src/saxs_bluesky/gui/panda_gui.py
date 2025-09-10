@@ -54,6 +54,7 @@ class PandAGUI:
         self,
         panda_config_yaml: str | None = None,
         configuration: ExperimentLoader | None = None,
+        ask_instrument_session: bool = False,
         start: bool = True,
     ):
         self.panda_config_yaml = panda_config_yaml
@@ -77,13 +78,17 @@ class PandAGUI:
             )
             quit()
 
-        self.instrument_session = str(
-            askstring(
-                "Instrument Session",
-                "Enter an intrument session:",
-                initialvalue=self.configuration.instrument_session,
+        if ask_instrument_session and self.configuration.instrument_session is not None:
+            self.instrument_session = str(
+                askstring(
+                    "Instrument Session",
+                    "Enter an intrument session:",
+                    initialvalue=self.configuration.instrument_session,
+                )
             )
-        )
+
+        else:
+            self.instrument_session = self.configuration.instrument_session
 
         blueapi_config_path = f"{os.path.dirname(saxs_bluesky.blueapi_configs.__file__)}/{BL}_blueapi_config.yaml"  # noqa
 
