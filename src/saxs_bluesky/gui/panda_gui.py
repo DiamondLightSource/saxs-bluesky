@@ -111,6 +111,12 @@ class PandAGUI:
         show_menu.add_command(label="Show Wiring", command=self.show_wiring_config)
         menubar.add_cascade(label="Show", menu=show_menu)
 
+        instr_menu = tkinter.Menu(menubar, tearoff=0)
+        instr_menu.add_command(
+            label="Change Instrument Session", command=self.request_instrument_session
+        )
+        menubar.add_cascade(label="Inst Session", menu=instr_menu)
+
         helpmenu = tkinter.Menu(menubar, tearoff=0)
         helpmenu.add_command(label="Help Index", command=self.show_about)
         helpmenu.add_command(label="About...", command=self.show_about)
@@ -166,7 +172,7 @@ class PandAGUI:
             self.window.mainloop()
 
     def request_instrument_session(self):
-        instrument_session = str(
+        self.instrument_session = str(
             askstring(
                 "Instrument Session",
                 "Enter an intrument session:",
@@ -174,7 +180,7 @@ class PandAGUI:
             )
         )
 
-        return instrument_session
+        return self.instrument_session
 
     def open_new_window(self):
         PandAGUI()
