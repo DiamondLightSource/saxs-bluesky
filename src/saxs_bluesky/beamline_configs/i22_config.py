@@ -4,6 +4,8 @@ Configuration for i22 PandA beamline
 
 """
 
+import copy
+
 from bluesky.protocols import Readable
 from dodal.beamlines import i22
 from dodal.common import inject
@@ -101,11 +103,14 @@ DEFAULT_GROUP = Group(
 
 
 DEFAULT_PROFILE = Profile(
-    cycles=1, seq_trigger="IMMEDIATE", groups=[DEFAULT_GROUP], multiplier=[1, 1, 1, 1]
+    cycles=1,
+    seq_trigger="IMMEDIATE",
+    groups=[copy.deepcopy(DEFAULT_GROUP)],
+    multiplier=[1, 1, 1, 1],
 )
 
 DEFAULT_EXPERIMENT = ExperimentLoader(
-    profiles=[DEFAULT_PROFILE],
+    profiles=[copy.deepcopy(DEFAULT_PROFILE)],
     instrument=i22.BL,
     detectors=["saxs", "waxs"],
     instrument_session="cm40643-4",

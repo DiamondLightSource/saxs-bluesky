@@ -6,12 +6,12 @@ from dodal.common import inject
 
 class ActiveDetectorsFrame(ttk.Frame):
     def __init__(
-        self, window, PULSEBLOCKS, PULSE_CONNECTIONS, detectors, *args, **kwargs
+        self, window, PULSEBLOCKS, PULSE_CONNECTIONS, active_detectors, *args, **kwargs
     ):
         self.window = window
         self.PULSEBLOCKS = PULSEBLOCKS
         self.PULSE_CONNECTIONS = PULSE_CONNECTIONS
-        self.detectors = detectors
+        self.active_detectors = active_detectors
 
         super().__init__(self.window, *args, **kwargs)
 
@@ -47,7 +47,7 @@ class ActiveDetectorsFrame(ttk.Frame):
             for n, det in enumerate(self.PULSE_CONNECTIONS[pulse + 1]):
                 # experiment_var=tkinter.StringVar(value=self.configuration.experiment)
 
-                var = tkinter.IntVar(value=1)
+                var = tkinter.IntVar()
 
                 if (det.lower() == "fs") or ("shutter" in det.lower()):
                     ad_entry = tkinter.Checkbutton(
@@ -65,7 +65,7 @@ class ActiveDetectorsFrame(ttk.Frame):
                         variable=var,
                     )
 
-                if det in self.detectors:
+                if det in self.active_detectors:
                     ad_entry.select()
 
                 ad_entry.grid(column=n + 1, row=1, padx=5, pady=5, sticky="w")

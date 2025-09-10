@@ -123,6 +123,10 @@ class Profile(BaseModel):
         return total_frames
 
     @property
+    def n_groups(self):
+        return len(self.groups)
+
+    @property
     def duration_per_cycle(self) -> float:
         duration_per_cycle = 0
 
@@ -337,5 +341,5 @@ class ExperimentLoader:
         """Deletes the nth profile from the object"""
         self.profiles.pop(n)
 
-    def append_profile(self, Profile: Profile):
-        self.profiles.append(Profile)
+    def append_profile(self, profile: Profile):
+        self.profiles.append(profile)

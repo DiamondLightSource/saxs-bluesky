@@ -7,6 +7,7 @@ Python Elements for NCD PandA config GUI
 
 """
 
+import copy
 import tkinter
 from tkinter import messagebox, ttk
 
@@ -377,7 +378,7 @@ class ProfileTab(ttk.Frame):
         self.seq_triggers = self.profile.seq_triggers()
 
         ttk.Label(self, text="Seq Trigger").grid(
-            column=0, row=0, padx=5, pady=5, sticky="e"
+            column=0, row=0, padx=5, pady=5, sticky="w"
         )
 
         self.clicked_start_trigger = tkinter.StringVar()
@@ -391,7 +392,7 @@ class ProfileTab(ttk.Frame):
         ############# number of cycles box
 
         ttk.Label(self, text="No. of cycles").grid(
-            column=0, row=1, padx=5, pady=5, sticky="e"
+            column=0, row=1, padx=5, pady=5, sticky="w"
         )
 
         self.n_cycles_entry_value = tkinter.IntVar(self, value=self.profile.cycles)
@@ -460,12 +461,12 @@ class ProfileTab(ttk.Frame):
 
         row_str = "0X" + (row.replace("I", ""))
         row_int = int(row_str, 16)  # - 1
-        self.profile.insert_group(n=row_int, Group=DEFAULT_GROUP)
+        self.profile.insert_group(n=row_int, Group=copy.deepcopy(DEFAULT_GROUP))
         self.build_profile_tree()
         self.generate_info_boxes()
 
     def append_group_button_action(self):
-        self.profile.append_group(Group=DEFAULT_GROUP)
+        self.profile.append_group(Group=copy.deepcopy(DEFAULT_GROUP))
         self.build_profile_tree()
         self.generate_info_boxes()
 

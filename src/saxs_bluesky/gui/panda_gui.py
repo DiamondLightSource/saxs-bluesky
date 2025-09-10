@@ -7,6 +7,7 @@ Python dataclasses and GUI as a replacement for NCDDetectors
 
 """
 
+import copy
 import json
 import os
 import tkinter
@@ -40,6 +41,11 @@ BL = get_saxs_beamline()
 
 CONFIG = load_beamline_config()
 DEFAULT_PROFILE = CONFIG.DEFAULT_PROFILE
+
+print(DEFAULT_PROFILE.n_groups)
+print("DEFAULT_PROFILE id:", id(DEFAULT_PROFILE))
+
+
 ############################################################################################
 
 
@@ -84,8 +90,6 @@ class PandAGUI:
         self.client = BlueAPIPythonClient(
             BL, blueapi_config_path, self.instrument_session
         )
-
-        self.profiles = self.configuration.profiles
 
         self.window = tkinter.Tk()
         self.window.wm_resizable(True, True)
@@ -155,6 +159,7 @@ class PandAGUI:
             CONFIG.PULSE_CONNECTIONS,
             self.configuration.detectors,
         )
+
         self.build_profile_edit_frame(side="left")
 
         #################################################################
@@ -181,14 +186,8 @@ class PandAGUI:
 
             self.notebook.forget(self.add_frame)
 
-            # for profile in self.configuration.profiles:
-            #     print(profile)
-
-            self.configuration.append_profile(DEFAULT_PROFILE)
+            self.configuration.append_profile(copy.deepcopy(DEFAULT_PROFILE))
             index = len(self.configuration.profiles) - 1
-
-            # for profile in self.configuration.profiles:
-            #     print(profile)
 
             new_profile_tab = ProfileTab(
                 self.notebook,
@@ -199,7 +198,7 @@ class PandAGUI:
 
             self.build_add_tab()  # re add tab +
 
-            for n, _tab in enumerate(self.notebook.tabs()[0:-1]):
+            for n in range(self.configuration.n_profiles):
                 self.notebook.tab(n, text="Profile " + str(n))
 
             self.notebook.select(
@@ -234,20 +233,22 @@ class PandAGUI:
         ##rename all the tabs
         for n, _tab in enumerate(self.notebook.tabs()[0:-1]):
             self.notebook.tab(n, text="Profile " + str(n))
-            # proftab_object: ProfileTab = self.profile_tabs[n]
-            # ttk.Label(proftab_object, text="Profile " + str(n)).grid(
-            #     column=0, row=0, padx=5, pady=5, sticky="w"
-            # )
 
         return None
 
     def commit_config(self):
         # tab_names = self.notebook.tabs()
 
+        self.configuration.instrument_session = self.instrument_session
+        self.configuration.detectors = (
+            self.active_detectors_frame.get_active_detectors()
+        )
+
         profile_tabs = self.return_all_profile_tabs()
 
-        for profile_tab in profile_tabs:
+        for n, profile_tab in enumerate(profile_tabs):
             profile_tab.edit_config_for_profile()
+            self.configuration.profiles[n] = profile_tab.profile
 
     def load_config(self):
         panda_config_yaml = filedialog.askopenfilename()
@@ -537,7 +538,7 @@ class PandAGUI:
 
         return None
 
-    def return_all_profile_tabs(self):
+    def return_all_profile_tabs(self) -> list[ProfileTab]:
         tab_names = self.notebook.tabs()[:-1]  # miss last one because it the + tab
 
         print(tab_names)
@@ -557,6 +558,9 @@ class PandAGUI:
         self.proftab = self.get_profile_tab()
 
     def build_add_tab(self):
+        for n, profile in enumerate(self.configuration.profiles):
+            print(f"profile {n} id:", id(profile))
+
         self.add_frame = tkinter.Frame()
         self.notebook.add(self.add_frame, text="+")
         self.window.bind("<<NotebookTabChanged>>", self.add_profile_tab)
