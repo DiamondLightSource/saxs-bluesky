@@ -415,7 +415,7 @@ class PandAGUI:
     def build_blueapi_frame(self):
         self.run_frame = ttk.Frame(self.always_visible_frame, borderwidth=5)
 
-        self.run_frame.pack(fill="y", expand=True, side="right", anchor="e")
+        self.run_frame.pack(fill="y", expand=True, side="right")
         get_plans_button = ttk.Button(
             self.run_frame, text="Get Plans", command=self.get_plans
         )
