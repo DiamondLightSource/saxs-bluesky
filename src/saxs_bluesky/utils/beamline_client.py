@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from pathlib import Path
 
 from blueapi.cli.updates import CliEventRenderer
@@ -28,7 +29,12 @@ class BlueAPIPythonClient(BlueapiClient):
         blueapi_class = BlueapiClient.from_config(loaded_config)
         super().__init__(blueapi_class._rest, blueapi_class._events)  # noqa
 
-    def run(self, plan_name: str, params: dict):
+    def run(self, plan: str | Callable, params: dict):
+        if isinstance(plan, str):
+            plan_name = plan
+        else:
+            plan_name = plan.__name__
+
         task = TaskRequest(
             name=plan_name,
             params=params,

@@ -177,8 +177,8 @@ class DropdownPopup(ttk.Combobox):
         self.tableview.item(rowid, values=vals)
         self.destroy()
 
-        # self.tableview.proftab.edit_config_for_profile()
-        # self.tableview.proftab.generate_info_boxes()
+        self.tableview.proftab.edit_config_for_profile()
+        self.tableview.proftab.generate_info_boxes()
 
 
 class CheckButtonPopup(ttk.Checkbutton):
@@ -288,8 +288,8 @@ class EntryPopup(ttk.Entry):
     def __init__(
         self,
         tableview: EditableTableview,
-        iid: str,
-        column: int,
+        row_id: str,
+        col_id: int,
         text: str,
         entrytype=int,
         **kw,
@@ -298,8 +298,8 @@ class EntryPopup(ttk.Entry):
 
         ttk.Style().configure("pad.TEntry", padding="1 1 1 1")
         self.tableview = tableview
-        self.iid = iid
-        self.column = column
+        self.row_id = row_id
+        self.col_id = col_id
         self.entrytype = entrytype
         self.insert(0, text)
         self["exportselection"] = False
@@ -313,8 +313,8 @@ class EntryPopup(ttk.Entry):
         self.bind("<Escape>", lambda *ignore: self.destroy())
 
     def on_return(self, event):
-        rowid = self.tableview.focus()
-        vals = self.tableview.item(rowid, "values")
+        # rowid = self.tableview.focus()
+        vals = self.tableview.item(self.row_id, "values")
         vals = list(vals)
 
         if isinstance(self.entrytype, int):
@@ -333,12 +333,12 @@ class EntryPopup(ttk.Entry):
             messagebox.showinfo("Info", f"Must be of type {self.entrytype}")
             print(f"{e} Must be of type {self.entrytype}")
 
-        vals[self.column] = selection  # type: ignore
+        vals[self.col_id] = selection  # type: ignore
 
-        self.tableview.item(rowid, values=vals)
+        self.tableview.item(self.row_id, values=vals)
 
-        # self.tableview.proftab.parent.commit_config()
-        # self.tableview.proftab.generate_info_boxes()
+        self.tableview.proftab.edit_config_for_profile()
+        self.tableview.proftab.generate_info_boxes()
 
         self.destroy()
 
@@ -429,6 +429,7 @@ class ProfileTab(ttk.Frame):
 
     def delete_last_groups_button_action(self):
         if len(self.profile.groups) == 1:
+            messagebox.showinfo("Info", "Must have atleast one group")
             return
 
         row_int = len(self.profile.groups) - 1

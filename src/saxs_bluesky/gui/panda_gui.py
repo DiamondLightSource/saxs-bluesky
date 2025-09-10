@@ -138,14 +138,27 @@ class PandAGUI:
             self.notebook.add(profile_tab, text="Profile " + str(n))
             self.profile_tabs.append(profile_tab)
 
+        def print_prof():
+            self.get_profile_tab().print_profile_button_action()
+
         print_profile_button = ttk.Button(
             self.run_frame,
             text="Print Profile",
-            command=self.get_profile_tab().print_profile_button_action,
+            command=print_prof,
         )
         print_profile_button.grid(
             column=2, row=11, padx=5, pady=5, columnspan=1, sticky="news"
         )
+
+        # x = ttk.Button(
+        #     self.run_frame,
+        #     text="Print Profile",
+        #     command=self.get_profile_tab.print_profile_button_action,
+        # )
+        # x.grid(column=2, row=20, padx=5, pady=5, columnspan=1, sticky="news")
+
+        # print(self.get_profile_index())
+
         ########################################################
 
         text_list = [
@@ -188,10 +201,16 @@ class PandAGUI:
         if self.notebook.select() == self.notebook.tabs()[-1]:
             print("new profile tab created")
 
+            self.commit_config()
+
             self.notebook.forget(self.add_frame)
+
+            print(self.configuration.profiles)
 
             self.configuration.append_profile(DEFAULT_PROFILE)
             index = len(self.configuration.profiles) - 1
+
+            print(self.configuration.profiles)
 
             new_profile_tab = ProfileTab(
                 self.notebook,
@@ -575,30 +594,40 @@ class PandAGUI:
         self.profile_edit_frame = ttk.Frame(self.always_visible_frame, borderwidth=5)
         self.profile_edit_frame.pack(fill="both", expand=True, side="left")
 
-        profile_tab = self.get_profile_tab()
+        def insert():
+            self.get_profile_tab().insert_group_button_action()
 
         insertrow_button = ttk.Button(
             self.profile_edit_frame,
             text="Insert Group",
-            command=profile_tab.insert_group_button_action,
+            command=insert,
         )
+
+        def delete():
+            self.get_profile_tab().delete_group_button_action()
 
         deleterow_button = ttk.Button(
             self.profile_edit_frame,
             text="Delete Group",
-            command=profile_tab.delete_group_button_action,
+            command=delete,
         )
+
+        def append():
+            self.get_profile_tab().append_group_button_action()
 
         appendrow_button = ttk.Button(
             self.profile_edit_frame,
             text="Add Group",
-            command=profile_tab.append_group_button_action,
+            command=append,
         )
 
-        deletefinalrow_button = ttk.Button(
+        def discard():
+            self.get_profile_tab().delete_last_groups_button_action()
+
+        discardrow_button = ttk.Button(
             self.profile_edit_frame,
             text="Discard Group",
-            command=profile_tab.delete_last_groups_button_action,
+            command=discard,
         )
 
         delete_profile_button = ttk.Button(
@@ -610,7 +639,7 @@ class PandAGUI:
         insertrow_button.pack(fill="x", expand=True, side=side)  # type: ignore
         deleterow_button.pack(fill="x", expand=True, side=side)  # type: ignore
         appendrow_button.pack(fill="x", expand=True, side=side)  # type: ignore
-        deletefinalrow_button.pack(fill="x", expand=True, side=side)  # type: ignore
+        discardrow_button.pack(fill="x", expand=True, side=side)  # type: ignore
         delete_profile_button.pack(fill="x", expand=True, side=side)  # type: ignore
 
         return None
