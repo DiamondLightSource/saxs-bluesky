@@ -91,37 +91,14 @@ class PandAGUI:
         self.window.wm_resizable(True, True)
         self.window.minsize(600, 200)
         self.window.title("PandA Config")
-        self.theme()
+        self.style = ttk.Style(self.window)
+        self.window.tk.call(
+            "source", f"{os.path.dirname(os.path.realpath(__file__))}/sv.tcl"
+        )  # Put here the path of your theme file
+        # Set the theme with the theme_use method
+        self.theme("dark")
 
-        menubar = tkinter.Menu(self.window)
-        filemenu = tkinter.Menu(menubar, tearoff=0)
-        filemenu.add_command(label="New", command=self.open_new_window)
-        filemenu.add_command(label="Open", command=self.load_config)
-        filemenu.add_command(label="Save", command=self.save_config)
-        filemenu.add_separator()
-        filemenu.add_command(label="Exit", command=self.window.quit)
-        menubar.add_cascade(label="File", menu=filemenu)
-
-        config_menu = tkinter.Menu(menubar, tearoff=0)
-        config_menu.add_command(label="Edit Config", command=self.open_settings)
-        menubar.add_cascade(label="Config", menu=config_menu)
-
-        show_menu = tkinter.Menu(menubar, tearoff=0)
-        show_menu.add_command(label="Show Wiring", command=self.show_wiring_config)
-        menubar.add_cascade(label="Show", menu=show_menu)
-
-        instr_menu = tkinter.Menu(menubar, tearoff=0)
-        instr_menu.add_command(
-            label="Change Instrument Session", command=self.request_instrument_session
-        )
-        menubar.add_cascade(label="Inst Session", menu=instr_menu)
-
-        helpmenu = tkinter.Menu(menubar, tearoff=0)
-        helpmenu.add_command(label="Help Index", command=self.show_about)
-        helpmenu.add_command(label="About...", command=self.show_about)
-        menubar.add_cascade(label="Help", menu=helpmenu)
-
-        self.window.config(menu=menubar)
+        self.build_menu_bar()
 
         self.always_visible_frame = ttk.Frame(self.window, borderwidth=5)
         self.always_visible_frame.pack(fill="both", side="bottom", expand=True)
@@ -168,6 +145,44 @@ class PandAGUI:
         if start:
             self.window.mainloop()
 
+    def build_menu_bar(self):
+        menubar = tkinter.Menu(self.window)
+        filemenu = tkinter.Menu(menubar, tearoff=0)
+        filemenu.add_command(label="New", command=self.open_new_window)
+        filemenu.add_command(label="Open", command=self.load_config)
+        filemenu.add_command(label="Save", command=self.save_config)
+        filemenu.add_separator()
+        filemenu.add_command(label="Exit", command=self.window.quit)
+        menubar.add_cascade(label="File", menu=filemenu)
+
+        config_menu = tkinter.Menu(menubar, tearoff=0)
+        config_menu.add_command(label="Edit Config", command=self.open_settings)
+        menubar.add_cascade(label="Config", menu=config_menu)
+
+        show_menu = tkinter.Menu(menubar, tearoff=0)
+        show_menu.add_command(label="Show Wiring", command=self.show_wiring_config)
+        menubar.add_cascade(label="Show", menu=show_menu)
+
+        instr_menu = tkinter.Menu(menubar, tearoff=0)
+        instr_menu.add_command(
+            label="Change Instrument Session", command=self.request_instrument_session
+        )
+        menubar.add_cascade(label="Inst Session", menu=instr_menu)
+
+        theme_menu = tkinter.Menu(menubar, tearoff=0)
+        theme_menu.add_command(label="dark", command=lambda *ignore: self.theme("dark"))
+        theme_menu.add_command(
+            label="light", command=lambda *ignore: self.theme("light")
+        )
+        menubar.add_cascade(label="Theme", menu=theme_menu)
+
+        helpmenu = tkinter.Menu(menubar, tearoff=0)
+        helpmenu.add_command(label="Help Index", command=self.show_about)
+        helpmenu.add_command(label="About...", command=self.show_about)
+        menubar.add_cascade(label="Help", menu=helpmenu)
+
+        self.window.config(menu=menubar)
+
     def request_instrument_session(self):
         self.instrument_session = str(
             askstring(
@@ -192,16 +207,11 @@ class PandAGUI:
         messagebox.showinfo("About", __version__)
 
     def theme(self, theme_name: str = "light"):
-        self.style = ttk.Style(self.window)
-
-        self.window.tk.call(
-            "source", f"{os.path.dirname(os.path.realpath(__file__))}/sv.tcl"
-        )  # Put here the path of your theme file
-        # Set the theme with the theme_use method
-        self.style.theme_use(f"sun-valley-{theme_name}")
-
-        # print("All themes:", style.theme_names())
-        # self.style.theme_use(theme_name)
+        if theme_name in ["light", "dark"]:
+            self.style.theme_use(f"sun-valley-{theme_name}")
+        else:
+            self.style.theme_use(theme_name)
+            print("All themes:", self.style.theme_names())
 
     def add_profile_tab(self, event):
         if self.notebook.select() == self.notebook.tabs()[-1]:
