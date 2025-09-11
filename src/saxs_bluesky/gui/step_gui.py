@@ -21,7 +21,7 @@ class StepWidget:
             "stop": float(self.StopLabelEntry.get_value()),
             "num": float(self.StepLabelEntry.get_value()),
             "axis": inject(self.ScanAxisLabelEntry.get_value()),
-            "detectors": list(CONFIG.FAST_DETECTORS),
+            "detectors": list(self.detectors),
         }
 
         try:
@@ -35,7 +35,7 @@ class StepWidget:
             "stop": float(self.StopLabelEntry.get_value()),
             "num": float(self.StepLabelEntry.get_value()),
             "axis": inject(self.ScanAxisLabelEntry.get_value()),
-            "detectors": list(CONFIG.FAST_DETECTORS),
+            "detectors": list(self.detectors),
         }
 
         try:
@@ -46,8 +46,9 @@ class StepWidget:
     def show(self):
         print(self.StartLabelEntry.get_value())
 
-    def __init__(self, client: BlueAPIPythonClient):
+    def __init__(self, detectors: list, client: BlueAPIPythonClient):
         self.client = client
+        self.detectors = detectors
         self.root = tkinter.Tk()
         self.root.minsize(300, 160)
         self.root.title("Step Scan Control")
@@ -95,4 +96,7 @@ if __name__ == "__main__":
     BL = "i22"
     blueapi_config_path = f"./src/saxs_bluesky/blueapi_configs/{BL}_blueapi_config.yaml"
     client = BlueAPIPythonClient(BL, blueapi_config_path, "None")
-    StepWidget(client)
+
+    detectors = CONFIG.FAST_DETECTORS
+
+    StepWidget(detectors, client)

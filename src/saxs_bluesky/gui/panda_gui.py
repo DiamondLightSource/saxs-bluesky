@@ -397,7 +397,7 @@ class PandAGUI:
             print("Could not upload profile to panda")
 
     def open_step_widget(self):
-        StepWidget(self.client)
+        StepWidget(list(CONFIG.FAST_DETECTORS), self.client)
 
     def show_active_detectors(self):
         active_detectors = self.active_detectors_frame.get_active_detectors()
