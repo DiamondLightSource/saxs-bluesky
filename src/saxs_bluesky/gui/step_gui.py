@@ -46,17 +46,8 @@ class StepWidget:
     def show(self):
         print(self.StartLabelEntry.get_value())
 
-    def __init__(self, BL, instrument_session):
-        blueapi_config_path = (
-            f"./src/saxs_bluesky/blueapi_configs/{BL}_blueapi_config.yaml"
-        )
-
-        self.instrument_session = instrument_session
-
-        self.client = BlueAPIPythonClient(
-            BL, blueapi_config_path, self.instrument_session
-        )
-
+    def __init__(self, client: BlueAPIPythonClient):
+        self.client = client
         self.root = tkinter.Tk()
         self.root.minsize(300, 160)
         self.root.title("Step Scan Control")
@@ -86,7 +77,7 @@ class StepWidget:
             label_text="Scan Axis",
             row=3,
             column=1,
-            initial_val="base_top.x",
+            initial_val="base.x",
         )
 
         tkinter.Button(self.root, text="Run Step Scan", command=self.step_action).grid(
@@ -101,4 +92,7 @@ class StepWidget:
 
 
 if __name__ == "__main__":
-    StepWidget("i22", "None")
+    BL = "i22"
+    blueapi_config_path = f"./src/saxs_bluesky/blueapi_configs/{BL}_blueapi_config.yaml"
+    client = BlueAPIPythonClient(BL, blueapi_config_path, "None")
+    StepWidget(client)
