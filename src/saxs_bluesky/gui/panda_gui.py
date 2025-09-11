@@ -76,6 +76,8 @@ class PandAGUI:
 
         if ask_instrument_session and self.configuration.instrument_session is not None:
             self.instrument_session = self.request_instrument_session()
+        elif self.configuration.instrument_session is None:
+            self.instrument_session = self.request_instrument_session()
         else:
             self.instrument_session = self.configuration.instrument_session
 
