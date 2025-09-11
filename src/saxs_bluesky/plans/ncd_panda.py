@@ -257,10 +257,10 @@ def show_deadtime(detector_deadtime, active_detector_names):
 
 
 def set_panda_output(
-    panda: HDFPanda,
     output_type: str = "TTL",
     output: int = 1,
-    state: str = "ON",
+    state: bool | int = 1,
+    panda: HDFPanda = DEFAULT_PANDA,
     group: str = "switch",
 ) -> MsgGenerator:
     """
@@ -273,12 +273,49 @@ def set_panda_output(
         state (str): Desired state ("ON" or "OFF").
         group (str): Bluesky group name.
     """
-    state_value = (
-        PandaBitMux.ONE.value if state.upper() == "ON" else PandaBitMux.ZERO.value
-    )
+    state_value = PandaBitMux.ONE.value if state else PandaBitMux.ZERO.value
     output_attr = getattr(panda, f"{output_type.lower()}out")[int(output)]
     yield from bps.abs_set(output_attr.val, state_value, group=group)
     yield from bps.wait(group=group, timeout=DEFAULT_TIMEOUT)
+
+
+def get_output(device: str) -> tuple[str | None, int | None]:
+    device = device.upper()
+
+    output_type = None
+    output = None
+
+    for out in CONFIG.TTLOUT.keys():
+        if device == CONFIG.TTLOUT[out].upper():
+            output_type = "TTL"
+            output = out
+
+    for out in CONFIG.CONFIG.LVDSOUT.keys():
+        if device == CONFIG.TTLOUT[out].upper():
+            output_type = "TTL"
+            output = out
+
+    return output_type, output
+
+
+def turn_on(device: str) -> MsgGenerator:
+    output_type, output = get_output(device)
+
+    if (output_type is None) or (output is None):
+        yield from bps.null()
+        LOGGER.info("No detector of that name in beamline config")
+    else:
+        yield from set_panda_output(output_type, output, 1)
+
+
+def turn_off(device: str) -> MsgGenerator:
+    output_type, output = get_output(device)
+
+    if (output_type is None) or (output is None):
+        LOGGER.info("No detector of that name in beamline config")
+        yield from bps.null()
+    else:
+        yield from set_panda_output(output_type, output, 0)
 
 
 # @attach_data_session_metadata_decorator()
