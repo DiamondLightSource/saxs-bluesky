@@ -569,7 +569,7 @@ class PandAGUI:
         for n, profile in enumerate(self.configuration.profiles):
             print(f"profile {n} id:", id(profile))
 
-        self.add_frame = tkinter.Frame()
+        self.add_frame = ttk.Frame()
         self.notebook.add(self.add_frame, text="+")
         self.window.bind("<<NotebookTabChanged>>", self.add_profile_tab)
 

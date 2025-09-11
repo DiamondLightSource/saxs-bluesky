@@ -238,7 +238,7 @@ class CheckButtonPopup(ttk.Checkbutton):
 
             self.option_var[pulse] = var
 
-            CB = tkinter.Checkbutton(
+            CB = ttk.Checkbutton(
                 self.root,
                 text=f"Pulse: {pulse}",
                 variable=self.option_var[pulse],
@@ -387,8 +387,8 @@ class ProfileTab(ttk.Frame):
         )
 
         self.n_cycles_entry_value = tkinter.IntVar(self, value=self.profile.cycles)
-        self.cycles_entry = tkinter.Entry(
-            self, bd=1, width=15, textvariable=self.n_cycles_entry_value
+        self.cycles_entry = ttk.Entry(
+            self, width=15, textvariable=self.n_cycles_entry_value
         )
 
         self.cycles_entry.grid(column=1, row=1, padx=5, pady=5, sticky="w")
@@ -640,7 +640,7 @@ class ProfileTab(ttk.Frame):
             self.multiplier_var = tkinter.StringVar(
                 value=str(self.profile.multiplier[i])  # type: ignore
             )
-            tkinter.Entry(self, bd=1, width=10, textvariable=self.multiplier_var).grid(
+            ttk.Entry(self, width=10, textvariable=self.multiplier_var).grid(
                 column=col_pos, row=0, padx=5, pady=5, sticky="nes"
             )
 

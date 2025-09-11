@@ -50,23 +50,22 @@ class ActiveDetectorsFrame(ttk.Frame):
                 var = tkinter.IntVar()
 
                 if (det.lower() == "fs") or ("shutter" in det.lower()):
-                    ad_entry = tkinter.Checkbutton(
+                    var.set(1)
+                    ad_entry = ttk.Checkbutton(
                         active_detectors_frame_n,
-                        bd=1,
                         text=det,
                         state="disabled",
                         variable=var,
                     )
                 else:
-                    ad_entry = tkinter.Checkbutton(
+                    ad_entry = ttk.Checkbutton(
                         active_detectors_frame_n,
-                        bd=1,
                         text=det,
                         variable=var,
                     )
 
                 if det in self.active_detectors:
-                    ad_entry.select()
+                    var.set(1)
 
                 ad_entry.grid(column=n + 1, row=1, padx=5, pady=5, sticky="w")
 
