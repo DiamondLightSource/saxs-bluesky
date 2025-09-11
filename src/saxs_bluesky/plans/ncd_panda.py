@@ -528,12 +528,26 @@ def set_detectors(
 
 @validate_call(config={"arbitrary_types_allowed": True})
 def log_detectors() -> MsgGenerator:
+    """
+    Log the currently stored detectors using the configured logger.
+
+    Yields:
+        Msg: Bluesky message indicating detectors have been logged.
+    """
     LOGGER.info(STORED_DETECTORS)
     return (yield Msg("detectors_logged"))
 
 
 @validate_call(config={"arbitrary_types_allowed": True})
 def set_profile(profile: Profile) -> MsgGenerator:
+    """
+    Store the provided profile globally for later use.
+
+    Args:
+        profile (Profile): The profile to store.
+    Yields:
+        Msg: Bluesky message indicating profile has been logged.
+    """
     global STORED_PROFILE
     STORED_PROFILE = profile
     return (yield Msg("profile_logged"))
@@ -541,16 +555,36 @@ def set_profile(profile: Profile) -> MsgGenerator:
 
 @validate_call(config={"arbitrary_types_allowed": True})
 def set_trigger_info(trigger_info: TriggerInfo) -> MsgGenerator:
+    """
+    Store the provided trigger info globally for later use.
+
+    Args:
+        trigger_info (TriggerInfo): The trigger info to store.
+    Yields:
+        Msg: Bluesky message indicating trigger info has been set.
+    """
     global STORED_TRIGGER_INFO
     STORED_TRIGGER_INFO = trigger_info
     return (yield Msg("profile_set"))
 
 
 def get_trigger_info() -> TriggerInfo | None:
+    """
+    Retrieve the globally stored trigger info.
+
+    Returns:
+        TriggerInfo | None: The stored trigger info, or None if not set.
+    """
     return STORED_TRIGGER_INFO
 
 
 def get_profile() -> Profile | None:
+    """
+    Retrieve the globally stored profile.
+
+    Returns:
+        Profile | None: The stored profile, or None if not set.
+    """
     return STORED_PROFILE
 
 
