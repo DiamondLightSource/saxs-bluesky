@@ -372,7 +372,7 @@ class PandAGUI:
 
     def set_detectors_plan(self):
         params = {
-            "detectors": list(CONFIG.FAST_DETECTORS),
+            "detectors": list(self.active_detectors_frame.get_active_detectors()),
         }
 
         try:
@@ -388,7 +388,7 @@ class PandAGUI:
 
     def count_detectors(self):
         params = {
-            "detectors": list(CONFIG.FAST_DETECTORS),
+            "detectors": list(self.active_detectors_frame.get_active_detectors()),
         }
 
         try:
@@ -397,7 +397,9 @@ class PandAGUI:
             print("Could not upload profile to panda")
 
     def open_step_widget(self):
-        StepWidget(list(CONFIG.FAST_DETECTORS), self.client)
+        StepWidget(
+            list(self.active_detectors_frame.get_active_detectors()), self.client
+        )
 
     def show_active_detectors(self):
         active_detectors = self.active_detectors_frame.get_active_detectors()
