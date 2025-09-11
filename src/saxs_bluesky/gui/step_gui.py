@@ -3,6 +3,7 @@ import tkinter
 from dodal.common import inject
 
 from saxs_bluesky.gui.gui_utils import LabelEntryPair
+from saxs_bluesky.plans.ncd_panda import step_rscan, step_scan
 from saxs_bluesky.utils.beamline_client import BlueAPIPythonClient
 from saxs_bluesky.utils.utils import (
     get_saxs_beamline,
@@ -24,7 +25,7 @@ class StepWidget:
         }
 
         try:
-            self.client.run("step_scan", params)
+            self.client.run(step_scan, params)
         except ConnectionError:
             print("Could not upload profile to panda")
 
@@ -38,7 +39,7 @@ class StepWidget:
         }
 
         try:
-            self.client.run("step_rscan", params)
+            self.client.run(step_rscan, params)
         except ConnectionError:
             print("Could not upload profile to panda")
 

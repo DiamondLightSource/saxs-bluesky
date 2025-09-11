@@ -79,9 +79,6 @@ class ProfilePlotter:
 
         self.fig.canvas.draw()
 
-        # if not self.open:
-        #     self.show()
-
     def on_close(self, event):
         print("Figure Closed")
         plt.clf()

@@ -33,10 +33,6 @@ class Group(BaseModel):
     run_units: str
     wait_pulses: list[int]
     run_pulses: list[int]
-    # created by model_post_init
-    # wait_time_s: float = 0.0
-    # run_time_s: float = 0.0
-    # group_duration: float = 0.0
 
     def model_post_init(self, __context: Any) -> None:
         assert len(self.wait_pulses) == len(self.run_pulses)
@@ -70,7 +66,7 @@ class Group(BaseModel):
             trigger = SeqTrigger.IMMEDIATE
             self.trigger = "IMMEDIATE"
         else:
-            trigger = eval(f"SeqTrigger.{self.trigger}")
+            trigger = eval(f"{SeqTrigger.__name__}.{self.trigger}")
 
         seq_table_kwargs = {
             "repeats": self.frames,

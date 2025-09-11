@@ -15,6 +15,7 @@ from tkinter import filedialog, messagebox, ttk
 from tkinter.simpledialog import askstring
 
 import matplotlib.pyplot as plt
+from bluesky.plans import count
 
 import saxs_bluesky.blueapi_configs
 from saxs_bluesky._version import __version__
@@ -87,6 +88,7 @@ class PandAGUI:
         self.window = tkinter.Tk()
         self.window.wm_resizable(True, True)
         self.window.minsize(600, 200)
+        self.window.title("PandA Config")
         self.theme(CONFIG.THEME_NAME)
 
         menubar = tkinter.Menu(self.window)
@@ -118,8 +120,6 @@ class PandAGUI:
         menubar.add_cascade(label="Help", menu=helpmenu)
 
         self.window.config(menu=menubar)
-
-        self.window.title("PandA Config")
 
         self.always_visible_frame = ttk.Frame(self.window, borderwidth=5)
         self.always_visible_frame.pack(fill="both", side="bottom", expand=True)
@@ -360,13 +360,13 @@ class PandAGUI:
         params = {"profile": profile_to_upload, "detectors": active_detectors}
 
         try:
-            self.client.run(configure_panda_triggering.__name__, params)
+            self.client.run(configure_panda_triggering, params)
         except ConnectionError:
             print("Could not upload profile to panda")
 
     def run_plan(self):
         try:
-            self.client.run(run_panda_triggering.__name__, {})
+            self.client.run(run_panda_triggering, {})
         except ConnectionError:
             print("Could not upload profile to panda")
 
@@ -376,13 +376,13 @@ class PandAGUI:
         }
 
         try:
-            self.client.run(set_detectors.__name__, params)
+            self.client.run(set_detectors, params)
         except ConnectionError:
             print("Could not upload profile to panda")
 
     def log_detectors_plan(self):
         try:
-            self.client.run(log_detectors.__name__, {})
+            self.client.run(log_detectors, {})
         except ConnectionError:
             print("Could not upload profile to panda")
 
@@ -392,21 +392,9 @@ class PandAGUI:
         }
 
         try:
-            self.client.run("count", params)
+            self.client.run(count, params)
         except ConnectionError:
             print("Could not upload profile to panda")
-
-    def stop_plan(self):
-        self.client.stop()
-
-    def reload_environment(self):
-        self.client.reload_environment()
-
-    def pause_plan(self):
-        self.client.pause()
-
-    def resume_plan(self):
-        self.client.resume()
 
     def open_step_widget(self):
         StepWidget(BL, self.instrument_session)
@@ -434,21 +422,21 @@ class PandAGUI:
         )
 
         stop_plans_button = ttk.Button(
-            self.run_frame, text="Stop Plan", command=self.stop_plan
+            self.run_frame, text="Stop Plan", command=self.client.stop
         )
         stop_plans_button.grid(
             column=2, row=5, padx=5, pady=5, columnspan=1, sticky="news"
         )
 
         pause_plans_button = ttk.Button(
-            self.run_frame, text="Pause Plan", command=self.pause_plan
+            self.run_frame, text="Pause Plan", command=self.client.pause
         )
         pause_plans_button.grid(
             column=2, row=7, padx=5, pady=5, columnspan=1, sticky="news"
         )
 
         resume_plans_button = ttk.Button(
-            self.run_frame, text="Resume Plan", command=self.resume_plan
+            self.run_frame, text="Resume Plan", command=self.client.resume
         )
         resume_plans_button.grid(
             column=2,
@@ -460,7 +448,7 @@ class PandAGUI:
         )
 
         reload_env_button = ttk.Button(
-            self.run_frame, text="Reload Env", command=self.reload_environment
+            self.run_frame, text="Reload Env", command=self.client.reload_environment
         )
         reload_env_button.grid(
             column=2, row=12, padx=5, pady=5, columnspan=1, sticky="news"
