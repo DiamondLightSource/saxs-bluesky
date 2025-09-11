@@ -91,7 +91,7 @@ class PandAGUI:
         self.window.wm_resizable(True, True)
         self.window.minsize(600, 200)
         self.window.title("PandA Config")
-        self.theme(CONFIG.THEME_NAME)
+        self.theme()
 
         menubar = tkinter.Menu(self.window)
         filemenu = tkinter.Menu(menubar, tearoff=0)
@@ -191,10 +191,17 @@ class PandAGUI:
     def show_about(self):
         messagebox.showinfo("About", __version__)
 
-    def theme(self, theme_name: str):
-        style = ttk.Style(self.window)
-        print("All themes:", style.theme_names())
-        style.theme_use(theme_name)
+    def theme(self, theme_name: str = "light"):
+        self.style = ttk.Style(self.window)
+
+        self.window.tk.call(
+            "source", f"{os.path.dirname(os.path.realpath(__file__))}/sv.tcl"
+        )  # Put here the path of your theme file
+        # Set the theme with the theme_use method
+        self.style.theme_use(f"sun-valley-{theme_name}")
+
+        # print("All themes:", style.theme_names())
+        # self.style.theme_use(theme_name)
 
     def add_profile_tab(self, event):
         if self.notebook.select() == self.notebook.tabs()[-1]:

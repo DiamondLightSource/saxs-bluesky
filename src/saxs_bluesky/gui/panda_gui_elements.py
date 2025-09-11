@@ -47,7 +47,7 @@ class EditableTableview(ttk.Treeview):
     def close_popups(self):
         if hasattr(self, "pulse_popup"):
             # self.pulse_popup.on_return(None)  # close previous popup
-            self.pulse_popup.destroy()
+            self.pulse_popup.on_return(None)
             del self.pulse_popup
         if hasattr(self, "Popup"):
             # self.Popup.on_return(None)  # close previous popup
@@ -234,9 +234,10 @@ class CheckButtonPopup(ttk.Checkbutton):
             if value is None:
                 raise ValueError("Pulse value is None")
             else:
-                var = tkinter.IntVar(value=int(value))
+                var = tkinter.IntVar()
 
             self.option_var[pulse] = var
+            self.option_var[pulse].set(value)
 
             CB = ttk.Checkbutton(
                 self.root,
@@ -248,15 +249,7 @@ class CheckButtonPopup(ttk.Checkbutton):
             )
 
             CB.grid(column=pulse, row=0, padx=5, pady=5, columnspan=1)
-
-            self.option_var[pulse].set(1)
-
             self.checkbuttons[pulse] = CB
-
-            if value == 1:
-                self.checkbuttons[pulse].select()
-            else:
-                self.checkbuttons[pulse].deselect()
 
     def toggle(self, pulse):
         if self.option_var[pulse].get() == 1:
@@ -279,7 +272,7 @@ class CheckButtonPopup(ttk.Checkbutton):
 
         self.tableview.item(self.rowid, values=self.vals)
         self.root.destroy()
-        del self
+        # del self
 
 
 class EntryPopup(ttk.Entry):
