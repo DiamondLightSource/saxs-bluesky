@@ -175,6 +175,12 @@ class PandAGUI:
             )
         )
 
+        if self.instrument_session is None:
+            messagebox.showinfo(
+                "Instrument Session", "Instrument Session must not be None!"
+            )
+            self.request_instrument_session()
+
         return self.instrument_session
 
     def open_new_window(self):
