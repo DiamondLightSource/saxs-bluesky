@@ -2,10 +2,14 @@ import os
 from importlib import import_module
 from pathlib import Path
 
+import dodal.beamlines
+
 ############################################################################################
 import matplotlib.pyplot as plt
 import numpy as np
+from dodal.common import inject
 from dodal.utils import get_beamline_name
+from ophyd_async.core import StandardDetector
 
 import saxs_bluesky.beamline_configs
 from saxs_bluesky.utils.ncdcore import ncdcore
@@ -13,6 +17,12 @@ from saxs_bluesky.utils.profile_groups import ExperimentLoader, Profile
 
 
 def get_saxs_beamline() -> str:
+    """
+    Get the current SAXS beamline name from the environment or default to 'i22'.
+
+    Returns:
+        str: The beamline name.
+    """
     BL = get_beamline_name(os.getenv("BEAMLINE"))  # type: ignore
 
     if BL is None:
@@ -22,15 +32,71 @@ def get_saxs_beamline() -> str:
     return BL
 
 
-BL = get_saxs_beamline()
+def load_beamline_config():
+    """
+    Dynamically import and return the beamline configuration module.
 
+    Returns:
+        module: The imported beamline configuration module.
+    """
+    BL = get_saxs_beamline()
 
-def load_beamline_config(BL: str):
     BL_CONFIG = import_module(f"{saxs_bluesky.beamline_configs.__name__}.{BL}_config")
     return BL_CONFIG
 
 
+def return_standard_detectors(BL) -> list[StandardDetector]:
+    """
+    Attempt to return a list of standard detectors for the given beamline.
+
+    Args:
+        BL: The beamline module.
+
+    Returns:
+        list[StandardDetector]: List of instantiated standard detectors.
+    """
+    standard_detector_list = []
+    exec(f"from {dodal.beamlines.__name__} import {BL}")
+
+    beamline_module_variables = dir(eval(BL))
+
+    for variable in beamline_module_variables:
+        if variable.islower():  # only devices will be lowercase
+            try:
+                object = eval(f"{BL}.{variable}")("", None)
+                if isinstance(object, StandardDetector):
+                    standard_detector_list.append(inject(variable))
+            except:  # noqa
+                pass
+
+    return standard_detector_list
+
+
 class ProfilePlotter:
+    """
+    Utility class for plotting pulse signals from a Profile.
+    """
+
+    def __init__(self, profile: Profile, pulse_names: list[str] | None = None):
+        """
+        Initialize the ProfilePlotter.
+
+        Args:
+            profile (Profile): The profile to plot.
+            pulse_names (list[str] | None): Optional list of pulse names.
+        """
+        self.profile = profile
+        self.pulse_names = pulse_names
+        self.name = "Panda Pulse Signals"
+        self.open = False
+
+        if self.pulse_names is None:
+            self.pulse_names = [
+                f"Seq Pulse {f}" for f in range(len(self.profile.active_pulses))
+            ]
+
+        self.setup_figure()
+
     @staticmethod
     def generate_pulse_signal(
         profile: Profile, pulse: int
@@ -61,9 +127,12 @@ class ProfilePlotter:
         return trigger_time, signal
 
     def plot_pulses(self):
-        if len(self.profile.active_pulses) != len(self.axes):
-            plt.close()
-            self.setup_figure()
+        """
+        Plot the pulse signals for all active pulses in the profile.
+        """
+        # if len(self.profile.active_pulses) != len(self.axes):
+        #     plt.close()
+        #     self.setup_figure()
 
         if len(self.profile.active_pulses) > 0:
             for n, i in enumerate(self.profile.active_pulses):
@@ -79,22 +148,31 @@ class ProfilePlotter:
 
         self.fig.canvas.draw()
 
-        # if not self.open:
-        #     self.show()
-
     def on_close(self, event):
+        """
+        Callback for when the plot window is closed.
+        """
         print("Figure Closed")
         plt.clf()
         plt.close()
         self.open = False
 
-    def show(self, block=False):
+    def show(self, block: bool = True):
+        """
+        Show the plot window.
+
+        Args:
+            block (bool): Whether to block execution until the window is closed.
+        """
         # plt.tight_layout(pad=1.15)
         self.open = True
         plt.xlabel("Time (s)")
         plt.show(block=block)
 
     def setup_figure(self):
+        """
+        Set up the matplotlib figure and axes for plotting.
+        """
         self.fig, self.axes = plt.subplots(
             len(self.profile.active_pulses),
             1,
@@ -105,21 +183,10 @@ class ProfilePlotter:
 
         self.fig.canvas.mpl_connect("close_event", self.on_close)
 
-    def __init__(self, profile: Profile, pulse_names: list[str] | None = None):
-        self.profile = profile
-        self.pulse_names = pulse_names
-        self.name = "Panda Pulse Signals"
-        self.open = False
-
-        if self.pulse_names is None:
-            self.pulse_names = [
-                f"Seq Pulse {f}" for f in range(len(self.profile.active_pulses))
-            ]
-
-        self.setup_figure()
-
 
 if __name__ == "__main__":
+    print(return_standard_detectors("i22"))
+
     _REPO_ROOT = Path(__file__).parent.parent.parent.parent
 
     default_config_path = os.path.join(
@@ -131,3 +198,4 @@ if __name__ == "__main__":
 
     plotter = ProfilePlotter(profile)
     plotter.plot_pulses()
+    plotter.show()

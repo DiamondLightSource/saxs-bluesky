@@ -1,3 +1,5 @@
+import copy
+
 from bluesky.protocols import Readable
 from dodal.beamlines import b21
 from dodal.common import inject
@@ -89,12 +91,12 @@ DEFAULT_GROUP = Group(
 DEFAULT_PROFILE = Profile(
     cycles=1,
     seq_trigger="IMMEDIATE",
-    groups=[DEFAULT_GROUP],
+    groups=[copy.deepcopy(DEFAULT_GROUP)],
     multiplier=None,
 )
 
 DEFAULT_EXPERIMENT = ExperimentLoader(
-    profiles=[DEFAULT_PROFILE],
+    profiles=[copy.deepcopy(DEFAULT_PROFILE)],
     instrument=b21.BL,
     detectors=["saxs", "waxs"],
     instrument_session="cm40642-4",

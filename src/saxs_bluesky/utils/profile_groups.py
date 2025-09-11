@@ -33,10 +33,6 @@ class Group(BaseModel):
     run_units: str
     wait_pulses: list[int]
     run_pulses: list[int]
-    # created by model_post_init
-    # wait_time_s: float = 0.0
-    # run_time_s: float = 0.0
-    # group_duration: float = 0.0
 
     def model_post_init(self, __context: Any) -> None:
         assert len(self.wait_pulses) == len(self.run_pulses)
@@ -70,7 +66,7 @@ class Group(BaseModel):
             trigger = SeqTrigger.IMMEDIATE
             self.trigger = "IMMEDIATE"
         else:
-            trigger = eval(f"SeqTrigger.{self.trigger}")
+            trigger = eval(f"{SeqTrigger.__name__}.{self.trigger}")
 
         seq_table_kwargs = {
             "repeats": self.frames,
@@ -121,6 +117,10 @@ class Profile(BaseModel):
         for n_group in self.groups:
             total_frames += n_group.frames
         return total_frames
+
+    @property
+    def n_groups(self):
+        return len(self.groups)
 
     @property
     def duration_per_cycle(self) -> float:
@@ -239,8 +239,9 @@ class ExperimentLoader:
     detectors: list[str]
     instrument_session: str = ""
 
-    def __post_init__(self):
-        self.n_profiles = len(self.profiles)
+    @property
+    def n_profiles(self):
+        return len(self.profiles)
 
     @staticmethod
     def read_from_yaml(config_filepath: str | Path):
@@ -335,8 +336,6 @@ class ExperimentLoader:
     def delete_profile(self, n: int):
         """Deletes the nth profile from the object"""
         self.profiles.pop(n)
-        self.__post_init__()
 
-    def append_profile(self, Profile: Profile):
-        self.profiles.append(Profile)
-        self.__post_init__()
+    def append_profile(self, profile: Profile):
+        self.profiles.append(profile)

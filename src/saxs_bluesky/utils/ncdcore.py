@@ -7,7 +7,7 @@ Useful functions
 
 class ncdcore:
     @staticmethod
-    def decimal_to_binary(n, bits=8):
+    def decimal_to_binary(n: int, bits: int = 8) -> str:
         """
         (decimal_to_binary(192)
 
@@ -21,7 +21,7 @@ class ncdcore:
         return leading_zeros + binary_string
 
     @staticmethod
-    def binary_to_decimal(n) -> int:
+    def binary_to_decimal(n: str) -> int:
         """
         binary_to_decimal("11000000")
 
@@ -31,7 +31,7 @@ class ncdcore:
         return int(n, 2)
 
     @staticmethod
-    def str2bool(v):
+    def str2bool(v: str) -> bool | None:
         if str(v).lower() in ("y", "yes", "True", "true", "t", "1"):
             return True
         elif str(v).lower() in ("n", "no", "False", "false", "f", "0"):

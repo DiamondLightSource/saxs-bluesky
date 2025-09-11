@@ -7,6 +7,7 @@ Python Elements for NCD PandA config GUI
 
 """
 
+import copy
 import tkinter
 from tkinter import messagebox, ttk
 
@@ -16,16 +17,16 @@ from ophyd_async.fastcs.panda import (
 from ophyd_async.fastcs.panda._block import PandaTimeUnits
 
 from saxs_bluesky.utils.ncdcore import ncdcore
-from saxs_bluesky.utils.profile_groups import ExperimentLoader, Group, Profile
+from saxs_bluesky.utils.profile_groups import Group, Profile
 from saxs_bluesky.utils.utils import (
     ProfilePlotter,
     get_saxs_beamline,
     load_beamline_config,
 )
 
-BL = get_saxs_beamline()
-CONFIG = load_beamline_config(BL=BL)
+CONFIG = load_beamline_config()
 DEFAULT_GROUP = CONFIG.DEFAULT_GROUP
+BL = get_saxs_beamline()
 
 
 def recursive_destroy(frame):
@@ -37,17 +38,21 @@ def recursive_destroy(frame):
 
 
 class EditableTableview(ttk.Treeview):
-    def __init__(self, proftab, *args, **kwargs):
-        self.proftab = proftab
-        super().__init__(self.proftab, *args, **kwargs)
+    def __init__(self, profile_tab, *args, **kwargs):
+        self.profile_tab = profile_tab
+        super().__init__(self.profile_tab, *args, **kwargs)
         self.bind("<Double-1>", lambda event: self.onDoubleClick(event))
         self.kwargs = kwargs
 
     def close_popups(self):
         if hasattr(self, "pulse_popup"):
-            self.pulse_popup.on_return(None)  # close previous popup
+            # self.pulse_popup.on_return(None)  # close previous popup
+            self.pulse_popup.on_return(None)
+            del self.pulse_popup
         if hasattr(self, "Popup"):
-            self.Popup.on_return(None)  # close previous popup
+            # self.Popup.on_return(None)  # close previous popup
+            self.Popup.destroy()
+            del self.Popup
 
     def onDoubleClick(self, event):
         """Executed, when a row is double-clicked. Opens
@@ -173,9 +178,6 @@ class DropdownPopup(ttk.Combobox):
         self.tableview.item(rowid, values=vals)
         self.destroy()
 
-        self.tableview.proftab.parent.commit_config()
-        self.tableview.proftab.generate_info_boxes()
-
 
 class CheckButtonPopup(ttk.Checkbutton):
     def __init__(self, tableview, rowid, column, x, y, columns, **kw):
@@ -232,11 +234,12 @@ class CheckButtonPopup(ttk.Checkbutton):
             if value is None:
                 raise ValueError("Pulse value is None")
             else:
-                var = tkinter.IntVar(value=int(value))
+                var = tkinter.IntVar()
 
             self.option_var[pulse] = var
+            self.option_var[pulse].set(value)
 
-            CB = tkinter.Checkbutton(
+            CB = ttk.Checkbutton(
                 self.root,
                 text=f"Pulse: {pulse}",
                 variable=self.option_var[pulse],
@@ -246,15 +249,7 @@ class CheckButtonPopup(ttk.Checkbutton):
             )
 
             CB.grid(column=pulse, row=0, padx=5, pady=5, columnspan=1)
-
-            self.option_var[pulse].set(1)
-
             self.checkbuttons[pulse] = CB
-
-            if value == 1:
-                self.checkbuttons[pulse].select()
-            else:
-                self.checkbuttons[pulse].deselect()
 
     def toggle(self, pulse):
         if self.option_var[pulse].get() == 1:
@@ -277,14 +272,14 @@ class CheckButtonPopup(ttk.Checkbutton):
 
         self.tableview.item(self.rowid, values=self.vals)
         self.root.destroy()
-        del self
+        # del self
 
 
 class EntryPopup(ttk.Entry):
     def __init__(
         self,
         tableview: EditableTableview,
-        iid: str,
+        rowid: str,
         column: int,
         text: str,
         entrytype=int,
@@ -294,7 +289,7 @@ class EntryPopup(ttk.Entry):
 
         ttk.Style().configure("pad.TEntry", padding="1 1 1 1")
         self.tableview = tableview
-        self.iid = iid
+        self.rowid = rowid
         self.column = column
         self.entrytype = entrytype
         self.insert(0, text)
@@ -309,8 +304,7 @@ class EntryPopup(ttk.Entry):
         self.bind("<Escape>", lambda *ignore: self.destroy())
 
     def on_return(self, event):
-        rowid = self.tableview.focus()
-        vals = self.tableview.item(rowid, "values")
+        vals = self.tableview.item(self.rowid, "values")
         vals = list(vals)
 
         if isinstance(self.entrytype, int):
@@ -331,11 +325,8 @@ class EntryPopup(ttk.Entry):
 
         vals[self.column] = selection  # type: ignore
 
-        self.tableview.item(rowid, values=vals)
+        self.tableview.item(self.rowid, values=vals)
         self.destroy()
-
-        self.tableview.proftab.parent.commit_config()
-        self.tableview.proftab.generate_info_boxes()
 
     def select_all(self, *ignore):
         """Set selection on the whole text"""
@@ -346,6 +337,71 @@ class EntryPopup(ttk.Entry):
 
 
 class ProfileTab(ttk.Frame):
+    def __init__(self, notebook, profile: Profile):
+        self.notebook = notebook
+        self.profile = profile
+
+        super().__init__(borderwidth=5)
+
+        self.columnconfigure(tuple(range(60)), weight=1)
+        self.rowconfigure(tuple(range(30)), weight=1)
+
+        self.outputs = self.profile.outputs()
+        self.inputs = self.profile.inputs()
+
+        if self.profile.multiplier is not None:
+            self.build_multiplier_choices()
+        else:
+            self.multiplier_var_options = None
+        ### add tree view ############################################
+        self.build_profile_tree()
+
+        ############################################################
+
+        ##### input trigger select
+        self.seq_triggers = self.profile.seq_triggers()
+
+        ttk.Label(self, text="Seq Trigger").grid(
+            column=0, row=0, padx=5, pady=5, sticky="w"
+        )
+
+        self.clicked_start_trigger = tkinter.StringVar()
+        ttk.OptionMenu(
+            self,
+            self.clicked_start_trigger,
+            self.profile.seq_trigger,
+            *self.seq_triggers,
+        ).grid(column=1, row=0, padx=5, pady=5, sticky="w")
+
+        ############# number of cycles box
+
+        ttk.Label(self, text="No. of cycles").grid(
+            column=0, row=1, padx=5, pady=5, sticky="w"
+        )
+
+        self.n_cycles_entry_value = tkinter.IntVar(self, value=self.profile.cycles)
+        self.cycles_entry = ttk.Entry(
+            self, width=15, textvariable=self.n_cycles_entry_value
+        )
+
+        self.cycles_entry.grid(column=1, row=1, padx=5, pady=5, sticky="w")
+        # Tracing the entry and calling the above function
+        self.n_cycles_entry_value.trace_add("write", self.entry_changed)
+
+        ############# plot button
+        ############# profile info
+
+        self.generate_info_boxes()
+
+        ############profile settings
+        self.plot_profile_button = ttk.Button(
+            self, text="Plot Profile", command=self.commit_and_plot
+        )
+
+        self.plot_profile_button.grid(
+            column=8, row=0, padx=5, pady=5, columnspan=1, sticky="nes"
+        )
+
     def get_start_value(self):
         return self.clicked_start_trigger.get()
 
@@ -353,6 +409,10 @@ class ProfileTab(ttk.Frame):
         return int(self.n_cycles_entry_value.get())
 
     def delete_last_groups_button_action(self):
+        if len(self.profile.groups) == 1:
+            messagebox.showinfo("Info", "Must have atleast one group")
+            return
+
         row_int = len(self.profile.groups) - 1
         self.profile.delete_group(n=row_int)
         self.build_profile_tree()
@@ -382,12 +442,12 @@ class ProfileTab(ttk.Frame):
 
         row_str = "0X" + (row.replace("I", ""))
         row_int = int(row_str, 16)  # - 1
-        self.profile.insert_group(n=row_int, Group=DEFAULT_GROUP)
+        self.profile.insert_group(n=row_int, Group=copy.deepcopy(DEFAULT_GROUP))
         self.build_profile_tree()
         self.generate_info_boxes()
 
     def append_group_button_action(self):
-        self.profile.append_group(Group=DEFAULT_GROUP)
+        self.profile.append_group(Group=copy.deepcopy(DEFAULT_GROUP))
         self.build_profile_tree()
         self.generate_info_boxes()
 
@@ -403,6 +463,7 @@ class ProfileTab(ttk.Frame):
         else:
             self.profile_config_tree.close_popups()
             self.profile_config_tree.destroy()
+            del self.profile_config_tree
             self.profile_config_tree = EditableTableview(
                 self, columns=COLUMN_NAMES, show="headings"
             )
@@ -449,6 +510,9 @@ class ProfileTab(ttk.Frame):
 
         # Configuring treeview
         self.profile_config_tree.configure(yscrollcommand=verscrlbar.set)
+        self.profile_config_tree.bind_all(
+            "<FocusOut>", self.entry_changed
+        )  # regen figures when edited
 
         ############################################################
 
@@ -513,31 +577,43 @@ class ProfileTab(ttk.Frame):
         cycles = self.get_n_cycles_value()
         profile_trigger = self.get_start_value()
 
-        if self.multiplier_var_options:
-            multiplier = [int(f.get()) for f in self.multiplier_var_options]
-        else:
-            multiplier = None
+        multipliers = self.get_multipliers()
 
         new_profile = Profile(
             cycles=cycles,
             seq_trigger=profile_trigger,
             groups=group_list,
-            multiplier=multiplier,
+            multiplier=multipliers,
         )
 
         self.profile = new_profile
-        self.configuration.profiles[self.n_profile] = new_profile
+        # self.configuration.profiles[self.n_profile] = new_profile
 
     def print_profile_button_action(self):
-        self.parent.commit_config()
+        self.edit_config_for_profile()
         self.generate_info_boxes()
 
         for i in self.profile.groups:
             print(i)
 
-        print(self.profile)
-        print(self.profile.active_pulses)
-        print(self.profile.duration)
+        # print(self.profile)
+        print("Active Pulses", self.profile.active_pulses)
+        print("Duration", self.profile.duration, "Seconds")
+
+    def get_multipliers(self):
+        """Returns the give multiplier values"""
+
+        if (self.profile.multiplier is None) and (self.multiplier_var_options is None):
+            return None
+
+        elif self.multiplier_var_options is not None:
+            mulitpliers = []
+
+            for mul in self.multiplier_var_options:
+                multi_val = int(mul.get())
+                mulitpliers.append(multi_val)
+
+            return mulitpliers
 
     # TODO: https://github.com/DiamondLightSource/saxs-bluesky/issues/23
     def build_multiplier_choices(self):
@@ -557,7 +633,7 @@ class ProfileTab(ttk.Frame):
             self.multiplier_var = tkinter.StringVar(
                 value=str(self.profile.multiplier[i])  # type: ignore
             )
-            tkinter.Entry(self, bd=1, width=10, textvariable=self.multiplier_var).grid(
+            ttk.Entry(self, width=10, textvariable=self.multiplier_var).grid(
                 column=col_pos, row=0, padx=5, pady=5, sticky="nes"
             )
 
@@ -565,7 +641,7 @@ class ProfileTab(ttk.Frame):
 
     def commit_and_plot(self):
         # self.edit_config_for_profile()
-        self.parent.commit_config()
+        self.edit_config_for_profile()
 
         if not hasattr(self, "plotter"):
             self.plotter = ProfilePlotter(self.profile, CONFIG.PULSE_BLOCK_NAMES)
@@ -583,130 +659,5 @@ class ProfileTab(ttk.Frame):
 
     # Fucntion that will be called when entry is changed
     def entry_changed(self, *args):
-        self.parent.commit_config()
+        self.edit_config_for_profile()
         self.generate_info_boxes()
-
-    def __init__(
-        self, parent, notebook, configuration: ExperimentLoader, n_profile: int
-    ):
-        self.notebook = notebook
-        self.parent = parent
-
-        self.configuration = configuration
-        self.n_profile = n_profile
-        self.profile: Profile = self.configuration.profiles[self.n_profile]
-
-        self.seq_table = self.profile.seq_table
-
-        super().__init__(self.notebook, borderwidth=5, relief="raised")
-
-        self.notebook.add(self, text="Profile " + str(n_profile))
-
-        self.columnconfigure(tuple(range(60)), weight=1)
-        self.rowconfigure(tuple(range(30)), weight=1)
-
-        ttk.Label(self, text="Profile " + str(n_profile)).grid(
-            column=0, row=0, padx=5, pady=5, sticky="w"
-        )
-
-        self.outputs = self.profile.outputs()
-        self.inputs = self.profile.inputs()
-
-        if self.profile.multiplier is not None:
-            self.build_multiplier_choices()
-        else:
-            self.multiplier_var_options = None
-            ### add tree view ############################################
-
-        self.build_profile_tree()
-
-        ############################################################
-
-        ##### input trigger select
-
-        self.seq_triggers = self.profile.seq_triggers()
-        # self.seq_triggers = [f.lower() for f in self.seq_triggers]
-
-        ttk.Label(self, text="Seq Trigger").grid(
-            column=0, row=0, padx=5, pady=5, sticky="e"
-        )
-
-        self.clicked_start_trigger = tkinter.StringVar()
-        ttk.OptionMenu(
-            self,
-            self.clicked_start_trigger,
-            self.profile.seq_trigger,
-            *self.seq_triggers,
-        ).grid(column=1, row=0, padx=5, pady=5, sticky="w")
-
-        ############# number of cycles box
-
-        ttk.Label(self, text="No. of cycles").grid(
-            column=0, row=1, padx=5, pady=5, sticky="e"
-        )
-
-        self.n_cycles_entry_value = tkinter.IntVar(self, value=self.profile.cycles)
-        self.cycles_entry = tkinter.Entry(
-            self, bd=1, width=15, textvariable=self.n_cycles_entry_value
-        )
-
-        self.cycles_entry.grid(column=1, row=1, padx=5, pady=5, sticky="w")
-
-        # Tracing the entry and calling the above function
-        self.n_cycles_entry_value.trace_add("write", self.entry_changed)
-
-        # cycles_entry.bind("<FocusOut>", self.focus_out_generate_info_boxes)
-
-        ############# plot button
-        ############# profile info
-
-        self.generate_info_boxes()
-
-        ############profile settings
-        self.plot_profile_button = ttk.Button(
-            self, text="Plot Profile", command=self.commit_and_plot
-        )
-
-        self.insertrow_button = ttk.Button(
-            self, text="Insert group", command=self.insert_group_button_action
-        )
-
-        self.deleterow_button = ttk.Button(
-            self, text="Delete group", command=self.delete_group_button_action
-        )
-
-        self.appendrow_button = ttk.Button(
-            self, text="Add group", command=self.append_group_button_action
-        )
-
-        self.deletefinalrow_button = ttk.Button(
-            self, text="Discard group", command=self.delete_last_groups_button_action
-        )
-
-        self.print_profile_button = ttk.Button(
-            self, text="Print Profile", command=self.print_profile_button_action
-        )
-
-        self.plot_profile_button.grid(
-            column=8, row=0, padx=5, pady=5, columnspan=1, sticky="nes"
-        )
-
-        self.insertrow_button.grid(
-            column=0, row=10, padx=5, pady=5, columnspan=1, sticky="news"
-        )
-
-        self.deleterow_button.grid(
-            column=1, row=10, padx=5, pady=5, columnspan=1, sticky="news"
-        )
-
-        self.appendrow_button.grid(
-            column=3, row=10, padx=5, pady=5, columnspan=1, sticky="news"
-        )
-
-        self.deletefinalrow_button.grid(
-            column=4, row=10, padx=5, pady=5, columnspan=1, sticky="news"
-        )
-
-        self.print_profile_button.grid(
-            column=3, row=1, padx=5, pady=5, columnspan=1, sticky="nes"
-        )

@@ -1,13 +1,9 @@
-# import json
-# import os
 import tkinter
-from tkinter import ttk
 
 from dodal.common import inject
 
-# from tkinter import filedialog, messagebox, ttk
-# from tkinter.simpledialog import askstring
-# import matplotlib.pyplot as plt
+from saxs_bluesky.gui.gui_utils import LabelEntryPair
+from saxs_bluesky.plans.ncd_panda import step_rscan, step_scan
 from saxs_bluesky.utils.beamline_client import BlueAPIPythonClient
 from saxs_bluesky.utils.utils import (
     get_saxs_beamline,
@@ -15,19 +11,7 @@ from saxs_bluesky.utils.utils import (
 )
 
 BL = get_saxs_beamline()
-CONFIG = load_beamline_config(BL)
-
-
-class LabelEntryPair:
-    def get_value(self):
-        return self.entry.get()
-
-    def __init__(self, master, label_text, row, column, initial_val):
-        self.var = tkinter.StringVar(value=initial_val)
-        self.label = ttk.Label(master, text=label_text)
-        self.label.grid(row=row, column=column, padx=5, pady=5, sticky="w")
-        self.entry = ttk.Entry(master, textvariable=self.var)
-        self.entry.grid(row=row, column=column + 1, padx=5, pady=5, sticky="w")
+CONFIG = load_beamline_config()
 
 
 class StepWidget:
@@ -37,11 +21,11 @@ class StepWidget:
             "stop": float(self.StopLabelEntry.get_value()),
             "num": float(self.StepLabelEntry.get_value()),
             "axis": inject(self.ScanAxisLabelEntry.get_value()),
-            "detectors": list(CONFIG.FAST_DETECTORS),
+            "detectors": list(self.detectors),
         }
 
         try:
-            self.client.run("step_scan", params)
+            self.client.run(step_scan, params)
         except ConnectionError:
             print("Could not upload profile to panda")
 
@@ -51,28 +35,20 @@ class StepWidget:
             "stop": float(self.StopLabelEntry.get_value()),
             "num": float(self.StepLabelEntry.get_value()),
             "axis": inject(self.ScanAxisLabelEntry.get_value()),
-            "detectors": list(CONFIG.FAST_DETECTORS),
+            "detectors": list(self.detectors),
         }
 
         try:
-            self.client.run("step_rscan", params)
+            self.client.run(step_rscan, params)
         except ConnectionError:
             print("Could not upload profile to panda")
 
     def show(self):
         print(self.StartLabelEntry.get_value())
 
-    def __init__(self, instrument_session):
-        blueapi_config_path = (
-            f"./src/saxs_bluesky/blueapi_configs/{BL}_blueapi_config.yaml"
-        )
-
-        self.instrument_session = instrument_session
-
-        self.client = BlueAPIPythonClient(
-            BL, blueapi_config_path, self.instrument_session
-        )
-
+    def __init__(self, detectors: list, client: BlueAPIPythonClient):
+        self.client = client
+        self.detectors = detectors
         self.root = tkinter.Tk()
         self.root.minsize(300, 160)
         self.root.title("Step Scan Control")
@@ -102,7 +78,7 @@ class StepWidget:
             label_text="Scan Axis",
             row=3,
             column=1,
-            initial_val="base_top.x",
+            initial_val="base.x",
         )
 
         tkinter.Button(self.root, text="Run Step Scan", command=self.step_action).grid(
@@ -117,4 +93,10 @@ class StepWidget:
 
 
 if __name__ == "__main__":
-    StepWidget("None")
+    BL = "i22"
+    blueapi_config_path = f"./src/saxs_bluesky/blueapi_configs/{BL}_blueapi_config.yaml"
+    client = BlueAPIPythonClient(BL, blueapi_config_path, "None")
+
+    detectors = CONFIG.FAST_DETECTORS
+
+    StepWidget(detectors, client)
