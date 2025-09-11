@@ -165,7 +165,7 @@ class PandAGUI:
 
         instr_menu = tkinter.Menu(menubar, tearoff=0)
         instr_menu.add_command(
-            label="Change Instrument Session", command=self.request_instrument_session
+            label="Change Instrument Session", command=self.change_intrument_session
         )
         menubar.add_cascade(label="Inst Session", menu=instr_menu)
 
@@ -199,6 +199,17 @@ class PandAGUI:
             self.request_instrument_session()
 
         return self.instrument_session
+
+    def change_intrument_session(self):
+        self.instrument_session = self.request_instrument_session()
+
+        text_list = [
+            f"Instrument: {BL}",
+            f"Instrument Session: {self.instrument_session}",
+        ]
+
+        for label, text in zip(self.info_labels, text_list, strict=False):
+            label.set(text)
 
     def open_new_window(self):
         PandAGUI()
@@ -601,16 +612,24 @@ class PandAGUI:
             fill="both", expand=True, side="bottom", anchor="n"
         )
 
+        self.info_labels = []
+
         for n, text in enumerate(text_list):
-            ttk.Label(
+            labelVar = tkinter.StringVar(value=text)
+
+            info_label = ttk.Label(
                 self.experiment_settings_frame,
-                text=text,
-            ).grid(column=n * 2, row=0, padx=5, pady=5, sticky="news")
+                textvariable=labelVar,
+            )
+
+            info_label.grid(column=n * 2, row=0, padx=5, pady=5, sticky="news")
 
             ttk.Label(
                 self.experiment_settings_frame,
                 text=seperator,
             ).grid(column=(n * 2) + 1, row=0, padx=5, pady=5, sticky="news")
+
+            self.info_labels.append(labelVar)
 
         return None
 
