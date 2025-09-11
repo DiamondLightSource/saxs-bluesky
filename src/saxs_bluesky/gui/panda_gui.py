@@ -409,7 +409,7 @@ class PandAGUI:
         self.client.resume()
 
     def open_step_widget(self):
-        StepWidget(self.instrument_session)
+        StepWidget(BL, self.instrument_session)
 
     def show_active_detectors(self):
         active_detectors = self.active_detectors_frame.get_active_detectors()
@@ -561,11 +561,11 @@ class PandAGUI:
     def get_profile_tab(self) -> ProfileTab:
         index = self.get_profile_index()
         tab_names = self.notebook.tabs()
-        proftab_object: ProfileTab = self.notebook.nametowidget(tab_names[index])
-        return proftab_object
+        profile_tab: ProfileTab = self.notebook.nametowidget(tab_names[index])
+        return profile_tab
 
     def set_profile_tab(self):
-        self.proftab = self.get_profile_tab()
+        self.profile_tab = self.get_profile_tab()
 
     def build_add_tab(self):
         for n, profile in enumerate(self.configuration.profiles):

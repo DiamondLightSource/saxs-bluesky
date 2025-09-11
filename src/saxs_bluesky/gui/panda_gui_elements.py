@@ -38,9 +38,9 @@ def recursive_destroy(frame):
 
 
 class EditableTableview(ttk.Treeview):
-    def __init__(self, proftab, *args, **kwargs):
-        self.proftab = proftab
-        super().__init__(self.proftab, *args, **kwargs)
+    def __init__(self, profile_tab, *args, **kwargs):
+        self.profile_tab = profile_tab
+        super().__init__(self.profile_tab, *args, **kwargs)
         self.bind("<Double-1>", lambda event: self.onDoubleClick(event))
         self.kwargs = kwargs
 
@@ -177,9 +177,6 @@ class DropdownPopup(ttk.Combobox):
 
         self.tableview.item(rowid, values=vals)
         self.destroy()
-
-        self.tableview.proftab.edit_config_for_profile()
-        self.tableview.proftab.generate_info_boxes()
 
 
 class CheckButtonPopup(ttk.Checkbutton):
@@ -336,10 +333,6 @@ class EntryPopup(ttk.Entry):
         vals[self.column] = selection  # type: ignore
 
         self.tableview.item(self.rowid, values=vals)
-
-        self.tableview.proftab.edit_config_for_profile()
-        self.tableview.proftab.generate_info_boxes()
-
         self.destroy()
 
     def select_all(self, *ignore):
@@ -370,8 +363,6 @@ class ProfileTab(ttk.Frame):
         ### add tree view ############################################
         self.build_profile_tree()
 
-        self.profile_config_tree.bind_all("write", self.entry_changed)
-
         ############################################################
 
         ##### input trigger select
@@ -401,11 +392,8 @@ class ProfileTab(ttk.Frame):
         )
 
         self.cycles_entry.grid(column=1, row=1, padx=5, pady=5, sticky="w")
-
         # Tracing the entry and calling the above function
         self.n_cycles_entry_value.trace_add("write", self.entry_changed)
-
-        # cycles_entry.bind("<FocusOut>", self.focus_out_generate_info_boxes)
 
         ############# plot button
         ############# profile info
@@ -529,6 +517,9 @@ class ProfileTab(ttk.Frame):
 
         # Configuring treeview
         self.profile_config_tree.configure(yscrollcommand=verscrlbar.set)
+        self.profile_config_tree.bind_all(
+            "<FocusOut>", self.entry_changed
+        )  # regen figures when edited
 
         ############################################################
 

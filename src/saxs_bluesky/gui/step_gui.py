@@ -45,7 +45,7 @@ class StepWidget:
     def show(self):
         print(self.StartLabelEntry.get_value())
 
-    def __init__(self, instrument_session):
+    def __init__(self, BL, instrument_session):
         blueapi_config_path = (
             f"./src/saxs_bluesky/blueapi_configs/{BL}_blueapi_config.yaml"
         )
@@ -100,4 +100,4 @@ class StepWidget:
 
 
 if __name__ == "__main__":
-    StepWidget("None")
+    StepWidget("i22", "None")
