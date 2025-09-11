@@ -38,13 +38,8 @@ from saxs_bluesky.utils.utils import (
 
 BL = get_saxs_beamline()
 
-
 CONFIG = load_beamline_config()
 DEFAULT_PROFILE = CONFIG.DEFAULT_PROFILE
-
-print(DEFAULT_PROFILE.n_groups)
-print("DEFAULT_PROFILE id:", id(DEFAULT_PROFILE))
-
 
 ############################################################################################
 
