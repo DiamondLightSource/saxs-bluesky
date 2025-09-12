@@ -700,6 +700,31 @@ def step_rscan(
     yield from bsp.rel_scan(detectors, axis, start, stop, num)
 
 
+@attach_data_session_metadata_decorator()
+@bpp.baseline_decorator(DEFAULT_BASELINE)
+@validate_call(config={"arbitrary_types_allowed": True})
+def centre_sample(
+    start: float,
+    stop: float,
+    step: float,
+    axis: Motor,
+    detectors: list[Readable] = FAST_DETECTORS,
+) -> MsgGenerator:
+    step_list = create_steps(start, stop, step)
+
+    summed_values = []
+
+    for step in step_list:
+        yield from bps.mv(axis, step)
+        value = yield from bps.rd(*detectors)
+        summed_values.append(np.sum(value))
+
+    max_index = np.argmax(summed_values)
+    centre_point = summed_values[max_index]
+
+    yield from bps.mv(axis, centre_point)
+
+
 if __name__ == "__main__":
     from bluesky.run_engine import RunEngine
 
