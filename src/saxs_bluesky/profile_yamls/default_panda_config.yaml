@@ -8,7 +8,7 @@ BITA:
   High: True
 
 profile-0:
-  cycles: 3
+  repeats: 3
   seq_trigger: "IMMEDIATE" #this can be "IMMEDIATE"
   multiplier: [1, 1, 1, 1] #ie first set of detectors run at the bas clock, and others run as 1/N the duration of the first
 

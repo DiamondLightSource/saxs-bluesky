@@ -4,7 +4,7 @@ instrument_session: cm40643-4
 instrument: i22
 detectors: [saxs, waxs]
 profile-0:
-  cycles: 3
+  repeats: 3
   seq_trigger: IMMEDIATE
   multiplier: [1, 2, 4, 8]
   total_frames: 12
@@ -70,7 +70,7 @@ profile-0:
     run_time_s: 1.0
     group_duration: 4.0
 profile-1:
-  cycles: 1
+  repeats: 1
   seq_trigger: IMMEDIATE
   multiplier: [1, 2, 4, 8]
   total_frames: 1
@@ -88,7 +88,7 @@ profile-1:
     run_time_s: 1
     group_duration: 2
 profile-2:
-  cycles: 1
+  repeats: 1
   seq_trigger: IMMEDIATE
   multiplier: [1, 2, 4, 8]
   total_frames: 2
@@ -118,7 +118,7 @@ profile-2:
     run_time_s: 1
     group_duration: 2
 profile-3:
-  cycles: 1
+  repeats: 1
   seq_trigger: IMMEDIATE
   multiplier: [1, 1, 1, 1]
   total_frames: 100
@@ -136,7 +136,7 @@ profile-3:
     run_time_s: 1
     group_duration: 100
 profile-4:
-  cycles: 1
+  repeats: 1
   seq_trigger: TTL1IN
   multiplier: [1, 2, 4, 8]
   total_frames: 100
@@ -154,7 +154,7 @@ profile-4:
     run_time_s: 1
     group_duration: 100
 profile-5:
-  cycles: 1
+  repeats: 1
   seq_trigger: IMMEDIATE
   multiplier: [1, 2, 4, 8]
   total_frames: 1005

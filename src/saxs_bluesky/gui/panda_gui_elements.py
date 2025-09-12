@@ -373,20 +373,20 @@ class ProfileTab(ttk.Frame):
             *self.seq_triggers,
         ).grid(column=1, row=0, padx=5, pady=5, sticky="w")
 
-        ############# number of cycles box
+        ############# number of repeats box
 
-        ttk.Label(self, text="No. of cycles").grid(
+        ttk.Label(self, text="No. of repeats").grid(
             column=0, row=1, padx=5, pady=5, sticky="w"
         )
 
-        self.n_cycles_entry_value = tkinter.IntVar(self, value=self.profile.cycles)
-        self.cycles_entry = ttk.Entry(
-            self, width=15, textvariable=self.n_cycles_entry_value
+        self.n_repeats_entry_value = tkinter.IntVar(self, value=self.profile.repeats)
+        self.repeats_entry = ttk.Entry(
+            self, width=15, textvariable=self.n_repeats_entry_value
         )
 
-        self.cycles_entry.grid(column=1, row=1, padx=5, pady=5, sticky="w")
+        self.repeats_entry.grid(column=1, row=1, padx=5, pady=5, sticky="w")
         # Tracing the entry and calling the above function
-        self.n_cycles_entry_value.trace_add("write", self.entry_changed)
+        self.n_repeats_entry_value.trace_add("write", self.entry_changed)
 
         ############# plot button
         ############# profile info
@@ -405,8 +405,8 @@ class ProfileTab(ttk.Frame):
     def get_start_value(self):
         return self.clicked_start_trigger.get()
 
-    def get_n_cycles_value(self):
-        return int(self.n_cycles_entry_value.get())
+    def get_n_repeats_value(self):
+        return int(self.n_repeats_entry_value.get())
 
     def delete_last_groups_button_action(self):
         if len(self.profile.groups) == 1:
@@ -526,7 +526,7 @@ class ProfileTab(ttk.Frame):
             )
             self.total_time_label.config(
                 text=f"Total time: "
-                f"{self.profile.duration_per_cycle * self.profile.cycles:.3f} s"
+                f"{self.profile.duration_per_cycle * self.profile.repeats:.3f} s"
             )
 
         except Exception:
@@ -546,7 +546,7 @@ class ProfileTab(ttk.Frame):
             self.total_time_label = ttk.Label(
                 self,
                 text=f"Total time: "
-                f"{self.profile.duration_per_cycle * self.profile.cycles:.3f} s",
+                f"{self.profile.duration_per_cycle * self.profile.repeats:.3f} s",
             )
             self.total_time_label.grid(column=8, row=3, padx=5, pady=5, sticky="e")
 
@@ -574,13 +574,13 @@ class ProfileTab(ttk.Frame):
 
             group_list.append(n_group)
 
-        cycles = self.get_n_cycles_value()
+        repeats = self.get_n_repeats_value()
         profile_trigger = self.get_start_value()
 
         multipliers = self.get_multipliers()
 
         new_profile = Profile(
-            cycles=cycles,
+            repeats=repeats,
             seq_trigger=profile_trigger,
             groups=group_list,
             multiplier=multipliers,
