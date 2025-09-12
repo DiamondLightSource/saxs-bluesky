@@ -44,6 +44,7 @@ BL = get_saxs_beamline()
 CONFIG = load_beamline_config()
 DEFAULT_PANDA = CONFIG.DEFAULT_PANDA
 FAST_DETECTORS = CONFIG.FAST_DETECTORS
+DEFAULT_BASELINE = CONFIG.DEFAULT_BASELINE
 
 
 STORED_DETECTORS: list[StandardDetector] | list[str] | None = None
@@ -475,6 +476,7 @@ def run_panda_triggering(
 
 
 @bpp.run_decorator()  #    # open/close run
+@bpp.baseline_decorator(DEFAULT_BASELINE)
 @attach_data_session_metadata_decorator()
 def configure_and_run_panda_triggering(
     profile: Annotated[
