@@ -393,42 +393,52 @@ class PandAGUI:
         print(profile_to_upload)
         print(active_detectors)
 
-        params = {"profile": profile_to_upload, "detectors": active_detectors}
+        # params = {"profile": profile_to_upload, "detectors": active_detectors}
 
         try:
-            self.client.run(configure_panda_triggering, params)
+            self.client.run(
+                configure_panda_triggering,
+                profile=profile_to_upload,
+                detectors=active_detectors,
+            )
         except ConnectionError:
             print("Could not upload profile to panda")
 
     def run_plan(self):
         try:
-            self.client.run(run_panda_triggering, {})
+            self.client.run(run_panda_triggering)
         except ConnectionError:
             print("Could not upload profile to panda")
 
     def set_detectors_plan(self):
-        params = {
-            "detectors": list(self.active_detectors_frame.get_active_detectors()),
-        }
+        # params = {
+        #     "detectors": list(self.active_detectors_frame.get_active_detectors()),
+        # }
 
         try:
-            self.client.run(set_detectors, params)
+            self.client.run(
+                set_detectors,
+                detectors=list(self.active_detectors_frame.get_active_detectors()),
+            )
         except ConnectionError:
             print("Could not upload profile to panda")
 
     def log_detectors_plan(self):
         try:
-            self.client.run(log_detectors, {})
+            self.client.run(log_detectors)
         except ConnectionError:
             print("Could not upload profile to panda")
 
     def count_detectors(self):
-        params = {
-            "detectors": list(self.active_detectors_frame.get_active_detectors()),
-        }
+        # params = {
+        #     "detectors": list(self.active_detectors_frame.get_active_detectors()),
+        # }
 
         try:
-            self.client.run(count, params)
+            self.client.run(
+                count,
+                detectors=list(self.active_detectors_frame.get_active_detectors()),
+            )
         except ConnectionError:
             print("Could not upload profile to panda")
 

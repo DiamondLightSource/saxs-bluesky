@@ -29,18 +29,15 @@ class BlueAPIPythonClient(BlueapiClient):
         blueapi_class = BlueapiClient.from_config(loaded_config)
         super().__init__(blueapi_class._rest, blueapi_class._events)  # noqa
 
-    def run(self, plan: str | Callable, params: dict | None, **kwargs):
+    def run(self, plan: str | Callable, **kwargs):
         if isinstance(plan, str):
             plan_name = plan
         else:
             plan_name = plan.__name__
 
-        if params is None:
-            params = kwargs
-
         task = TaskRequest(
             name=plan_name,
-            params=params,
+            params=kwargs,
             instrument_session=self.instrument_session,
         )
 
