@@ -238,7 +238,7 @@ def multiple_pulse_blocks():
     #   get the pulse block, find out what is attached to it
     #   set the multiplier and possibly duration accordingly
     #   for det in detectors_on_pulse_block:
-    #       trigger_info = TriggerInfo(number_of_triggers=n_triggers*n_cycles,
+    #       trigger_info = TriggerInfo(number_of_triggers=n_triggers*n_repeats,
     #                                   trigger=DetectorTrigger.CONSTANT_GATE,
     #                                  deadtime=max_deadtime,
     #                                  multiplier=1,
@@ -373,7 +373,7 @@ def configure_panda_triggering(
     if force_load:
         yield from check_and_apply_panda_settings(panda, panda.name)
 
-    # n_cycles = profile.cycles
+    # n_repeats = profile.repeats
     # seq table should be grabbed from the panda and used instead,
     # in order to decouple run from setup panda
     # seq_table = profile.seq_table

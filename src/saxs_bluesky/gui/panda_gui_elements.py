@@ -521,12 +521,12 @@ class ProfileTab(ttk.Frame):
             self.total_frames_label.config(
                 text=f"Total Frames: {self.profile.total_frames}"
             )
-            self.total_time_per_cycle.config(
-                text=f"Time/cycle: {self.profile.duration_per_cycle:.3f} s"
+            self.total_time_per_repeat.config(
+                text=f"Time/repeat: {self.profile.duration_per_repeat:.3f} s"
             )
             self.total_time_label.config(
                 text=f"Total time: "
-                f"{self.profile.duration_per_cycle * self.profile.repeats:.3f} s"
+                f"{self.profile.duration_per_repeat * self.profile.repeats:.3f} s"
             )
 
         except Exception:
@@ -536,17 +536,17 @@ class ProfileTab(ttk.Frame):
             )
             self.total_frames_label.grid(column=8, row=1, padx=5, pady=5, sticky="e")
 
-            self.total_time_per_cycle = ttk.Label(
-                self, text=f"Time/cycle: {self.profile.duration_per_cycle:.3f} s"
+            self.total_time_per_repeat = ttk.Label(
+                self, text=f"Time/repeat: {self.profile.duration_per_repeat:.3f} s"
             )
-            self.total_time_per_cycle.grid(column=8, row=2, padx=5, pady=5, sticky="e")
+            self.total_time_per_repeat.grid(column=8, row=2, padx=5, pady=5, sticky="e")
 
             ### total time
 
             self.total_time_label = ttk.Label(
                 self,
                 text=f"Total time: "
-                f"{self.profile.duration_per_cycle * self.profile.repeats:.3f} s",
+                f"{self.profile.duration_per_repeat * self.profile.repeats:.3f} s",
             )
             self.total_time_label.grid(column=8, row=3, padx=5, pady=5, sticky="e")
 

@@ -123,12 +123,12 @@ class Profile(BaseModel):
         return len(self.groups)
 
     @property
-    def duration_per_cycle(self) -> float:
-        duration_per_cycle = 0
+    def duration_per_repeat(self) -> float:
+        duration_per_repeat = 0
 
         for n_group in self.groups:
-            duration_per_cycle += n_group.group_duration
-        return duration_per_cycle
+            duration_per_repeat += n_group.group_duration
+        return duration_per_repeat
 
     @property
     def max_livetime(self) -> float:
@@ -136,7 +136,7 @@ class Profile(BaseModel):
 
     @property
     def duration(self) -> float:
-        duration = self.duration_per_cycle * self.repeats
+        duration = self.duration_per_repeat * self.repeats
         return duration
 
     @property

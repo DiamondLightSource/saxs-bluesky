@@ -8,7 +8,7 @@ profile-0:
   seq_trigger: IMMEDIATE
   multiplier: [1, 2, 4, 8]
   total_frames: 12
-  duration_per_cycle: 32.0
+  duration_per_repeat: 32.0
   group-0:
     frames: 1
     trigger: IMMEDIATE
@@ -74,7 +74,7 @@ profile-1:
   seq_trigger: IMMEDIATE
   multiplier: [1, 2, 4, 8]
   total_frames: 1
-  duration_per_cycle: 2
+  duration_per_repeat: 2
   group-0:
     frames: 1
     trigger: IMMEDIATE
@@ -92,7 +92,7 @@ profile-2:
   seq_trigger: IMMEDIATE
   multiplier: [1, 2, 4, 8]
   total_frames: 2
-  duration_per_cycle: 4
+  duration_per_repeat: 4
   group-0:
     frames: 1
     trigger: IMMEDIATE
@@ -122,7 +122,7 @@ profile-3:
   seq_trigger: IMMEDIATE
   multiplier: [1, 1, 1, 1]
   total_frames: 100
-  duration_per_cycle: 100
+  duration_per_repeat: 100
   group-0:
     frames: 100
     trigger: IMMEDIATE
@@ -140,7 +140,7 @@ profile-4:
   seq_trigger: TTL1IN
   multiplier: [1, 2, 4, 8]
   total_frames: 100
-  duration_per_cycle: 100
+  duration_per_repeat: 100
   group-0:
     frames: 100
     trigger: IMMEDIATE
@@ -158,7 +158,7 @@ profile-5:
   seq_trigger: IMMEDIATE
   multiplier: [1, 2, 4, 8]
   total_frames: 1005
-  duration_per_cycle: 5.005
+  duration_per_repeat: 5.005
   group-0:
     frames: 5
     trigger: IMMEDIATE
