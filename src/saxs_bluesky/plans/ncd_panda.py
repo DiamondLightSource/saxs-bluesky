@@ -44,6 +44,7 @@ BL = get_saxs_beamline()
 CONFIG = load_beamline_config()
 DEFAULT_PANDA = CONFIG.DEFAULT_PANDA
 FAST_DETECTORS = CONFIG.FAST_DETECTORS
+DEFAULT_BASELINE = CONFIG.DEFAULT_BASELINE
 
 
 STORED_DETECTORS: list[StandardDetector] | list[str] | None = None
@@ -410,6 +411,7 @@ def configure_panda_triggering(
 
 
 @attach_data_session_metadata_decorator()
+@bpp.baseline_decorator(DEFAULT_BASELINE)
 @bpp.run_decorator()  #    # open/close run
 @validate_call(config={"arbitrary_types_allowed": True})
 def run_panda_triggering(
@@ -667,6 +669,7 @@ def create_steps(start: float, stop: float | None, step: float | None):
 
 
 @attach_data_session_metadata_decorator()
+@bpp.baseline_decorator(DEFAULT_BASELINE)
 @validate_call(config={"arbitrary_types_allowed": True})
 def step_scan(
     start: float,
@@ -682,6 +685,7 @@ def step_scan(
 
 
 @attach_data_session_metadata_decorator()
+@bpp.baseline_decorator(DEFAULT_BASELINE)
 @validate_call(config={"arbitrary_types_allowed": True})
 def step_rscan(
     start: float,
@@ -694,6 +698,31 @@ def step_rscan(
 
     # step_list = create_steps(start, stop, step)
     yield from bsp.rel_scan(detectors, axis, start, stop, num)
+
+
+@attach_data_session_metadata_decorator()
+@bpp.baseline_decorator(DEFAULT_BASELINE)
+@validate_call(config={"arbitrary_types_allowed": True})
+def centre_sample(
+    start: float,
+    stop: float,
+    step: float,
+    axis: Motor,
+    detectors: list[Readable] = FAST_DETECTORS,
+) -> MsgGenerator:
+    step_list = create_steps(start, stop, step)
+
+    summed_values = []
+
+    for step in step_list:
+        yield from bps.mv(axis, step)
+        value = yield from bps.rd(*detectors)
+        summed_values.append(np.sum(value))
+
+    max_index = np.argmax(summed_values)
+    centre_point = summed_values[max_index]
+
+    yield from bps.mv(axis, centre_point)
 
 
 if __name__ == "__main__":
