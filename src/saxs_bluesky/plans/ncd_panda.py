@@ -669,6 +669,7 @@ def create_steps(start: float, stop: float | None, step: float | None):
 
 
 @attach_data_session_metadata_decorator()
+@bpp.baseline_decorator(DEFAULT_BASELINE)
 @validate_call(config={"arbitrary_types_allowed": True})
 def step_scan(
     start: float,
@@ -684,6 +685,7 @@ def step_scan(
 
 
 @attach_data_session_metadata_decorator()
+@bpp.baseline_decorator(DEFAULT_BASELINE)
 @validate_call(config={"arbitrary_types_allowed": True})
 def step_rscan(
     start: float,
