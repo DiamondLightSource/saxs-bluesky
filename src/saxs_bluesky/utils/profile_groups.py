@@ -98,7 +98,7 @@ class Group(BaseModel):
 
 class Profile(BaseModel):
     """A basemodel for all the information needed to configure the PandA triggering.
-    Cycles are the number of times the who sequence table is run
+    Repeats are the number of times the who sequence table is run
     Seq trigger must be set to either immediate or one of the panda trigger types.
     A group is effectively a line in the sequencer table
     Multiplier is use when the PandA is set up for triggering different
@@ -106,7 +106,7 @@ class Profile(BaseModel):
     The information stored in this BaseModel can be passed to ncd_panda and applied.
     The information can also be used to configure it in the gui"""
 
-    cycles: int = 1
+    repeats: int = 1
     seq_trigger: str = "Immediate"
     groups: list[Group] = []
     multiplier: list[int] | None = None
@@ -136,13 +136,13 @@ class Profile(BaseModel):
 
     @property
     def duration(self) -> float:
-        duration = self.duration_per_cycle * self.cycles
+        duration = self.duration_per_cycle * self.repeats
         return duration
 
     @property
     def seq_table_info(self) -> SeqTableInfo:
         seq_table_info = SeqTableInfo(
-            sequence_table=self.seq_table, repeats=self.cycles
+            sequence_table=self.seq_table, repeats=self.repeats
         )
 
         return seq_table_info
@@ -187,7 +187,7 @@ class Profile(BaseModel):
 
     @property
     def number_of_events(self) -> list[int]:
-        return self.triggers * self.cycles
+        return self.triggers * self.repeats
 
     def append_group(self, Group: Group) -> None:
         self.groups.append(Group)
@@ -262,7 +262,7 @@ class ExperimentLoader:
             profiles = []
 
             for profile_name in profile_names:
-                profile_cycles = config[profile_name]["cycles"]
+                profile_repeats = config[profile_name]["repeats"]
                 profile_trigger = config[profile_name]["seq_trigger"]
                 multiplier = config[profile_name]["multiplier"]
                 groups = {
@@ -289,7 +289,7 @@ class ExperimentLoader:
                     group_list.append(n_Group)
 
                 n_profile = Profile(
-                    cycles=profile_cycles,
+                    repeats=profile_repeats,
                     seq_trigger=profile_trigger,
                     groups=group_list,
                     multiplier=multiplier,

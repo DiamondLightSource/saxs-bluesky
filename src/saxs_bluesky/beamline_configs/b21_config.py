@@ -89,7 +89,7 @@ DEFAULT_GROUP = Group(
 
 
 DEFAULT_PROFILE = Profile(
-    cycles=1,
+    repeats=1,
     seq_trigger="IMMEDIATE",
     groups=[copy.deepcopy(DEFAULT_GROUP)],
     multiplier=None,

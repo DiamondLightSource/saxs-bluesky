@@ -166,12 +166,12 @@ def generate_repeated_trigger_info(
 
     # [3, 1, 1, 1, 1] or something
     n_triggers = [group.frames for group in profile.groups]
-    n_cycles = profile.cycles
+    repeats = profile.repeats
 
     if profile.multiplier is not None:
         for multiplier in profile.multiplier:
             trigger_info = TriggerInfo(
-                number_of_events=n_triggers * n_cycles,
+                number_of_events=n_triggers * repeats,
                 trigger=trigger,
                 deadtime=max_deadtime,
                 livetime=profile.duration,
@@ -592,14 +592,14 @@ def get_profile() -> Profile | None:
 
 @validate_call(config={"arbitrary_types_allowed": True})
 def create_profile(
-    cycles: int = 1,
+    repeats: int = 1,
     seq_trigger: str = "Immediate",
     multiplier: list[int] | None = None,
 ) -> MsgGenerator:
     global STORED_PROFILE
 
     STORED_PROFILE = Profile(
-        cycles=cycles, seq_trigger=seq_trigger, multiplier=multiplier
+        repeats=repeats, seq_trigger=seq_trigger, multiplier=multiplier
     )
 
     return (yield Msg("profile_created"))
