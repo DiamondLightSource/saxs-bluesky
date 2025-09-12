@@ -28,5 +28,6 @@ Or if it is a commandline tool then you might put some example commands here:
 
 ```
 python -m saxs-bluesky --version
+python -m saxs-bluesky login #to authenticate user
 python -m saxs-bluesky start_gui
 ```
