@@ -18,13 +18,15 @@ To install saxs-bluesky clone this repo, navigate into the directory containing 
 
 ```pip install -e .```
 
+This module can then be imported and use within your python environment such as:
+
 ```python
 from saxs_bluesky import __version__
 
 print(f"Hello saxs_bluesky {__version__}")
 ```
 
-Or if it is a commandline tool then you might put some example commands here:
+Certain feature can be interacted though the commandline tool, some example commands here:
 
 ```
 python -m saxs-bluesky --version
