@@ -14,9 +14,13 @@ Source          | <https://github.com/DiamondLightSource/saxs-bluesky>
 :---:           | :---:
 Releases        | <https://github.com/DiamondLightSource/saxs-bluesky/releases>
 
-To install saxs-bluesky clone this repo, navigate into the directory containing this repo and run:
+To install saxs-bluesky clone this repo, navigate into the directory containing this repo and install it via:
 
-```pip install -e .```
+```
+git clone https://github.com/DiamondLightSource/saxs-bluesky.git
+cd saxs-bluesky
+pip install -e .
+```
 
 This module can then be imported and use within your python environment such as:
 
