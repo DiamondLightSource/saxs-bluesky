@@ -40,13 +40,13 @@ my_profile = Profile(repeats=1,seq_trigger="IMMEDIATE",groups=[]) #currently has
 
 #now we create a group
 group = Group(
-    frames=1
+    frames=1,
     trigger="IMMEDIATE"
     wait_time=1,
     wait_units="S",
     run_time=1,
     run_units="S,
-    wait_pulses=[0, 0,  0, 0],
+    wait_pulses=[0, 0, 0, 0],
     run_pulses=[1, 1, 1, 1],
 )
 
@@ -58,12 +58,15 @@ print(my_profile.duration)
 print(my_pfoile.total_frames)
 ```
 
-To use this in an experiment we can do this through the BlueAPIPythonClient, along with the bluesky plans that are loaded in BlueAPI
+To use this in an experiment we can do this through the BlueAPIPythonClient, along with the bluesky plans that are loaded in BlueAPI. The BEAMLINE variable should already be set on the beamline, but if not it should be set first.
 
 ```python
 
 from saxs_bluesky.utils.beamline_client import BlueAPIPythonClient
 from saxs_bluesky.plans.ncd_panda import configure_panda_triggering, run_panda_triggering
+
+BL = "i22"
+blueapi_config_path = "PATH_TO_CONFIG"
 
 client = BlueAPIPythonClient(BL, blueapi_config_path=blueapi_config_path, instrument_session="cm12345-1")
 
