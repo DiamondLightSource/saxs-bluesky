@@ -30,7 +30,55 @@ from saxs_bluesky import __version__
 print(f"Hello saxs_bluesky {__version__}")
 ```
 
-Certain feature can be interacted though the commandline tool, some example commands here:
+This package can be used within GDA or seperately from GDA. To use it seperately from GDA, (in python3) can be done in the following way:
+
+```python
+
+from saxs_bluesky.utils.profile_groups import Group, Profile
+
+my_profile = Profile(repeats=1,seq_trigger="IMMEDIATE",groups=[]) #currently has no 'groups' - ie line in seq table
+
+#now we create a group
+group = Group(
+    frames=1
+    trigger="IMMEDIATE"
+    wait_time=1,
+    wait_units="S",
+    run_time=1,
+    run_units="S,
+    wait_pulses=[0, 0,  0, 0],
+    run_pulses=[1, 1, 1, 1],
+)
+
+my_profile.append_group(group)
+
+#now we have a profile with a single group. We can add more, delete them and have a look etc
+
+print(my_profile.duration)
+print(my_pfoile.total_frames)
+```
+
+To use this in an experiment we can do this through the BlueAPIPythonClient, along with the bluesky plans that are loaded in BlueAPI
+
+```python
+
+from saxs_bluesky.utils.beamline_client import BlueAPIPythonClient
+from saxs_bluesky.plans.ncd_panda import configure_panda_triggering, run_panda_triggering
+
+client = BlueAPIPythonClient(BL, blueapi_config_path=blueapi_config_path, instrument_session="cm12345-1")
+
+client.run(
+    configure_panda_triggering,
+    profile=my_profile,
+    detectors=["saxs", "waxs"], #whatever StandardDetectors that are created for the beamline
+) #to load all the data onto the panda and the detctors
+
+client.run(run_panda_triggering) #to actually tun the experiment
+
+
+```
+
+Certain feature can be interacted though the commandline tool, some example commands here. A lot of the configuration can be done through the PandA GUI:
 
 ```
 python -m saxs-bluesky --version
