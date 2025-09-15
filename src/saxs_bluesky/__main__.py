@@ -34,7 +34,7 @@ def main(ctx: click.Context) -> None:
 @main.command(name="start_gui")
 def start_gui():
     CONFIG = load_beamline_config()
-    PandAGUI(BL, configuration=CONFIG.DEFAULT_EXPERIMENT)
+    PandAGUI(configuration=CONFIG.DEFAULT_EXPERIMENT)
 
 
 @main.command(name="login")
