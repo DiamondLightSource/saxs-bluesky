@@ -16,16 +16,21 @@ CONFIG = load_beamline_config()
 
 class StepWidget:
     def step_action(self):
-        params = {
-            "start": float(self.StartLabelEntry.get_value()),
-            "stop": float(self.StopLabelEntry.get_value()),
-            "num": float(self.StepLabelEntry.get_value()),
-            "axis": inject(self.ScanAxisLabelEntry.get_value()),
-            "detectors": list(self.detectors),
-        }
+        start = float(self.StartLabelEntry.get_value())
+        stop = float(self.StopLabelEntry.get_value())
+        num = float(self.StepLabelEntry.get_value())
+        axis = inject(self.ScanAxisLabelEntry.get_value())
+        detectors = list(self.detectors)
 
         try:
-            self.client.run(step_scan, params)
+            self.client.run(
+                step_scan,
+                start=start,
+                stop=stop,
+                num=num,
+                axis=axis,
+                detectors=detectors,
+            )
         except ConnectionError:
             print("Could not upload profile to panda")
 
@@ -39,7 +44,7 @@ class StepWidget:
         }
 
         try:
-            self.client.run(step_rscan, params)
+            self.client.run(step_rscan, **params)
         except ConnectionError:
             print("Could not upload profile to panda")
 

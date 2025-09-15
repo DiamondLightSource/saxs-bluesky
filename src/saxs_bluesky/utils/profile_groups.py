@@ -1,4 +1,5 @@
 import os
+from copy import deepcopy
 from pathlib import Path
 from string import ascii_lowercase
 from typing import Any
@@ -190,13 +191,13 @@ class Profile(BaseModel):
         return self.triggers * self.repeats
 
     def append_group(self, Group: Group) -> None:
-        self.groups.append(Group)
+        self.groups.append(deepcopy(Group))
 
     def delete_group(self, n: int) -> None:
         self.groups.pop(n)
 
     def insert_group(self, n: int, Group: Group):
-        self.groups.insert(n, Group)
+        self.groups.insert(n, deepcopy(Group))
 
     @property
     def seq_table(self) -> SeqTable:
@@ -338,4 +339,4 @@ class ExperimentLoader:
         self.profiles.pop(n)
 
     def append_profile(self, profile: Profile):
-        self.profiles.append(profile)
+        self.profiles.append(deepcopy(profile))
