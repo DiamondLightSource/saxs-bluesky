@@ -14,9 +14,9 @@ Source          | <https://github.com/DiamondLightSource/saxs-bluesky>
 :---:           | :---:
 Releases        | <https://github.com/DiamondLightSource/saxs-bluesky/releases>
 
-This is where you should put some images or code snippets that illustrate
-some relevant examples. If it is a library then you might put some
-introductory code here:
+To install saxs-bluesky clone this repo, navigate into the directory containing this repo and run:
+
+```pip install -e .```
 
 ```python
 from saxs_bluesky import __version__
