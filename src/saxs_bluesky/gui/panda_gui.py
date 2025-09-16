@@ -92,11 +92,8 @@ class PandAGUI:
         self.window.minsize(600, 200)
         self.window.title("PandA Config")
         self.style = ttk.Style(self.window)
-        self.window.tk.call(
-            "source", f"{os.path.dirname(os.path.realpath(__file__))}/sv.tcl"
-        )  # Put here the path of your theme file
-        # Set the theme with the theme_use method
-        self.theme("dark")
+
+        self.theme("clam")
 
         self.build_menu_bar()
 
@@ -219,6 +216,15 @@ class PandAGUI:
 
     def theme(self, theme_name: str = "light"):
         if theme_name in ["light", "dark"]:
+            try:
+                self.window.tk.call(
+                    "source", f"{os.path.dirname(os.path.realpath(__file__))}/sv.tcl"
+                )  # Put here the path of your theme file
+                # Set the theme with the theme_use method
+            except Exception as e:
+                print(e)
+                pass
+
             self.style.theme_use(f"sun-valley-{theme_name}")
         else:
             self.style.theme_use(theme_name)
