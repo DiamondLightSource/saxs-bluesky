@@ -7,8 +7,7 @@
 
 Bluesky plans, plan stubs and utilities for Small Angle Scattering beamline at DLS
 
-This is where you should write a short paragraph that describes what your module does,
-how it does it, and why people should use it.
+This repo is currently designed to work with i22, b21 and will be expanded to work with other beamslines that also use a PandA for hardware triggering. 
 
 Source          | <https://github.com/DiamondLightSource/saxs-bluesky>
 :---:           | :---:
@@ -88,3 +87,6 @@ python -m saxs-bluesky --version
 python -m saxs-bluesky login
 python -m saxs-bluesky start_gui
 ```
+
+
+If you are operating this repo via the jython terminal and blueAPI then speak to your DAQ person to set it up
