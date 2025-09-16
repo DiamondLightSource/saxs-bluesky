@@ -52,9 +52,16 @@ group = Group(
 my_profile.append_group(group)
 
 #now we have a profile with a single group. We can add more, delete them and have a look etc
-
 print(my_profile.duration)
 print(my_pfoile.total_frames)
+
+#you may also plot the PandA triggering sequencer
+from saxs_bluesky.utils.utils import ProfilePlotter
+
+plotter = ProfilePlotter(my_profile)
+plotter.plot_pulses()
+plotter.show()
+
 ```
 
 To use this in an experiment we can do this through the BlueAPIPythonClient, along with the bluesky plans that are loaded in BlueAPI. The BEAMLINE variable should already be set on the beamline, but if not it should be set first.
