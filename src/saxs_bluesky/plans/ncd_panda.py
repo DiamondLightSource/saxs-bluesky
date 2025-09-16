@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Any
 
 import bluesky.plan_stubs as bps
 import bluesky.plans as bsp
@@ -412,10 +412,11 @@ def configure_panda_triggering(
 
 @attach_data_session_metadata_decorator()
 @bpp.baseline_decorator(DEFAULT_BASELINE)
-@bpp.run_decorator()  #    # open/close run
+# @bpp.run_decorator()  #    # open/close run
 @validate_call(config={"arbitrary_types_allowed": True})
 def run_panda_triggering(
     panda: HDFPanda = DEFAULT_PANDA,
+    metadata: dict[str, Any] | None = None,
 ) -> MsgGenerator:
     """
 
@@ -440,8 +441,10 @@ def run_panda_triggering(
     trigger_logic = StaticSeqTableTriggerLogic(panda_seq_table)
     flyer = StandardFlyer(trigger_logic)
 
+    detectors = detectors + [panda]  # panda must be added so we can get HDF
+
     # STAGE SETS HDF WRITER TO ON
-    yield from bps.stage_all(*detectors, flyer, group="setup")
+    yield from bps.stage_all(*detectors, flyer, DEFAULT_BASELINE, group="setup")
 
     # yield from stage_and_prepare_detectors(list(detectors), flyer, trigger_info)
     for det in detectors:
@@ -450,11 +453,36 @@ def run_panda_triggering(
 
     yield from bps.wait(group="setup", timeout=DEFAULT_TIMEOUT * len(detectors))
 
-    yield from fly_and_collect_with_wait(
-        stream_name="primary",
-        detectors=list(detectors),
-        flyer=flyer,
-    )
+    ######################
+
+    # Collect metadata
+    plan_args = {
+        "total_frames": profile.number_of_events,
+        "duration": profile.duration,
+        "panda": panda.name + ":" + repr(panda),
+        "detectors": {device.name + ":" + repr(device) for device in detectors},
+        "baseline": {device.name + ":" + repr(device) for device in DEFAULT_BASELINE},
+    }
+    # Add panda to detectors so it captures and writes data.
+    # It needs to be in metadata but not metadata planargs.
+    _md = {
+        "detectors": {device.name for device in detectors},
+        "plan_args": plan_args,
+        "hints": {},
+    }
+    _md.update(metadata or {})
+
+    ##################
+
+    @bpp.run_decorator(md=_md)  # open/close run
+    def run():
+        yield from fly_and_collect_with_wait(
+            stream_name="primary",
+            detectors=list(detectors),
+            flyer=flyer,
+        )
+
+    yield from run()
 
     # name = "run"
     # yield from bps.declare_stream(*detectors, name=name, collect=True)
@@ -473,11 +501,11 @@ def run_panda_triggering(
     )
 
     # start diabling and unstaging everything
-    yield from bps.unstage_all(*detectors, flyer)  # stops the hdf capture mode
+    yield from bps.unstage_all(
+        *detectors, flyer, DEFAULT_BASELINE
+    )  # stops the hdf capture mode
 
 
-@bpp.run_decorator()  #    # open/close run
-@attach_data_session_metadata_decorator()
 def configure_and_run_panda_triggering(
     profile: Annotated[
         Profile,
