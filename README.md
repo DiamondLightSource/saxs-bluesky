@@ -64,10 +64,9 @@ To use this in an experiment we can do this through the BlueAPIPythonClient, alo
 from saxs_bluesky.utils.beamline_client import BlueAPIPythonClient
 from saxs_bluesky.plans.ncd_panda import configure_panda_triggering, run_panda_triggering
 
-BL = "i22"
 blueapi_config_path = "PATH_TO_CONFIG"
 
-client = BlueAPIPythonClient(BL, blueapi_config_path=blueapi_config_path, instrument_session="cm12345-1")
+client = BlueAPIPythonClient(BL="i22", blueapi_config_path=blueapi_config_path, instrument_session="cm12345-1")
 
 client.run(
     configure_panda_triggering,
