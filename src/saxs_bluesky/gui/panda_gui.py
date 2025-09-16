@@ -224,7 +224,6 @@ class PandAGUI:
             except Exception as e:
                 print(e)
                 pass
-
             self.style.theme_use(f"sun-valley-{theme_name}")
         else:
             self.style.theme_use(theme_name)
