@@ -410,12 +410,13 @@ def configure_panda_triggering(
     # yield from bps.wait(group="prepare", timeout=DEFAULT_TIMEOUT * len(detectors))
 
 
-@attach_data_session_metadata_decorator()
-@bpp.baseline_decorator(DEFAULT_BASELINE)
+# @attach_data_session_metadata_decorator()
+# @bpp.baseline_decorator(DEFAULT_BASELINE)
 # @bpp.run_decorator()  #    # open/close run
 @validate_call(config={"arbitrary_types_allowed": True})
 def run_panda_triggering(
     panda: HDFPanda = DEFAULT_PANDA,
+    baseline: list[Readable] = DEFAULT_BASELINE,
     metadata: dict[str, Any] | None = None,
 ) -> MsgGenerator:
     """
@@ -442,9 +443,10 @@ def run_panda_triggering(
     flyer = StandardFlyer(trigger_logic)
 
     detectors = detectors + [panda]  # panda must be added so we can get HDF
+    all_devices = detectors + DEFAULT_BASELINE
 
     # STAGE SETS HDF WRITER TO ON
-    yield from bps.stage_all(*detectors, flyer, DEFAULT_BASELINE, group="setup")
+    yield from bps.stage_all(*all_devices, flyer, group="setup")
 
     # yield from stage_and_prepare_detectors(list(detectors), flyer, trigger_info)
     for det in detectors:
@@ -474,7 +476,10 @@ def run_panda_triggering(
 
     ##################
 
-    @bpp.run_decorator(md=_md)  # open/close run
+    @bpp.baseline_decorator(baseline)
+    @attach_data_session_metadata_decorator()
+    @bpp.stage_decorator(all_devices)
+    @bpp.run_decorator(md=_md)
     def run():
         yield from fly_and_collect_with_wait(
             stream_name="primary",
@@ -501,9 +506,7 @@ def run_panda_triggering(
     )
 
     # start diabling and unstaging everything
-    yield from bps.unstage_all(
-        *detectors, flyer, DEFAULT_BASELINE
-    )  # stops the hdf capture mode
+    yield from bps.unstage_all(*all_devices, flyer)  # stops the hdf capture mode
 
 
 def configure_and_run_panda_triggering(
