@@ -12,6 +12,7 @@ from blueapi.core import DataEvent
 from blueapi.service.model import TaskRequest
 from blueapi.worker import ProgressEvent
 from bluesky.callbacks.best_effort import BestEffortCallback
+from dodal.common import inject
 
 
 class BlueAPIPythonClient(BlueapiClient):
@@ -55,3 +56,15 @@ class BlueAPIPythonClient(BlueapiClient):
         print(response)
         if response.task_status is not None and not response.task_status.task_failed:
             print("Plan Succeeded")
+
+    def return_detectors(self):
+        devices = self.get_devices().devices
+        return [inject(d.name) for d in devices]
+
+
+if __name__ == "__main__":
+    BL = "i22"
+    blueapi_config_path = f"./src/saxs_bluesky/blueapi_configs/{BL}_blueapi_config.yaml"
+    client = BlueAPIPythonClient(BL, blueapi_config_path, "None")
+
+    print(client.return_detectors())
