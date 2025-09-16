@@ -44,7 +44,7 @@ group = Group(
     wait_time=1,
     wait_units="S",
     run_time=1,
-    run_units="S,
+    run_units="S",
     wait_pulses=[0, 0, 0, 0],
     run_pulses=[1, 1, 1, 1],
 )
@@ -79,7 +79,7 @@ client.run(run_panda_triggering) #to actually tun the experiment
 
 ```
 
-Certain feature can be interacted though the commandline tool, some example commands here. A lot of the configuration can be done through the PandA GUI:
+Certain features can be interacted though the commandline tool, some example commands here. A lot of the configuration can be done through the PandA GUI:
 
 ```
 python -m saxs-bluesky --version
