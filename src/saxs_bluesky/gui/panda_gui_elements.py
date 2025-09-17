@@ -478,7 +478,7 @@ class ProfileTab(ttk.Frame):
         for i, col in enumerate(COLUMN_NAMES):
             self.profile_config_tree.heading(i, text=col)
             self.profile_config_tree.column(
-                i, minwidth=widths[i], width=widths[i], stretch=False, anchor="w"
+                i, minwidth=widths[i], width=widths[i], stretch=True, anchor="w"
             )
 
         # Insert sample data into the Treeview
