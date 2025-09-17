@@ -223,10 +223,12 @@ class PandAGUI:
             label=all_themes[12],
             command=lambda *ignore: self.window.set_theme(all_themes[12]),
         )
-        theme_menu.add_command(
-            label=all_themes[0],
-            command=lambda *ignore: self.window.set_theme_advanced(all_themes[0]),
-        )
+        # theme_menu.add_command(
+        #     label=all_themes[1] + "dark",
+        #     command=lambda *ignore: self.window.set_theme_advanced(
+        #         all_themes[1] + "dark", brightness=0
+        #     ),
+        # )
 
         menubar.add_cascade(label="Theme", menu=theme_menu)
 
