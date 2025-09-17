@@ -478,7 +478,7 @@ def run_panda_triggering(
 
     @bpp.baseline_decorator(baseline)
     @attach_data_session_metadata_decorator()
-    @bpp.stage_decorator(all_devices)
+    # @bpp.stage_decorator(all_devices)
     @bpp.run_decorator(md=_md)
     def run():
         yield from fly_and_collect_with_wait(
