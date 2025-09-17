@@ -168,19 +168,7 @@ class PandAGUI:
         menubar.add_cascade(label="Inst Session", menu=instr_menu)
 
         theme_menu = tkinter.Menu(menubar, tearoff=0)
-        all_themes = [
-            "arc",
-            "blue",
-            "clearlooks",
-            "elegance",
-            "kroc",
-            "plastik",
-            "radiance",
-            "winxpblue",
-            "clam",
-            "default",
-            "alt",
-        ]
+        all_themes = self.window.pixmap_themes + ["clam", "default", "alt", "classic"]
 
         theme_menu.add_command(
             label=all_themes[0], command=lambda *ignore: self.theme(all_themes[0])
@@ -214,6 +202,13 @@ class PandAGUI:
         )
         theme_menu.add_command(
             label=all_themes[10], command=lambda *ignore: self.theme(all_themes[10])
+        )
+
+        theme_menu.add_command(
+            label=all_themes[11], command=lambda *ignore: self.theme(all_themes[11])
+        )
+        theme_menu.add_command(
+            label=all_themes[12], command=lambda *ignore: self.theme(all_themes[12])
         )
         menubar.add_cascade(label="Theme", menu=theme_menu)
 
