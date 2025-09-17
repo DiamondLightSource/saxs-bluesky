@@ -3,14 +3,6 @@ requires = ["setuptools>=64", "setuptools_scm[toml]>=8"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "saxs-bluesky"
-classifiers = [
-    "Development Status :: 3 - Alpha",
-    "License :: OSI Approved :: Apache Software License",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-]
-description = "Bluesky plans, plan stubs and utilities for Small Angle Scattering beamline at DLS"
 dependencies = [
     "dls-dodal @ git+https://github.com/DiamondLightSource/dodal.git@main",
     "ophyd_async",
@@ -18,7 +10,15 @@ dependencies = [
     "blueapi >= 1.2.1",
     "matplotlib",
     "pydantic",
-] # Add project dependencies here, e.g. ["click", "numpy"]
+    "ttkthemes",
+] # Add project dependencies here, e.g. ["click", "numpy"]name = "saxs-bluesky"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+description = "Bluesky plans, plan stubs and utilities for Small Angle Scattering beamline at DLS"
 dynamic = ["version"]
 license.file = "LICENSE"
 readme = "README.md"
