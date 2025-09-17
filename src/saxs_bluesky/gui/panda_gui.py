@@ -225,7 +225,7 @@ class PandAGUI:
         )
         theme_menu.add_command(
             label=all_themes[0],
-            command=lambda *ignore: self.window.set_theme(all_themes[0]),
+            command=lambda *ignore: self.window.set_theme_advanced(all_themes[0]),
         )
 
         menubar.add_cascade(label="Theme", menu=theme_menu)
