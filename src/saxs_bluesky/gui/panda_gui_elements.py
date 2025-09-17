@@ -137,7 +137,7 @@ class EditableTableview(ttk.Treeview):
 
 class DropdownPopup(ttk.Combobox):
     def __init__(self, tableview, rowid, column, text, options, **kw):
-        ttk.Style().configure("pad.TEntry", padding="1 1 1 1")
+        # ttk.Style().configure("pad.TEntry", padding="1 1 1 1")
 
         self.option_var = tkinter.StringVar()
         self.tableview: EditableTableview = tableview
@@ -287,7 +287,10 @@ class EntryPopup(ttk.Entry):
     ):
         super().__init__(tableview, style="pad.TEntry", **kw)
 
-        ttk.Style().configure("pad.TEntry", padding="1 1 1 1")
+        # s = ttk.Style()
+        # s.configure("pad.TEntry", padding="1 1 1 1")
+        # s.configure("Treeview", rowheight=1000)  # repace 40 with whatever you need
+
         self.tableview = tableview
         self.rowid = rowid
         self.column = column
@@ -475,7 +478,7 @@ class ProfileTab(ttk.Frame):
         for i, col in enumerate(COLUMN_NAMES):
             self.profile_config_tree.heading(i, text=col)
             self.profile_config_tree.column(
-                i, minwidth=widths[i], width=widths[i], stretch=True, anchor="w"
+                i, minwidth=widths[i], width=widths[i], stretch=False, anchor="w"
             )
 
         # Insert sample data into the Treeview

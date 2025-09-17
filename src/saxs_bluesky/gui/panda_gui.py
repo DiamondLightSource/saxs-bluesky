@@ -16,6 +16,7 @@ from tkinter.simpledialog import askstring
 
 import matplotlib.pyplot as plt
 from bluesky.plans import count
+from ttkthemes import ThemedTk
 
 import saxs_bluesky.blueapi_configs
 from saxs_bluesky._version import __version__
@@ -87,13 +88,13 @@ class PandAGUI:
             BL, blueapi_config_path, self.instrument_session
         )
 
-        self.window = tkinter.Tk()
+        self.window = ThemedTk(theme="arc")
         self.window.wm_resizable(True, True)
         self.window.minsize(600, 200)
         self.window.title("PandA Config")
         self.style = ttk.Style(self.window)
 
-        self.theme("clam")
+        # self.theme("dark")
 
         self.build_menu_bar()
 
@@ -167,9 +168,52 @@ class PandAGUI:
         menubar.add_cascade(label="Inst Session", menu=instr_menu)
 
         theme_menu = tkinter.Menu(menubar, tearoff=0)
-        theme_menu.add_command(label="dark", command=lambda *ignore: self.theme("dark"))
+        all_themes = [
+            "arc",
+            "blue",
+            "clearlooks",
+            "elegance",
+            "kroc",
+            "plastik",
+            "radiance",
+            "winxpblue",
+            "clam",
+            "default",
+            "alt",
+        ]
+
         theme_menu.add_command(
-            label="light", command=lambda *ignore: self.theme("light")
+            label=all_themes[0], command=lambda *ignore: self.theme(all_themes[0])
+        )
+        theme_menu.add_command(
+            label=all_themes[1], command=lambda *ignore: self.theme(all_themes[1])
+        )
+        theme_menu.add_command(
+            label=all_themes[2], command=lambda *ignore: self.theme(all_themes[2])
+        )
+        theme_menu.add_command(
+            label=all_themes[3], command=lambda *ignore: self.theme(all_themes[3])
+        )
+        theme_menu.add_command(
+            label=all_themes[4], command=lambda *ignore: self.theme(all_themes[4])
+        )
+        theme_menu.add_command(
+            label=all_themes[5], command=lambda *ignore: self.theme(all_themes[5])
+        )
+        theme_menu.add_command(
+            label=all_themes[6], command=lambda *ignore: self.theme(all_themes[6])
+        )
+        theme_menu.add_command(
+            label=all_themes[7], command=lambda *ignore: self.theme(all_themes[7])
+        )
+        theme_menu.add_command(
+            label=all_themes[8], command=lambda *ignore: self.theme(all_themes[8])
+        )
+        theme_menu.add_command(
+            label=all_themes[9], command=lambda *ignore: self.theme(all_themes[9])
+        )
+        theme_menu.add_command(
+            label=all_themes[10], command=lambda *ignore: self.theme(all_themes[10])
         )
         menubar.add_cascade(label="Theme", menu=theme_menu)
 
@@ -214,20 +258,8 @@ class PandAGUI:
     def show_about(self):
         messagebox.showinfo("About", __version__)
 
-    def theme(self, theme_name: str = "light"):
-        if theme_name in ["light", "dark"]:
-            try:
-                self.window.tk.call(
-                    "source", f"{os.path.dirname(os.path.realpath(__file__))}/sv.tcl"
-                )  # Put here the path of your theme file
-                # Set the theme with the theme_use method
-            except Exception as e:
-                print(e)
-                pass
-            self.style.theme_use(f"sun-valley-{theme_name}")
-        else:
-            self.style.theme_use(theme_name)
-            print("All themes:", self.style.theme_names())
+    def theme(self, theme_name: str = "arc"):
+        self.window.set_theme(theme_name)
 
     def add_profile_tab(self, event):
         if self.notebook.select() == self.notebook.tabs()[-1]:
