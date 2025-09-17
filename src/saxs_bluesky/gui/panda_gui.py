@@ -171,45 +171,63 @@ class PandAGUI:
         all_themes = self.window.pixmap_themes + ["clam", "default", "alt", "classic"]
 
         theme_menu.add_command(
-            label=all_themes[0], command=lambda *ignore: self.theme(all_themes[0])
+            label=all_themes[0],
+            command=lambda *ignore: self.window.set_theme(all_themes[0]),
         )
         theme_menu.add_command(
-            label=all_themes[1], command=lambda *ignore: self.theme(all_themes[1])
+            label=all_themes[1],
+            command=lambda *ignore: self.window.set_theme(all_themes[1]),
         )
         theme_menu.add_command(
-            label=all_themes[2], command=lambda *ignore: self.theme(all_themes[2])
+            label=all_themes[2],
+            command=lambda *ignore: self.window.set_theme(all_themes[2]),
         )
         theme_menu.add_command(
-            label=all_themes[3], command=lambda *ignore: self.theme(all_themes[3])
+            label=all_themes[3],
+            command=lambda *ignore: self.window.set_theme(all_themes[3]),
         )
         theme_menu.add_command(
-            label=all_themes[4], command=lambda *ignore: self.theme(all_themes[4])
+            label=all_themes[4],
+            command=lambda *ignore: self.window.set_theme(all_themes[4]),
         )
         theme_menu.add_command(
-            label=all_themes[5], command=lambda *ignore: self.theme(all_themes[5])
+            label=all_themes[5],
+            command=lambda *ignore: self.window.set_theme(all_themes[5]),
         )
         theme_menu.add_command(
-            label=all_themes[6], command=lambda *ignore: self.theme(all_themes[6])
+            label=all_themes[6],
+            command=lambda *ignore: self.window.set_theme(all_themes[6]),
         )
         theme_menu.add_command(
-            label=all_themes[7], command=lambda *ignore: self.theme(all_themes[7])
+            label=all_themes[7],
+            command=lambda *ignore: self.window.set_theme(all_themes[7]),
         )
         theme_menu.add_command(
-            label=all_themes[8], command=lambda *ignore: self.theme(all_themes[8])
+            label=all_themes[8],
+            command=lambda *ignore: self.window.set_theme(all_themes[8]),
         )
         theme_menu.add_command(
-            label=all_themes[9], command=lambda *ignore: self.theme(all_themes[9])
+            label=all_themes[9],
+            command=lambda *ignore: self.window.set_theme(all_themes[9]),
         )
         theme_menu.add_command(
-            label=all_themes[10], command=lambda *ignore: self.theme(all_themes[10])
+            label=all_themes[10],
+            command=lambda *ignore: self.window.set_theme(all_themes[10]),
         )
 
         theme_menu.add_command(
-            label=all_themes[11], command=lambda *ignore: self.theme(all_themes[11])
+            label=all_themes[11],
+            command=lambda *ignore: self.window.set_theme(all_themes[11]),
         )
         theme_menu.add_command(
-            label=all_themes[12], command=lambda *ignore: self.theme(all_themes[12])
+            label=all_themes[12],
+            command=lambda *ignore: self.window.set_theme(all_themes[12]),
         )
+        theme_menu.add_command(
+            label=all_themes[0],
+            command=lambda *ignore: self.window.set_theme(all_themes[0]),
+        )
+
         menubar.add_cascade(label="Theme", menu=theme_menu)
 
         helpmenu = tkinter.Menu(menubar, tearoff=0)
@@ -253,8 +271,8 @@ class PandAGUI:
     def show_about(self):
         messagebox.showinfo("About", __version__)
 
-    def theme(self, theme_name: str = "arc"):
-        self.window.set_theme(theme_name)
+    # def theme(self, theme_name: str = "arc"):
+    #     self.window.set_theme(theme_name)
 
     def add_profile_tab(self, event):
         if self.notebook.select() == self.notebook.tabs()[-1]:
