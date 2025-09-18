@@ -7,7 +7,7 @@ import bluesky.plans as bsp
 import bluesky.preprocessors as bpp
 import numpy as np
 from bluesky.protocols import Readable
-from bluesky.utils import Msg, MsgGenerator
+from bluesky.utils import MsgGenerator
 from dodal.common import inject
 from dodal.devices.motors import Motor
 from dodal.log import LOGGER
@@ -556,7 +556,7 @@ def set_detectors(
     else:
         STORED_DETECTORS = [inject(f) for f in detectors]  # type: ignore
 
-    return (yield Msg("detectors_set"))
+    yield from bps.null()
 
 
 @validate_call(config={"arbitrary_types_allowed": True})
@@ -568,8 +568,7 @@ def log_detectors() -> MsgGenerator:
         Msg: Bluesky message indicating detectors have been logged.
     """
     LOGGER.info(STORED_DETECTORS)
-    return (yield Msg("detectors_logged"))
-
+    yield from bps.null()
 
 @validate_call(config={"arbitrary_types_allowed": True})
 def set_profile(profile: Profile) -> MsgGenerator:
@@ -583,7 +582,7 @@ def set_profile(profile: Profile) -> MsgGenerator:
     """
     global STORED_PROFILE
     STORED_PROFILE = profile
-    return (yield Msg("profile_logged"))
+    yield from bps.null()
 
 
 @validate_call(config={"arbitrary_types_allowed": True})
@@ -598,7 +597,7 @@ def set_trigger_info(trigger_info: TriggerInfo) -> MsgGenerator:
     """
     global STORED_TRIGGER_INFO
     STORED_TRIGGER_INFO = trigger_info
-    return (yield Msg("profile_set"))
+    yield from bps.null()
 
 
 def get_trigger_info() -> TriggerInfo | None:
@@ -633,7 +632,7 @@ def create_profile(
         repeats=repeats, seq_trigger=seq_trigger, multiplier=multiplier
     )
 
-    return (yield Msg("profile_created"))
+    yield from bps.null()
 
 
 def append_group(
@@ -665,7 +664,7 @@ def append_group(
         )
     )
 
-    return (yield Msg("profile_appended"))
+    yield from bps.null()
 
 
 def delete_group(n: int = 1) -> MsgGenerator:
@@ -676,7 +675,7 @@ def delete_group(n: int = 1) -> MsgGenerator:
 
     STORED_PROFILE.delete_group(n)
 
-    return (yield Msg("group_deleted"))
+    yield from bps.null()
 
 
 def create_steps(start: float, stop: float | None, step: float | None):
