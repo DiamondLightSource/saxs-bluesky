@@ -93,10 +93,10 @@ CONFIG_NAME = "PandaTrigger"
 DEFAULT_GROUP = Group(
     frames=1,
     trigger="IMMEDIATE",
-    wait_time=1,
-    wait_units="S",
-    run_time=1,
-    run_units="S",
+    wait_time=10,
+    wait_units="MS",
+    run_time=100,
+    run_units="MS",
     wait_pulses=[0, 0, 0, 0],
     run_pulses=[1, 1, 1, 1],
 )
