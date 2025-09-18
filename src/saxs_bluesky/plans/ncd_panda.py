@@ -410,7 +410,7 @@ def configure_panda_triggering(
     # yield from bps.wait(group="prepare", timeout=DEFAULT_TIMEOUT * len(detectors))
 
 
-# @attach_data_session_metadata_decorator()
+@attach_data_session_metadata_decorator()
 # @bpp.baseline_decorator(DEFAULT_BASELINE)
 # @bpp.run_decorator()  #    # open/close run
 @validate_call(config={"arbitrary_types_allowed": True})
@@ -442,7 +442,7 @@ def run_panda_triggering(
     trigger_logic = StaticSeqTableTriggerLogic(panda_seq_table)
     flyer = StandardFlyer(trigger_logic)
 
-    detectors = detectors + [panda]  # panda must be added so we can get HDF
+    # detectors = detectors + [panda]  # panda must be added so we can get HDF
     all_devices = detectors + DEFAULT_BASELINE
 
     # STAGE SETS HDF WRITER TO ON
@@ -459,11 +459,11 @@ def run_panda_triggering(
 
     # Collect metadata
     plan_args = {
-        "total_frames": profile.number_of_events,
-        "duration": profile.duration,
+        "total_frames": 1,
+        "duration": 1,
         "panda": panda.name + ":" + repr(panda),
-        "detectors": {device.name + ":" + repr(device) for device in detectors},
-        "baseline": {device.name + ":" + repr(device) for device in DEFAULT_BASELINE},
+        # "detectors": {device.name + ":" + repr(device) for device in detectors},
+        # "baseline": {device.name + ":" + repr(device) for device in DEFAULT_BASELINE},
     }
     # Add panda to detectors so it captures and writes data.
     # It needs to be in metadata but not metadata planargs.
@@ -477,7 +477,6 @@ def run_panda_triggering(
     ##################
 
     @bpp.baseline_decorator(baseline)
-    @attach_data_session_metadata_decorator()
     # @bpp.stage_decorator(all_devices)
     @bpp.run_decorator(md=_md)
     def run():
