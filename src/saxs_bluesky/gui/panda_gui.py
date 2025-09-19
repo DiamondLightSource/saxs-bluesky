@@ -267,6 +267,8 @@ class PandAGUI:
         for label, text in zip(self.info_labels, text_list, strict=False):
             label.set(text)
 
+        self.client.change_session(self.instrument_session)
+
     def open_new_window(self):
         PandAGUI()
 

@@ -6,6 +6,7 @@ from dodal.common import inject
 from ophyd_async.core import StandardDetector
 from ophyd_async.fastcs.panda import HDFPanda
 
+from saxs_bluesky.utils.beamline_client import BlueAPIPythonClient
 from saxs_bluesky.utils.profile_groups import ExperimentLoader, Group, Profile
 
 """
@@ -14,8 +15,24 @@ Configuration for b21 PandA beamline
 
 """
 
-# GUI Elements
+DEFAULT_INSTRUMENT_SESSION = "cm40642-4"
 
+###THESE NEED TO BE LISTS TO BE SERIALISED
+FAST_DETECTORS: list[StandardDetector] = [inject("saxs"), inject("waxs")]
+
+DEFAULT_PANDA: HDFPanda = inject("panda2")
+
+DEFAULT_BASELINE: list[Readable] = [
+    inject("slits_1"),
+    inject("slits_2"),
+    inject("slits_3"),
+    inject("slits_5"),
+    inject("slits_6"),
+    inject("synchrotron"),
+]
+
+
+# GUI Elements
 PULSEBLOCKS = 6  # this is higher than the number of pulseblocks
 # so each connection cant have a pulseblock for mutpliers
 PULSEBLOCKASENTRYBOX = False
@@ -98,19 +115,11 @@ DEFAULT_PROFILE = Profile(
 DEFAULT_EXPERIMENT = ExperimentLoader(
     profiles=[copy.deepcopy(DEFAULT_PROFILE)],
     instrument=b21.BL,
-    detectors=["saxs", "waxs"],
-    instrument_session="cm40642-4",
+    detectors=FAST_DETECTORS,
+    instrument_session=DEFAULT_INSTRUMENT_SESSION,
 )
 
 
-FAST_DETECTORS: list[StandardDetector] = [inject("saxs"), inject("waxs")]
-DEFAULT_PANDA: HDFPanda = inject("panda2")
-
-DEFAULT_BASELINE: list[Readable] = [
-    inject("slits_1"),
-    inject("slits_2"),
-    inject("slits_3"),
-    inject("slits_5"),
-    inject("slits_6"),
-    inject("synchrotron"),
-]
+# BlueAPI client
+blueapi_config_path = f"./src/saxs_bluesky/blueapi_configs/{b21.BL}_blueapi_config.yaml"
+CLIENT = BlueAPIPythonClient("i22", blueapi_config_path, DEFAULT_INSTRUMENT_SESSION)
