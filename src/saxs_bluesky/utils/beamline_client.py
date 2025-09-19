@@ -12,9 +12,12 @@ from blueapi.core import DataEvent
 from blueapi.service.model import TaskRequest
 from blueapi.worker import ProgressEvent
 from bluesky.callbacks.best_effort import BestEffortCallback
+from dodal.common import inject
 
 
 class BlueAPIPythonClient(BlueapiClient):
+    """A simple BlueAPI client for running bluesky plans."""
+
     def __init__(
         self, BL: str, blueapi_config_path: str | Path, instrument_session: str
     ):
@@ -30,6 +33,7 @@ class BlueAPIPythonClient(BlueapiClient):
         super().__init__(blueapi_class._rest, blueapi_class._events)  # noqa
 
     def run(self, plan: str | Callable, **kwargs):
+        """Run a bluesky plan via BlueAPI."""
         if isinstance(plan, str):
             plan_name = plan
         else:
@@ -50,8 +54,24 @@ class BlueAPIPythonClient(BlueapiClient):
             elif isinstance(event, DataEvent):
                 callback(event.name, event.doc)
 
-        # response = self.create_and_start_task(task)
-        response = self.run_task(task, on_event=on_event, timeout=10)
+        response = self.run_task(task, on_event=on_event, timeout=None)
         print(response)
         if response.task_status is not None and not response.task_status.task_failed:
             print("Plan Succeeded")
+
+    def return_detectors(self):
+        """Return a list of detectors for the current beamline."""
+        devices = self.get_devices().devices
+        return [inject(d.name) for d in devices]
+
+    def change_session(self, new_session: str):
+        """Change the instrument session for the client."""
+        self.instrument_session = new_session
+
+
+if __name__ == "__main__":
+    BL = "i22"
+    blueapi_config_path = f"./src/saxs_bluesky/blueapi_configs/{BL}_blueapi_config.yaml"
+    client = BlueAPIPythonClient(BL, blueapi_config_path, "None")
+
+    print(client.return_detectors())

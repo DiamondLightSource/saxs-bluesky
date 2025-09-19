@@ -1,13 +1,13 @@
 import os
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Any
 
 import bluesky.plan_stubs as bps
 import bluesky.plans as bsp
 import bluesky.preprocessors as bpp
 import numpy as np
 from bluesky.protocols import Readable
-from bluesky.utils import Msg, MsgGenerator
+from bluesky.utils import MsgGenerator
 from dodal.common import inject
 from dodal.devices.motors import Motor
 from dodal.log import LOGGER
@@ -299,6 +299,7 @@ def get_output(device: str) -> tuple[str | None, int | None]:
     return output_type, output
 
 
+@validate_call(config={"arbitrary_types_allowed": True})
 def turn_on(device: str) -> MsgGenerator:
     output_type, output = get_output(device)
 
@@ -309,6 +310,7 @@ def turn_on(device: str) -> MsgGenerator:
         yield from set_panda_output(output_type, output, 1)
 
 
+@validate_call(config={"arbitrary_types_allowed": True})
 def turn_off(device: str) -> MsgGenerator:
     output_type, output = get_output(device)
 
@@ -411,11 +413,11 @@ def configure_panda_triggering(
 
 
 @attach_data_session_metadata_decorator()
-@bpp.baseline_decorator(DEFAULT_BASELINE)
-@bpp.run_decorator()  #    # open/close run
 @validate_call(config={"arbitrary_types_allowed": True})
 def run_panda_triggering(
     panda: HDFPanda = DEFAULT_PANDA,
+    baseline: list[Readable] = DEFAULT_BASELINE,
+    metadata: dict[str, Any] | None = None,
 ) -> MsgGenerator:
     """
 
@@ -440,8 +442,11 @@ def run_panda_triggering(
     trigger_logic = StaticSeqTableTriggerLogic(panda_seq_table)
     flyer = StandardFlyer(trigger_logic)
 
+    # detectors = detectors + [panda]  # panda must be added so we can get HDF
+    all_devices = detectors + DEFAULT_BASELINE
+
     # STAGE SETS HDF WRITER TO ON
-    yield from bps.stage_all(*detectors, flyer, group="setup")
+    yield from bps.stage_all(*all_devices, flyer, group="setup")
 
     # yield from stage_and_prepare_detectors(list(detectors), flyer, trigger_info)
     for det in detectors:
@@ -450,11 +455,37 @@ def run_panda_triggering(
 
     yield from bps.wait(group="setup", timeout=DEFAULT_TIMEOUT * len(detectors))
 
-    yield from fly_and_collect_with_wait(
-        stream_name="primary",
-        detectors=list(detectors),
-        flyer=flyer,
-    )
+    ######################
+
+    # Collect metadata
+    plan_args = {
+        "total_frames": trigger_info.number_of_events,
+        "duration": trigger_info.livetime,
+        "panda": panda.name + ":" + repr(panda),
+        # "detectors": {device.name + ":" + repr(device) for device in detectors},
+        # "baseline": {device.name + ":" + repr(device) for device in DEFAULT_BASELINE},
+    }
+    # Add panda to detectors so it captures and writes data.
+    # It needs to be in metadata but not metadata planargs.
+    _md = {
+        "detectors": {device.name for device in detectors},
+        "plan_args": plan_args,
+        "hints": {},
+    }
+    _md.update(metadata or {})
+
+    ##################
+
+    @bpp.baseline_decorator(baseline)
+    @bpp.run_decorator(md=_md)
+    def run():
+        yield from fly_and_collect_with_wait(
+            stream_name="primary",
+            detectors=list(detectors),
+            flyer=flyer,
+        )
+
+    yield from run()
 
     # name = "run"
     # yield from bps.declare_stream(*detectors, name=name, collect=True)
@@ -473,11 +504,9 @@ def run_panda_triggering(
     )
 
     # start diabling and unstaging everything
-    yield from bps.unstage_all(*detectors, flyer)  # stops the hdf capture mode
+    yield from bps.unstage_all(*all_devices, flyer)  # stops the hdf capture mode
 
 
-@bpp.run_decorator()  #    # open/close run
-@attach_data_session_metadata_decorator()
 def configure_and_run_panda_triggering(
     profile: Annotated[
         Profile,
@@ -525,7 +554,7 @@ def set_detectors(
     else:
         STORED_DETECTORS = [inject(f) for f in detectors]  # type: ignore
 
-    return (yield Msg("detectors_set"))
+    yield from bps.null()
 
 
 @validate_call(config={"arbitrary_types_allowed": True})
@@ -537,7 +566,7 @@ def log_detectors() -> MsgGenerator:
         Msg: Bluesky message indicating detectors have been logged.
     """
     LOGGER.info(STORED_DETECTORS)
-    return (yield Msg("detectors_logged"))
+    yield from bps.null()
 
 
 @validate_call(config={"arbitrary_types_allowed": True})
@@ -552,7 +581,7 @@ def set_profile(profile: Profile) -> MsgGenerator:
     """
     global STORED_PROFILE
     STORED_PROFILE = profile
-    return (yield Msg("profile_logged"))
+    yield from bps.null()
 
 
 @validate_call(config={"arbitrary_types_allowed": True})
@@ -567,7 +596,7 @@ def set_trigger_info(trigger_info: TriggerInfo) -> MsgGenerator:
     """
     global STORED_TRIGGER_INFO
     STORED_TRIGGER_INFO = trigger_info
-    return (yield Msg("profile_set"))
+    yield from bps.null()
 
 
 def get_trigger_info() -> TriggerInfo | None:
@@ -602,7 +631,7 @@ def create_profile(
         repeats=repeats, seq_trigger=seq_trigger, multiplier=multiplier
     )
 
-    return (yield Msg("profile_created"))
+    yield from bps.null()
 
 
 def append_group(
@@ -634,7 +663,7 @@ def append_group(
         )
     )
 
-    return (yield Msg("profile_appended"))
+    yield from bps.null()
 
 
 def delete_group(n: int = 1) -> MsgGenerator:
@@ -645,7 +674,7 @@ def delete_group(n: int = 1) -> MsgGenerator:
 
     STORED_PROFILE.delete_group(n)
 
-    return (yield Msg("group_deleted"))
+    yield from bps.null()
 
 
 def create_steps(start: float, stop: float | None, step: float | None):
