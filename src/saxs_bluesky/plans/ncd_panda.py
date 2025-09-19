@@ -299,6 +299,7 @@ def get_output(device: str) -> tuple[str | None, int | None]:
     return output_type, output
 
 
+@validate_call(config={"arbitrary_types_allowed": True})
 def turn_on(device: str) -> MsgGenerator:
     output_type, output = get_output(device)
 
@@ -309,6 +310,7 @@ def turn_on(device: str) -> MsgGenerator:
         yield from set_panda_output(output_type, output, 1)
 
 
+@validate_call(config={"arbitrary_types_allowed": True})
 def turn_off(device: str) -> MsgGenerator:
     output_type, output = get_output(device)
 
