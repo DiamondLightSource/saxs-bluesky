@@ -411,8 +411,6 @@ def configure_panda_triggering(
 
 
 @attach_data_session_metadata_decorator()
-# @bpp.baseline_decorator(DEFAULT_BASELINE)
-# @bpp.run_decorator()  #    # open/close run
 @validate_call(config={"arbitrary_types_allowed": True})
 def run_panda_triggering(
     panda: HDFPanda = DEFAULT_PANDA,
@@ -459,8 +457,8 @@ def run_panda_triggering(
 
     # Collect metadata
     plan_args = {
-        "total_frames": 1,
-        "duration": 1,
+        "total_frames": trigger_info.number_of_events,
+        "duration": trigger_info.livetime,
         "panda": panda.name + ":" + repr(panda),
         # "detectors": {device.name + ":" + repr(device) for device in detectors},
         # "baseline": {device.name + ":" + repr(device) for device in DEFAULT_BASELINE},
@@ -477,7 +475,6 @@ def run_panda_triggering(
     ##################
 
     @bpp.baseline_decorator(baseline)
-    # @bpp.stage_decorator(all_devices)
     @bpp.run_decorator(md=_md)
     def run():
         yield from fly_and_collect_with_wait(
@@ -568,6 +565,7 @@ def log_detectors() -> MsgGenerator:
     """
     LOGGER.info(STORED_DETECTORS)
     yield from bps.null()
+
 
 @validate_call(config={"arbitrary_types_allowed": True})
 def set_profile(profile: Profile) -> MsgGenerator:
