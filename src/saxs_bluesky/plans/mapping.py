@@ -33,7 +33,7 @@ def step_mapping() -> MsgGenerator:
 
 
 @validate_call(config={"arbitrary_types_allowed": True})
-def create_path(detectors: list[StandardReadable], axes: list[Motor]):
+def twod_grid_map(detectors: list[StandardReadable], axes: list[Motor]):
     grid = Line(inject("base.y"), 2.1, 3.8, 12) * ~Line(inject("base.x"), 0.5, 1.5, 10)
     # spec = Fly(0.4 @ grid) & Circle("x", "y", 1.0, 2.8, radius=0.5)
     stack = grid.calculate()
