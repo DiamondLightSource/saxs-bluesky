@@ -12,7 +12,12 @@ from dodal.common import inject
 from ophyd_async.core import StandardDetector
 from ophyd_async.fastcs.panda import HDFPanda
 
+from saxs_bluesky.utils.beamline_client import BlueAPIPythonClient
 from saxs_bluesky.utils.profile_groups import ExperimentLoader, Group, Profile
+
+DEFAULT_INSTRUMENT_SESSION = "cm40643-4"
+
+###THESE NEED TO BE LISTS TO BE SERIALISED
 
 FAST_DETECTORS: list[StandardDetector] = [
     inject("saxs"),
@@ -21,9 +26,7 @@ FAST_DETECTORS: list[StandardDetector] = [
     inject("it"),
 ]
 
-
 DEFAULT_PANDA: HDFPanda = inject("panda1")
-
 
 DEFAULT_BASELINE: list[Readable] = [
     inject("fswitch"),
@@ -41,7 +44,6 @@ DEFAULT_BASELINE: list[Readable] = [
 ]
 
 # GUI Elements
-
 PULSEBLOCKS = 4
 PULSEBLOCKASENTRYBOX = False
 PULSE_BLOCK_NAMES = ["FS", "DETS/TETS", "OAV", "Fluro"]
@@ -66,8 +68,6 @@ TTLOUT = {
 
 
 LVDSIN = {1: None, 2: None}
-
-
 LVDSOUT = {1: None, 2: None}
 
 PULSE_CONNECTIONS = {
@@ -112,6 +112,11 @@ DEFAULT_PROFILE = Profile(
 DEFAULT_EXPERIMENT = ExperimentLoader(
     profiles=[copy.deepcopy(DEFAULT_PROFILE)],
     instrument=i22.BL,
-    detectors=["saxs", "waxs"],
-    instrument_session="cm40643-4",
+    detectors=FAST_DETECTORS,
+    instrument_session=DEFAULT_INSTRUMENT_SESSION,
 )
+
+
+# BlueAPI client
+blueapi_config_path = f"./src/saxs_bluesky/blueapi_configs/{i22.BL}_blueapi_config.yaml"
+CLIENT = BlueAPIPythonClient("i22", blueapi_config_path, DEFAULT_INSTRUMENT_SESSION)

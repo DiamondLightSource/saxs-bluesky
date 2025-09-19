@@ -6,7 +6,7 @@ from typing import Any
 
 import numpy as np
 import yaml
-from ophyd_async.core import DetectorTrigger, TriggerInfo, in_micros
+from ophyd_async.core import DetectorTrigger, StandardDetector, TriggerInfo, in_micros
 from ophyd_async.fastcs.panda import SeqTable, SeqTableInfo, SeqTrigger
 from pydantic import BaseModel
 from pydantic.dataclasses import dataclass as pydanticdataclass
@@ -237,7 +237,7 @@ class ExperimentLoader:
 
     profiles: list[Profile]
     instrument: str
-    detectors: list[str]
+    detectors: list[str] | list[StandardDetector]
     instrument_session: str = ""
 
     @property
