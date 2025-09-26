@@ -94,8 +94,6 @@ class PandAGUI:
         self.window.title("PandA Config")
         self.style = ttk.Style(self.window)
 
-        # self.theme("dark")
-
         self.build_menu_bar()
 
         self.always_visible_frame = ttk.Frame(self.window, borderwidth=5)
@@ -246,9 +244,6 @@ class PandAGUI:
 
     def show_about(self):
         messagebox.showinfo("About", __version__)
-
-    # def theme(self, theme_name: str = "arc"):
-    #     self.window.set_theme(theme_name)
 
     def add_profile_tab(self, event):
         if self.notebook.select() == self.notebook.tabs()[-1]:
@@ -445,6 +440,7 @@ class PandAGUI:
             self.client.run(
                 set_detectors,
                 detectors=list(self.active_detectors_frame.get_active_detectors()),
+                timeout=1,
             )
         except ConnectionError:
             print("Could not upload profile to panda")

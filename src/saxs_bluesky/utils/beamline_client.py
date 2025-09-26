@@ -33,7 +33,12 @@ class BlueAPIPythonClient(BlueapiClient):
         blueapi_class = BlueapiClient.from_config(loaded_config)
         super().__init__(blueapi_class._rest, blueapi_class._events)  # noqa
 
-    def run(self, plan: str | Callable, **kwargs):
+    def run(
+        self,
+        plan: str | Callable,
+        timeout=None,
+        **kwargs,
+    ):
         """Run a bluesky plan via BlueAPI."""
         if isinstance(plan, str):
             plan_name = plan
@@ -55,10 +60,12 @@ class BlueAPIPythonClient(BlueapiClient):
             elif isinstance(event, DataEvent):
                 callback(event.name, event.doc)
 
-        response = self.run_task(task, on_event=on_event, timeout=None)
-        print(response)
+        response = self.run_task(task, on_event=on_event, timeout=timeout)
         if response.task_status is not None and not response.task_status.task_failed:
+            print(response)
             print("Plan Succeeded")
+        if response.task_status is not None and response.task_status.task_failed:
+            print("Plan Failed")
 
     def return_detectors(self) -> list[StandardReadable]:
         """Return a list of StandardReadable for the current beamline."""

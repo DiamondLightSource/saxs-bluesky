@@ -1,6 +1,7 @@
 from saxs_bluesky.utils.beamline_client import BlueAPIPythonClient
+from saxs_bluesky.utils.plotter import ProfilePlotter
 from saxs_bluesky.utils.profile_groups import Group, Profile
-from saxs_bluesky.utils.utils import ProfilePlotter, load_beamline_config
+from saxs_bluesky.utils.utils import load_beamline_config
 
 CONFIG = load_beamline_config()
 FAST_DETECTORS = CONFIG.FAST_DETECTORS
