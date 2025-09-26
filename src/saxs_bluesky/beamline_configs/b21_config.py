@@ -1,4 +1,4 @@
-import copy
+from copy import deepcopy
 
 from bluesky.protocols import Readable
 from dodal.beamlines import b21
@@ -108,12 +108,12 @@ DEFAULT_GROUP = Group(
 DEFAULT_PROFILE = Profile(
     repeats=1,
     seq_trigger="IMMEDIATE",
-    groups=[copy.deepcopy(DEFAULT_GROUP)],
+    groups=[deepcopy(DEFAULT_GROUP)],
     multiplier=None,
 )
 
 DEFAULT_EXPERIMENT = ExperimentLoader(
-    profiles=[copy.deepcopy(DEFAULT_PROFILE)],
+    profiles=[deepcopy(DEFAULT_PROFILE)],
     instrument=b21.BL,
     detectors=FAST_DETECTORS,
     instrument_session=DEFAULT_INSTRUMENT_SESSION,
