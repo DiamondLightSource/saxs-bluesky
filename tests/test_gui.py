@@ -1,4 +1,4 @@
-# from saxs_bluesky.gui.panda_gui import PandAGUI
+from saxs_bluesky.gui.panda_gui import PandAGUI
 from saxs_bluesky.utils.utils import (
     get_saxs_beamline,
     load_beamline_config,
@@ -11,4 +11,4 @@ CONFIG = load_beamline_config()
 
 
 def test_panda_gui():
-    pass
+    PandAGUI(configuration=CONFIG.DEFAULT_EXPERIMENT)
