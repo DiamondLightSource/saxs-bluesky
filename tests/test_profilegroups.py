@@ -128,4 +128,4 @@ def test_profile_properties():
 
     assert duration == 2
     assert total_frames == 1
-    assert number_of_events == 1
+    assert number_of_events == [1]
