@@ -34,7 +34,7 @@ from saxs_bluesky.stubs.panda_stubs import (
     load_settings_from_yaml,
     upload_yaml_to_panda,
 )
-from saxs_bluesky.utils.profile_groups import ExperimentLoader, Group, Profile
+from saxs_bluesky.utils.profile_groups import Group, Profile
 from saxs_bluesky.utils.utils import (
     get_saxs_beamline,
     load_beamline_config,
@@ -65,26 +65,6 @@ def wait_until_complete(pv_obj, waiting_value=0, timeout=None):
         await wait_for_value(pv_obj, waiting_value, timeout=timeout)
 
     yield from bps.wait_for([_wait])
-
-
-# def set_experiment_directory(beamline: str, visit_path: Path):
-#     """Updates the root folder"""
-
-#     print("should not require this to also be set in i22.py")
-
-#     path_provider = StaticVisitPathProvider(
-#         beamline,
-#         Path(visit_path),
-#         client=RemoteDirectoryServiceClient(f"http://{beamline}-control:8088/api"),
-#     )
-#     set_path_provider(path_provider)
-
-#     suffix = datetime.now().strftime("_%Y%m%d%H%M%S")
-
-#     async def set_panda_dir():
-#         await path_provider.update(directory=visit_path, suffix=suffix)
-
-#     yield from bps.wait_for([set_panda_dir])
 
 
 def set_panda_pulses(
@@ -408,8 +388,6 @@ def configure_panda_triggering(
     yield from set_detectors(detectors=detectors)  # store the detectors globally
     yield from set_profile(profile=profile)  # store the profile globally
     yield from set_trigger_info(trigger_info=trigger_info)  # store the profile globally
-
-    # yield from bps.wait(group="prepare", timeout=DEFAULT_TIMEOUT * len(detectors))
 
 
 @attach_data_session_metadata_decorator()
@@ -752,44 +730,3 @@ def centre_sample(
     centre_point = summed_values[max_index]
 
     yield from bps.mv(axis, centre_point)
-
-
-if __name__ == "__main__":
-    from bluesky.run_engine import RunEngine
-
-    RE = RunEngine(call_returns_result=True)
-
-    #################################
-
-    # notes to self
-    # tetramm only works with mulitple triggers,
-    # something to do with arm_status being set to none possible.
-    # when tetramm has multiple triggers eg, 2 the data shape is not 2.
-    # only every 1. It's duration is twice as long, but still 1000 samples
-
-    # tetramm.py
-    # async def prepare(self, trigger_info: TriggerInfo):
-    #     self.maximum_readings_per_frame = self.maximum_readings_per_frame * sum(
-    #         trigger_info.number_of_events
-    #     )
-
-    ###if TETRAMMS ARE NOT WORKING TRY TfgAcquisition() in gda to reset all malcolm
-    #### stuff to defaults
-
-    default_config_path = os.path.join(
-        os.path.dirname(os.path.realpath(__file__)),
-        "profile_yamls",
-        "panda_config.yaml",
-    )
-    configuration = ExperimentLoader.read_from_yaml(default_config_path)
-    profile = configuration.profiles[1]
-
-    detectors: list[StandardDetector] = [inject("saxs"), inject("waxs")]
-
-    RE(
-        configure_panda_triggering(
-            profile,
-            detectors=detectors,
-            force_load=False,
-        )
-    )
