@@ -68,11 +68,3 @@ class BlueAPIPythonClient(BlueapiClient):
     def change_session(self, new_session: str) -> None:
         """Change the instrument session for the client."""
         self.instrument_session = new_session
-
-
-if __name__ == "__main__":
-    BL = "i22"
-    blueapi_config_path = f"./src/saxs_bluesky/blueapi_configs/{BL}_blueapi_config.yaml"
-    client = BlueAPIPythonClient(BL, blueapi_config_path, "None")
-
-    print(client.return_detectors())
