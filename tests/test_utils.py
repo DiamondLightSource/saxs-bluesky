@@ -1,17 +1,9 @@
-import os
-from pathlib import Path
-
+from saxs_bluesky.utils.beamline_client import BlueAPIPythonClient
 from saxs_bluesky.utils.profile_groups import Group, Profile
 from saxs_bluesky.utils.utils import ProfilePlotter, load_beamline_config
 
 CONFIG = load_beamline_config()
 FAST_DETECTORS = CONFIG.FAST_DETECTORS
-
-SAXS_bluesky_ROOT = Path(__file__)
-
-yaml_dir = os.path.join(
-    SAXS_bluesky_ROOT.parent.parent, "src", "saxs_bluesky", "profile_yamls"
-)
 
 
 def test_profile_plotter():
@@ -37,3 +29,13 @@ def test_fast_detectors_without_beamline_env_var_makes_set():
     assert "saxs" in FAST_DETECTORS
     assert "waxs" in FAST_DETECTORS
     assert len(FAST_DETECTORS) == 4
+
+
+def test_blueapi_client():
+    BL = "i22"
+    blueapi_config_path = f"./src/saxs_bluesky/blueapi_configs/{BL}_blueapi_config.yaml"
+    client = BlueAPIPythonClient(BL, blueapi_config_path, "None")
+
+    assert client.BL == "i22"
+    client.change_session("9999")
+    assert client.instrument_session == "9999"
