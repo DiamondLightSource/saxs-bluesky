@@ -13,6 +13,7 @@ from blueapi.service.model import TaskRequest
 from blueapi.worker import ProgressEvent
 from bluesky.callbacks.best_effort import BestEffortCallback
 from dodal.common import inject
+from ophyd_async.core import StandardReadable
 
 
 class BlueAPIPythonClient(BlueapiClient):
@@ -59,12 +60,12 @@ class BlueAPIPythonClient(BlueapiClient):
         if response.task_status is not None and not response.task_status.task_failed:
             print("Plan Succeeded")
 
-    def return_detectors(self):
-        """Return a list of detectors for the current beamline."""
+    def return_detectors(self) -> list[StandardReadable]:
+        """Return a list of StandardReadable for the current beamline."""
         devices = self.get_devices().devices
         return [inject(d.name) for d in devices]
 
-    def change_session(self, new_session: str):
+    def change_session(self, new_session: str) -> None:
         """Change the instrument session for the client."""
         self.instrument_session = new_session
 
