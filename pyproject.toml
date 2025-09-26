@@ -18,6 +18,7 @@ dependencies = [
     "blueapi >= 1.2.1",
     "matplotlib",
     "pydantic",
+    "scipy",
     "ttkthemes",
 ] # Add project dependencies here, e.g. ["click", "numpy"]
 dynamic = ["version"]
