@@ -13,6 +13,8 @@ CONFIG = load_beamline_config()
 
 if os.environ.get("DISPLAY", "") == "":
     os.environ.__setitem__("DISPLAY", ":0.0")
+    os.system("export DISPLAY=:0.0")
+    os.system("Xvfb :0.0 &")
 
 
 def test_panda_gui():
