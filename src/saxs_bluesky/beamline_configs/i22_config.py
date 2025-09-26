@@ -4,7 +4,7 @@ Configuration for i22 PandA beamline
 
 """
 
-import copy
+from copy import deepcopy
 
 from bluesky.protocols import Readable
 from dodal.beamlines import i22
@@ -105,12 +105,12 @@ DEFAULT_GROUP = Group(
 DEFAULT_PROFILE = Profile(
     repeats=1,
     seq_trigger="IMMEDIATE",
-    groups=[copy.deepcopy(DEFAULT_GROUP)],
+    groups=[deepcopy(DEFAULT_GROUP)],
     multiplier=[1, 1, 1, 1],
 )
 
 DEFAULT_EXPERIMENT = ExperimentLoader(
-    profiles=[copy.deepcopy(DEFAULT_PROFILE)],
+    profiles=[deepcopy(DEFAULT_PROFILE)],
     instrument=i22.BL,
     detectors=FAST_DETECTORS,
     instrument_session=DEFAULT_INSTRUMENT_SESSION,
