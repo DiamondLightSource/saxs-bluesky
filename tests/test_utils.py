@@ -36,4 +36,4 @@ def test_profile_plotter():
 def test_fast_detectors_without_beamline_env_var_makes_set():
     assert "saxs" in FAST_DETECTORS
     assert "waxs" in FAST_DETECTORS
-    assert len(FAST_DETECTORS) == 2
+    assert len(FAST_DETECTORS) == 4
