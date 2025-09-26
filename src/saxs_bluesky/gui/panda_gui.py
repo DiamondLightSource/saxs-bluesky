@@ -168,67 +168,39 @@ class PandAGUI:
         menubar.add_cascade(label="Inst Session", menu=instr_menu)
 
         theme_menu = tkinter.Menu(menubar, tearoff=0)
-        all_themes = self.window.pixmap_themes + ["clam", "default", "alt", "classic"]
-
         theme_menu.add_command(
-            label=all_themes[0],
-            command=lambda *ignore: self.window.set_theme(all_themes[0]),
+            label="arc",
+            command=lambda *ignore: self.window.set_theme("arc"),
         )
         theme_menu.add_command(
-            label=all_themes[1],
-            command=lambda *ignore: self.window.set_theme(all_themes[1]),
-        )
-        theme_menu.add_command(
-            label=all_themes[2],
-            command=lambda *ignore: self.window.set_theme(all_themes[2]),
-        )
-        theme_menu.add_command(
-            label=all_themes[3],
-            command=lambda *ignore: self.window.set_theme(all_themes[3]),
-        )
-        theme_menu.add_command(
-            label=all_themes[4],
-            command=lambda *ignore: self.window.set_theme(all_themes[4]),
-        )
-        theme_menu.add_command(
-            label=all_themes[5],
-            command=lambda *ignore: self.window.set_theme(all_themes[5]),
-        )
-        theme_menu.add_command(
-            label=all_themes[6],
-            command=lambda *ignore: self.window.set_theme(all_themes[6]),
-        )
-        theme_menu.add_command(
-            label=all_themes[7],
-            command=lambda *ignore: self.window.set_theme(all_themes[7]),
-        )
-        theme_menu.add_command(
-            label=all_themes[8],
-            command=lambda *ignore: self.window.set_theme(all_themes[8]),
-        )
-        theme_menu.add_command(
-            label=all_themes[9],
-            command=lambda *ignore: self.window.set_theme(all_themes[9]),
-        )
-        theme_menu.add_command(
-            label=all_themes[10],
-            command=lambda *ignore: self.window.set_theme(all_themes[10]),
+            label="plastik",
+            command=lambda *ignore: self.window.set_theme("plastik"),
         )
 
         theme_menu.add_command(
-            label=all_themes[11],
-            command=lambda *ignore: self.window.set_theme(all_themes[11]),
+            label="radiance",
+            command=lambda *ignore: self.window.set_theme("radiance"),
         )
+
         theme_menu.add_command(
-            label=all_themes[12],
-            command=lambda *ignore: self.window.set_theme(all_themes[12]),
+            label="clam",
+            command=lambda *ignore: self.window.set_theme("clam"),
         )
-        # theme_menu.add_command(
-        #     label=all_themes[1] + "dark",
-        #     command=lambda *ignore: self.window.set_theme_advanced(
-        #         all_themes[1] + "dark", brightness=0
-        #     ),
-        # )
+
+        theme_menu.add_command(
+            label="yaru",
+            command=lambda *ignore: self.window.set_theme("yaru"),
+        )
+
+        theme_menu.add_command(
+            label="equilux",
+            command=lambda *ignore: self.window.set_theme("equilux"),
+        )
+
+        theme_menu.add_command(
+            label="black",
+            command=lambda *ignore: self.window.set_theme("black"),
+        )
 
         menubar.add_cascade(label="Theme", menu=theme_menu)
 
