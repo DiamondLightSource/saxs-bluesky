@@ -16,6 +16,7 @@ from tkinter.simpledialog import askstring
 
 import matplotlib.pyplot as plt
 from bluesky.plans import count
+from ttkthemes import ThemedTk
 
 import saxs_bluesky.blueapi_configs
 from saxs_bluesky._version import __version__
@@ -87,16 +88,11 @@ class PandAGUI:
             BL, blueapi_config_path, self.instrument_session
         )
 
-        self.window = tkinter.Tk()
+        self.window = ThemedTk(theme="arc")
         self.window.wm_resizable(True, True)
         self.window.minsize(600, 200)
         self.window.title("PandA Config")
         self.style = ttk.Style(self.window)
-        self.window.tk.call(
-            "source", f"{os.path.dirname(os.path.realpath(__file__))}/sv.tcl"
-        )  # Put here the path of your theme file
-        # Set the theme with the theme_use method
-        self.theme("dark")
 
         self.build_menu_bar()
 
@@ -170,10 +166,40 @@ class PandAGUI:
         menubar.add_cascade(label="Inst Session", menu=instr_menu)
 
         theme_menu = tkinter.Menu(menubar, tearoff=0)
-        theme_menu.add_command(label="dark", command=lambda *ignore: self.theme("dark"))
         theme_menu.add_command(
-            label="light", command=lambda *ignore: self.theme("light")
+            label="arc",
+            command=lambda *ignore: self.window.set_theme("arc"),
         )
+        theme_menu.add_command(
+            label="plastik",
+            command=lambda *ignore: self.window.set_theme("plastik"),
+        )
+
+        theme_menu.add_command(
+            label="radiance",
+            command=lambda *ignore: self.window.set_theme("radiance"),
+        )
+
+        theme_menu.add_command(
+            label="clam",
+            command=lambda *ignore: self.window.set_theme("clam"),
+        )
+
+        theme_menu.add_command(
+            label="yaru",
+            command=lambda *ignore: self.window.set_theme("yaru"),
+        )
+
+        theme_menu.add_command(
+            label="equilux",
+            command=lambda *ignore: self.window.set_theme("equilux"),
+        )
+
+        theme_menu.add_command(
+            label="black",
+            command=lambda *ignore: self.window.set_theme("black"),
+        )
+
         menubar.add_cascade(label="Theme", menu=theme_menu)
 
         helpmenu = tkinter.Menu(menubar, tearoff=0)
@@ -211,18 +237,13 @@ class PandAGUI:
         for label, text in zip(self.info_labels, text_list, strict=False):
             label.set(text)
 
+        self.client.change_session(self.instrument_session)
+
     def open_new_window(self):
         PandAGUI()
 
     def show_about(self):
         messagebox.showinfo("About", __version__)
-
-    def theme(self, theme_name: str = "light"):
-        if theme_name in ["light", "dark"]:
-            self.style.theme_use(f"sun-valley-{theme_name}")
-        else:
-            self.style.theme_use(theme_name)
-            print("All themes:", self.style.theme_names())
 
     def add_profile_tab(self, event):
         if self.notebook.select() == self.notebook.tabs()[-1]:
@@ -419,6 +440,7 @@ class PandAGUI:
             self.client.run(
                 set_detectors,
                 detectors=list(self.active_detectors_frame.get_active_detectors()),
+                timeout=1,
             )
         except ConnectionError:
             print("Could not upload profile to panda")

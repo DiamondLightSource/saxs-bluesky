@@ -104,3 +104,28 @@ def test_active_pulses():
     )
 
     assert P.active_pulses == [1, 2, 3, 4]
+
+
+def test_profile_properties():
+    P = Profile()
+    P.append_group(
+        Group(
+            frames=1,
+            trigger="IMMEDIATE",
+            wait_time=1,
+            wait_units="S",
+            run_time=1,
+            run_units="S",
+            wait_pulses=[0, 0, 0, 0],
+            run_pulses=[1, 1, 1, 1],
+        )
+    )
+
+    P.return_trigger_info(0.1)
+    number_of_events = P.number_of_events
+    total_frames = P.total_frames
+    duration = P.duration
+
+    assert duration == 2
+    assert total_frames == 1
+    assert number_of_events == [1]

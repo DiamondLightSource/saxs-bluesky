@@ -1,0 +1,8 @@
+api:
+  url: https://p38-blueapi.diamond.ac.uk
+stomp:
+  auth:
+    username: guest
+    password: guest
+  url: tcp://p38-rabbitmq-daq.diamond.ac.uk:61613
+  enabled: true

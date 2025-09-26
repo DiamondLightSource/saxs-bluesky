@@ -1,9 +1,6 @@
 import bluesky.plan_stubs as bps
 from bluesky.utils import MsgGenerator, short_uid
 from dodal.beamlines import module_name_for_beamline
-from dodal.devices.areadetector.plugins.CAM import ColorMode
-from dodal.devices.oav.oav_detector import OAV
-from dodal.devices.oav.oav_parameters import OAVParameters
 from dodal.utils import AnyDevice, make_all_devices, make_device
 from ophyd_async.core import StandardDetector, StandardFlyer, YamlSettingsProvider
 from ophyd_async.fastcs.panda import HDFPanda, PcompInfo, SeqTableInfo
@@ -139,12 +136,3 @@ def save_device_to_yaml(
 
     provider = YamlSettingsProvider(yaml_directory)
     yield from store_settings(provider, yaml_file_name, device)
-
-
-def setup_oav(oav: OAV, parameters: OAVParameters, group="oav_setup"):
-    yield from bps.abs_set(oav.cam.color_mode, ColorMode.RGB1, group=group)
-    yield from bps.abs_set(
-        oav.cam.acquire_period, parameters.acquire_period, group=group
-    )
-    yield from bps.abs_set(oav.cam.acquire_time, parameters.exposure, group=group)
-    yield from bps.abs_set(oav.cam.gain, parameters.gain, group=group)

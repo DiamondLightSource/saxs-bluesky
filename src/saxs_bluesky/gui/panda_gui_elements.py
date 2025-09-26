@@ -17,9 +17,9 @@ from ophyd_async.fastcs.panda import (
 from ophyd_async.fastcs.panda._block import PandaTimeUnits
 
 from saxs_bluesky.utils.ncdcore import ncdcore
+from saxs_bluesky.utils.plotter import ProfilePlotter
 from saxs_bluesky.utils.profile_groups import Group, Profile
 from saxs_bluesky.utils.utils import (
-    ProfilePlotter,
     get_saxs_beamline,
     load_beamline_config,
 )
@@ -137,7 +137,7 @@ class EditableTableview(ttk.Treeview):
 
 class DropdownPopup(ttk.Combobox):
     def __init__(self, tableview, rowid, column, text, options, **kw):
-        ttk.Style().configure("pad.TEntry", padding="1 1 1 1")
+        # ttk.Style().configure("pad.TEntry", padding="1 1 1 1")
 
         self.option_var = tkinter.StringVar()
         self.tableview: EditableTableview = tableview
@@ -287,7 +287,10 @@ class EntryPopup(ttk.Entry):
     ):
         super().__init__(tableview, style="pad.TEntry", **kw)
 
-        ttk.Style().configure("pad.TEntry", padding="1 1 1 1")
+        # s = ttk.Style()
+        # s.configure("pad.TEntry", padding="1 1 1 1")
+        # s.configure("Treeview", rowheight=1000)  # repace 40 with whatever you need
+
         self.tableview = tableview
         self.rowid = rowid
         self.column = column
@@ -640,19 +643,18 @@ class ProfileTab(ttk.Frame):
             self.multiplier_var_options.append(self.multiplier_var)
 
     def commit_and_plot(self):
-        # self.edit_config_for_profile()
         self.edit_config_for_profile()
 
         if not hasattr(self, "plotter"):
             self.plotter = ProfilePlotter(self.profile, CONFIG.PULSE_BLOCK_NAMES)
             self.plotter.plot_pulses()
-            self.plotter.show()
+            self.plotter.show(block=False)
         elif hasattr(self, "plotter") and not self.plotter.open:
             del self.plotter
             self.plotter = ProfilePlotter(self.profile, CONFIG.PULSE_BLOCK_NAMES)
             self.plotter.profile = self.profile
             self.plotter.plot_pulses()
-            self.plotter.show()
+            self.plotter.show(block=False)
         elif hasattr(self, "plotter") and self.plotter.open:
             self.plotter.profile = self.profile
             self.plotter.plot_pulses()

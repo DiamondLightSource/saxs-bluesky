@@ -9,8 +9,8 @@ import yaml
 from ophyd_async.core import DetectorTrigger, TriggerInfo, in_micros
 from ophyd_async.fastcs.panda import SeqTable, SeqTableInfo, SeqTrigger
 from pydantic import BaseModel
-from pydantic.dataclasses import dataclass as pydanticdataclass
 
+# from pydantic.dataclasses import dataclass as pydanticdataclass
 from saxs_bluesky.utils.ncdcore import ncdcore
 
 """
@@ -226,8 +226,8 @@ class Profile(BaseModel):
         return TTLOUTS + LVDSOUTS
 
 
-@pydanticdataclass
-class ExperimentLoader:
+# @pydanticdataclass
+class ExperimentLoader(BaseModel):
     """
     The stores multiple Profiles and can be used in the GUI.
     The is analoaghous to the information shown in the legacy
@@ -237,15 +237,15 @@ class ExperimentLoader:
 
     profiles: list[Profile]
     instrument: str
-    detectors: list[str]
+    detectors: list[Any]
     instrument_session: str = ""
 
     @property
     def n_profiles(self):
         return len(self.profiles)
 
-    @staticmethod
-    def read_from_yaml(config_filepath: str | Path):
+    @classmethod
+    def read_from_yaml(cls, config_filepath: str | Path):
         """Reads an Experimental configuration, containing n profiles
         and generates a ExperimentalProfiles object"""
         with open(config_filepath, "rb") as file:
@@ -298,7 +298,7 @@ class ExperimentLoader:
 
                 profiles.append(n_profile)
 
-            return ExperimentLoader(profiles, instrument, detectors)
+            return cls(profiles=profiles, instrument=instrument, detectors=detectors)
 
     def to_dict(self) -> dict:
         exp_dict = {

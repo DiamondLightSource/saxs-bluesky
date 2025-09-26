@@ -1,5 +1,3 @@
-import bluesky.plan_stubs as bps
-import bluesky.preprocessors as bpp
 from bluesky.utils import MsgGenerator
 from dodal.common import inject
 from dodal.devices.motors import Motor
@@ -25,23 +23,24 @@ FAST_DETECTORS = CONFIG.FAST_DETECTORS
 DEFAULT_BASELINE = CONFIG.DEFAULT_BASELINE
 
 
-@bpp.run_decorator()  #    # open/close run
-@bpp.baseline_decorator(DEFAULT_BASELINE)
 @attach_data_session_metadata_decorator()
-def step_mapping() -> MsgGenerator:
-    yield from bps.null()
-
-
 @validate_call(config={"arbitrary_types_allowed": True})
-def create_path(detectors: list[StandardReadable], axes: list[Motor]):
-    grid = Line(inject("base.y"), 2.1, 3.8, 12) * ~Line(inject("base.x"), 0.5, 1.5, 10)
+def twod_grid_map(
+    detectors: list[StandardReadable],
+    arg1: list[int],
+    arg2: list[int],
+    axes1: Motor = inject("base.x"),  # noqa
+    axes2: Motor = inject("base.y"),  # noqa
+) -> MsgGenerator:
+    grid = Line(axes1, arg1[0], arg1[1], arg1[2]) * ~Line(
+        axes2, arg2[0], arg2[1], arg2[2]
+    )
     # spec = Fly(0.4 @ grid) & Circle("x", "y", 1.0, 2.8, radius=0.5)
     stack = grid.calculate()
 
-    # path = Path(stack, start=5, num=30)
     stack[0].axes()  # ['y', 'x']
 
-    path = Path(stack, start=5, num=30)
+    path = Path(stack)
     chunk = path.consume(4096)  # you can't have any more than 4096 lines on a PandA
 
     LOGGER.info(len(stack[0]))  # 44
@@ -50,7 +49,3 @@ def create_path(detectors: list[StandardReadable], axes: list[Motor]):
     LOGGER.info(chunk.duration)  # duration of each frame
 
     yield from scanspec.spec_scan(set(detectors), grid)
-
-
-if __name__ == "__main__":
-    pass

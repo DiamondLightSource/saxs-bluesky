@@ -47,6 +47,9 @@ class ActiveDetectorsFrame(ttk.Frame):
             for n, det in enumerate(self.PULSE_CONNECTIONS[pulse + 1]):
                 # experiment_var=tkinter.StringVar(value=self.configuration.experiment)
 
+                if det is None:
+                    det = ""
+
                 var = tkinter.IntVar()
 
                 if (det.lower() == "fs") or ("shutter" in det.lower()):

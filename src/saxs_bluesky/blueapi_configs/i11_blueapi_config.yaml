@@ -1,0 +1,8 @@
+api:
+  url: https://i11-blueapi.diamond.ac.uk
+stomp:
+  auth:
+    username: guest
+    password: guest
+  url: tcp://i11-rabbitmq-daq.diamond.ac.uk:61613
+  enabled: true

@@ -12,9 +12,13 @@ from blueapi.core import DataEvent
 from blueapi.service.model import TaskRequest
 from blueapi.worker import ProgressEvent
 from bluesky.callbacks.best_effort import BestEffortCallback
+from dodal.common import inject
+from ophyd_async.core import StandardReadable
 
 
 class BlueAPIPythonClient(BlueapiClient):
+    """A simple BlueAPI client for running bluesky plans."""
+
     def __init__(
         self, BL: str, blueapi_config_path: str | Path, instrument_session: str
     ):
@@ -29,7 +33,13 @@ class BlueAPIPythonClient(BlueapiClient):
         blueapi_class = BlueapiClient.from_config(loaded_config)
         super().__init__(blueapi_class._rest, blueapi_class._events)  # noqa
 
-    def run(self, plan: str | Callable, **kwargs):
+    def run(
+        self,
+        plan: str | Callable,
+        timeout=None,
+        **kwargs,
+    ):
+        """Run a bluesky plan via BlueAPI."""
         if isinstance(plan, str):
             plan_name = plan
         else:
@@ -50,8 +60,18 @@ class BlueAPIPythonClient(BlueapiClient):
             elif isinstance(event, DataEvent):
                 callback(event.name, event.doc)
 
-        # response = self.create_and_start_task(task)
-        response = self.run_task(task, on_event=on_event, timeout=10)
-        print(response)
+        response = self.run_task(task, on_event=on_event, timeout=timeout)
         if response.task_status is not None and not response.task_status.task_failed:
+            print(response)
             print("Plan Succeeded")
+        if response.task_status is not None and response.task_status.task_failed:
+            print("Plan Failed")
+
+    def return_detectors(self) -> list[StandardReadable]:
+        """Return a list of StandardReadable for the current beamline."""
+        devices = self.get_devices().devices
+        return [inject(d.name) for d in devices]
+
+    def change_session(self, new_session: str) -> None:
+        """Change the instrument session for the client."""
+        self.instrument_session = new_session

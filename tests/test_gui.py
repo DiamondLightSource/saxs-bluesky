@@ -1,5 +1,12 @@
-# from saxs_bluesky.panda_gui import PandAGUI
-# from saxs_bluesky.panda_gui_elements import EditableTableview
+from saxs_bluesky.utils.utils import (
+    get_saxs_beamline,
+    load_beamline_config,
+)
+
+############################################################################################
+
+BL = get_saxs_beamline()
+CONFIG = load_beamline_config()
 
 
 def test_panda_gui():
