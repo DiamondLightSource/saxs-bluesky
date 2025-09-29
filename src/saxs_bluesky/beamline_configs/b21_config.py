@@ -122,8 +122,8 @@ DEFAULT_EXPERIMENT = ExperimentLoader(
 )
 
 
+path = os.path.dirname(saxs_bluesky.blueapi_configs.__file__)
+
 # BlueAPI client
-blueapi_config_path = os.path.join(
-    saxs_bluesky.blueapi_configs.__file__, f"{b21.BL}_blueapi_config.yaml"
-)
+blueapi_config_path = os.path.join(path, f"{b21.BL}_blueapi_config.yaml")
 CLIENT = BlueAPIPythonClient("b21", blueapi_config_path, DEFAULT_INSTRUMENT_SESSION)
