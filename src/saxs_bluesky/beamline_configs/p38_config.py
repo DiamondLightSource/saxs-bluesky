@@ -4,6 +4,7 @@ Configuration for i22 PandA beamline
 
 """
 
+import os
 from copy import deepcopy
 
 from bluesky.protocols import Readable
@@ -12,6 +13,7 @@ from dodal.common import inject
 from ophyd_async.core import StandardDetector
 from ophyd_async.fastcs.panda import HDFPanda
 
+import saxs_bluesky.blueapi_configs
 from saxs_bluesky.utils.beamline_client import BlueAPIPythonClient
 from saxs_bluesky.utils.profile_groups import ExperimentLoader, Group, Profile
 
@@ -108,5 +110,7 @@ DEFAULT_EXPERIMENT = ExperimentLoader(
 
 
 # BlueAPI client
-blueapi_config_path = f"./src/saxs_bluesky/blueapi_configs/{p38.BL}_blueapi_config.yaml"
-CLIENT = BlueAPIPythonClient(p38.BL, blueapi_config_path, DEFAULT_INSTRUMENT_SESSION)
+blueapi_config_path = os.path.join(
+    saxs_bluesky.blueapi_configs.__file__, f"{p38.BL}_blueapi_config.yaml"
+)
+CLIENT = BlueAPIPythonClient("p38", blueapi_config_path, DEFAULT_INSTRUMENT_SESSION)
