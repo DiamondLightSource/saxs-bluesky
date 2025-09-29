@@ -11,6 +11,9 @@ import saxs_bluesky.blueapi_configs
 from saxs_bluesky.utils.beamline_client import BlueAPIPythonClient
 from saxs_bluesky.utils.profile_groups import ExperimentLoader, Group, Profile
 
+BL = i11.BL
+
+
 """
 
 Configuration for b21 PandA beamline
@@ -122,8 +125,7 @@ DEFAULT_EXPERIMENT = ExperimentLoader(
 )
 
 
-path = os.path.dirname(saxs_bluesky.blueapi_configs.__file__)
-
-# BlueAPI client
-blueapi_config_path = os.path.join(path, f"{i11.BL}_blueapi_config.yaml")
-CLIENT = BlueAPIPythonClient("i11", blueapi_config_path, DEFAULT_INSTRUMENT_SESSION)
+blueapi_config_path = (
+    f"{os.path.dirname(saxs_bluesky.blueapi_configs.__file__)}/{BL}_blueapi_config.yaml"
+)
+CLIENT = BlueAPIPythonClient(BL, blueapi_config_path, DEFAULT_INSTRUMENT_SESSION)
