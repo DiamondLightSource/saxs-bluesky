@@ -17,6 +17,9 @@ import saxs_bluesky.blueapi_configs
 from saxs_bluesky.utils.beamline_client import BlueAPIPythonClient
 from saxs_bluesky.utils.profile_groups import ExperimentLoader, Group, Profile
 
+BL = i22.BL
+
+
 DEFAULT_INSTRUMENT_SESSION = "cm40643-4"
 
 ###THESE NEED TO BE LISTS TO BE SERIALISED
@@ -118,9 +121,7 @@ DEFAULT_EXPERIMENT = ExperimentLoader(
     instrument_session=DEFAULT_INSTRUMENT_SESSION,
 )
 
-
-path = os.path.dirname(saxs_bluesky.blueapi_configs.__file__)
-
-# BlueAPI client
-blueapi_config_path = os.path.join(path, f"{i22.BL}_blueapi_config.yaml")
-CLIENT = BlueAPIPythonClient("i22", blueapi_config_path, DEFAULT_INSTRUMENT_SESSION)
+blueapi_config_path = (
+    f"{os.path.dirname(saxs_bluesky.blueapi_configs.__file__)}/{BL}_blueapi_config.yaml"
+)
+CLIENT = BlueAPIPythonClient(BL, blueapi_config_path, DEFAULT_INSTRUMENT_SESSION)
