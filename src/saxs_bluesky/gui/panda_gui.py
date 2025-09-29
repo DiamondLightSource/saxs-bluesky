@@ -200,6 +200,10 @@ class PandAGUI:
             command=lambda *ignore: self.window.set_theme("black"),
         )
 
+        theme_menu.add_command(
+            label="adapta",
+            command=lambda *ignore: self.window.set_theme("adapta"),
+        )
         menubar.add_cascade(label="Theme", menu=theme_menu)
 
         helpmenu = tkinter.Menu(menubar, tearoff=0)
