@@ -16,17 +16,19 @@ from ophyd_async.fastcs.panda import (
 )
 from ophyd_async.fastcs.panda._block import PandaTimeUnits
 
+from saxs_bluesky.beamline_configs.config import (
+    DEFAULT_GROUP,
+    PULSE_BLOCK_NAMES,
+    PULSEBLOCKASENTRYBOX,
+    PULSEBLOCKS,
+)
 from saxs_bluesky.utils.ncdcore import ncdcore
 from saxs_bluesky.utils.plotter import ProfilePlotter
 from saxs_bluesky.utils.profile_groups import Group, Profile
-from saxs_bluesky.utils.utils import (
-    get_saxs_beamline,
-    load_beamline_config,
-)
 
-CONFIG = load_beamline_config()
-DEFAULT_GROUP = CONFIG.DEFAULT_GROUP
-BL = get_saxs_beamline()
+# CONFIG = load_beamline_config()
+# DEFAULT_GROUP = CONFIG.DEFAULT_GROUP
+# BL = get_saxs_beamline()
 
 
 def recursive_destroy(frame):
@@ -110,7 +112,7 @@ class EditableTableview(ttk.Treeview):
             if hasattr(self, "pulse_popup"):
                 self.pulse_popup.on_return(None)  # close previous popup
 
-            if not CONFIG.PULSEBLOCKASENTRYBOX:
+            if not PULSEBLOCKASENTRYBOX:
                 self.pulse_popup = CheckButtonPopup(
                     self,
                     rowid,
@@ -119,7 +121,7 @@ class EditableTableview(ttk.Treeview):
                     y=y,
                     columns=self.kwargs["columns"],
                 )
-            if CONFIG.PULSEBLOCKASENTRYBOX:
+            if PULSEBLOCKASENTRYBOX:
                 self.pulse_popup = EntryPopup(self, rowid, int(column[1:]) - 1, text)
                 self.pulse_popup.place(
                     x=x, y=y + pady, width=width, height=height, anchor="w"
@@ -187,7 +189,7 @@ class CheckButtonPopup(ttk.Checkbutton):
 
         self.row_num = int(rowid[-2::], 16) - 1
 
-        w = ((CONFIG.PULSEBLOCKS) * 105) + 50
+        w = ((PULSEBLOCKS) * 105) + 50
         h = 50  # height for the Tk root
 
         self.root = tkinter.Toplevel()  ##HOLY MOLY
@@ -221,15 +223,13 @@ class CheckButtonPopup(ttk.Checkbutton):
         self.root.geometry("%dx%d+%d+%d" % (w, h, x - 60, y))  # NOQA: UP031 The geometry call needs it specified in this way
         self.save_pulse_button = ttk.Button(
             self.root, text="Ok", command=self.on_return
-        ).grid(
-            column=CONFIG.PULSEBLOCKS, row=0, padx=5, pady=5, columnspan=1, sticky="e"
-        )
+        ).grid(column=PULSEBLOCKS, row=0, padx=5, pady=5, columnspan=1, sticky="e")
 
         self.root.protocol("WM_DELETE_WINDOW", self.abort)
         self.root.bind("<Escape>", lambda *ignore: self.destroy())
 
     def create_checkbuttons(self):
-        for pulse in range(CONFIG.PULSEBLOCKS):
+        for pulse in range(PULSEBLOCKS):
             value = ncdcore.str2bool(str(self.pulse_vals[pulse]))
             if value is None:
                 raise ValueError("Pulse value is None")
@@ -262,7 +262,7 @@ class CheckButtonPopup(ttk.Checkbutton):
         del self
 
     def on_return(self, event=None):
-        for pulse in range(CONFIG.PULSEBLOCKS):
+        for pulse in range(PULSEBLOCKS):
             val = str(self.option_var[pulse].get())
             self.pulse_vals[pulse] = val
 
@@ -626,10 +626,10 @@ class ProfileTab(ttk.Frame):
             column=2, row=0, padx=5, pady=5, sticky="news"
         )
 
-        for i in range(CONFIG.PULSEBLOCKS):  # 4 pulse blocks
+        for i in range(PULSEBLOCKS):  # 4 pulse blocks
             col_pos = i + 3
 
-            ttk.Label(self, text=f"{CONFIG.PULSE_BLOCK_NAMES[i]}:").grid(
+            ttk.Label(self, text=f"{PULSE_BLOCK_NAMES[i]}:").grid(
                 column=col_pos, row=0, padx=5, pady=5, sticky="nsw"
             )
 
@@ -646,12 +646,12 @@ class ProfileTab(ttk.Frame):
         self.edit_config_for_profile()
 
         if not hasattr(self, "plotter"):
-            self.plotter = ProfilePlotter(self.profile, CONFIG.PULSE_BLOCK_NAMES)
+            self.plotter = ProfilePlotter(self.profile, PULSE_BLOCK_NAMES)
             self.plotter.plot_pulses()
             self.plotter.show(block=False)
         elif hasattr(self, "plotter") and not self.plotter.open:
             del self.plotter
-            self.plotter = ProfilePlotter(self.profile, CONFIG.PULSE_BLOCK_NAMES)
+            self.plotter = ProfilePlotter(self.profile, PULSE_BLOCK_NAMES)
             self.plotter.profile = self.profile
             self.plotter.plot_pulses()
             self.plotter.show(block=False)

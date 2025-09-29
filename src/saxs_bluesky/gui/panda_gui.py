@@ -18,8 +18,18 @@ import matplotlib.pyplot as plt
 from bluesky.plans import count
 from ttkthemes import ThemedTk
 
-import saxs_bluesky.blueapi_configs
 from saxs_bluesky._version import __version__
+from saxs_bluesky.beamline_configs.config import (
+    CLIENT,
+    DEFAULT_EXPERIMENT,
+    DEFAULT_PROFILE,
+    LVDSIN,
+    LVDSOUT,
+    PULSE_CONNECTIONS,
+    PULSEBLOCKS,
+    TTLIN,
+    TTLOUT,
+)
 from saxs_bluesky.gui.gui_frames import ActiveDetectorsFrame
 from saxs_bluesky.gui.panda_gui_elements import ProfileTab
 from saxs_bluesky.gui.step_gui import StepWidget
@@ -29,7 +39,6 @@ from saxs_bluesky.plans.ncd_panda import (
     run_panda_triggering,
     set_detectors,
 )
-from saxs_bluesky.utils.beamline_client import BlueAPIPythonClient
 from saxs_bluesky.utils.profile_groups import ExperimentLoader
 from saxs_bluesky.utils.utils import (
     get_saxs_beamline,
@@ -39,9 +48,7 @@ from saxs_bluesky.utils.utils import (
 ############################################################################################
 
 BL = get_saxs_beamline()
-
 CONFIG = load_beamline_config()
-DEFAULT_PROFILE = CONFIG.DEFAULT_PROFILE
 
 ############################################################################################
 
@@ -82,11 +89,7 @@ class PandAGUI:
         else:
             self.instrument_session = self.configuration.instrument_session
 
-        blueapi_config_path = f"{os.path.dirname(saxs_bluesky.blueapi_configs.__file__)}/{BL}_blueapi_config.yaml"  # noqa
-
-        self.client = BlueAPIPythonClient(
-            BL, blueapi_config_path, self.instrument_session
-        )
+        self.client = CLIENT
 
         self.window = ThemedTk(theme="arc")
         self.window.wm_resizable(True, True)
@@ -129,8 +132,8 @@ class PandAGUI:
 
         self.active_detectors_frame = ActiveDetectorsFrame(
             self.always_visible_frame,
-            CONFIG.PULSEBLOCKS,
-            CONFIG.PULSE_CONNECTIONS,
+            PULSEBLOCKS,
+            PULSE_CONNECTIONS,
             self.configuration.detectors,
         )
 
@@ -360,28 +363,28 @@ class PandAGUI:
 
         labels = ["TTLIN", "LVDSIN", "TTLOUT", "LVDSOUT"]
 
-        for key in CONFIG.TTLIN.keys():
-            INDev = CONFIG.TTLIN[key]
+        for key in TTLIN.keys():
+            INDev = TTLIN[key]
 
             ax.scatter(0, key, color="k", s=50)
             ax.text(0 + 0.1, key, INDev)
 
-        for key in CONFIG.LVDSIN.keys():
-            LVDSINDev = CONFIG.LVDSIN[key]
+        for key in LVDSIN.keys():
+            LVDSINDev = LVDSIN[key]
 
             ax.scatter(1, key, color="k", s=50)
-            ax.text(1 + 0.1, key, LVDSINDev)
+            ax.text(1 + 0.1, key, str(LVDSINDev))
 
-        for key in CONFIG.TTLOUT.keys():
-            TTLOUTDev = CONFIG.TTLOUT[key]
+        for key in TTLOUT.keys():
+            TTLOUTDev = TTLOUT[key]
 
             ax.scatter(2, key, color="b", s=50)
-            ax.text(2 + 0.1, key, TTLOUTDev)
+            ax.text(2 + 0.1, key, str(TTLOUTDev))
 
-        for key in CONFIG.LVDSOUT.keys():
-            LVDSOUTDev = CONFIG.LVDSOUT[key]
+        for key in LVDSOUT.keys():
+            LVDSOUTDev = LVDSOUT[key]
             ax.scatter(3, key, color="b", s=50)
-            ax.text(3 + 0.1, key, LVDSOUTDev)
+            ax.text(3 + 0.1, key, str(LVDSOUTDev))
 
         ax.set_ylabel("I/O Connections")
         ax.grid()
@@ -731,4 +734,4 @@ if __name__ == "__main__":
 
     # dir_path = os.path.dirname(os.path.realpath(__file__))
     # config_filepath = os.path.join(dir_path, "profile_yamls", "panda_config.yaml")
-    PandAGUI(configuration=CONFIG.DEFAULT_EXPERIMENT)
+    PandAGUI(configuration=DEFAULT_EXPERIMENT)
