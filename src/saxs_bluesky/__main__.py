@@ -31,7 +31,7 @@ def main(ctx: click.Context) -> None:
         print("Please invoke subcommand!")
 
 
-@main.command(name="start_gui")
+@main.command(name="gui")
 def start_gui():
     CONFIG = load_beamline_config()
     PandAGUI(configuration=CONFIG.DEFAULT_EXPERIMENT)

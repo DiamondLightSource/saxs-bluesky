@@ -1,10 +1,9 @@
 import os
 from copy import deepcopy
 
-from bluesky.protocols import Readable
 from dodal.beamlines import b21
 from dodal.common import inject
-from ophyd_async.core import StandardDetector
+from ophyd_async.core import SignalR, StandardDetector, StandardReadable
 from ophyd_async.fastcs.panda import HDFPanda
 
 import saxs_bluesky.blueapi_configs
@@ -27,7 +26,7 @@ FAST_DETECTORS: list[StandardDetector] = [inject("saxs"), inject("waxs")]
 
 DEFAULT_PANDA: HDFPanda = inject("panda2")
 
-DEFAULT_BASELINE: list[Readable] = [
+DEFAULT_BASELINE: list[StandardReadable] = [
     inject("slits_1"),
     inject("slits_2"),
     inject("slits_3"),
@@ -35,6 +34,10 @@ DEFAULT_BASELINE: list[Readable] = [
     inject("slits_6"),
     inject("synchrotron"),
 ]
+
+STAMPED_PV: list[SignalR] = [
+    inject("it.intensity")
+]  # any stamped PV will potentially slow down acquisition
 
 
 # GUI Elements
@@ -83,13 +86,10 @@ PULSE_CONNECTIONS = {
 
 """
 
-# Buffer added to deadtime to handle minor discrepencies between detector
-# and panda clocks
-DEADTIME_BUFFER = 20e-6
+
 # default sequencer is this one, b21 currently uses seq 1 for somthing else
 DEFAULT_SEQ = 2
-
-CONFIG_NAME = "PandaTriggerWithCounterAndPCAP"
+CONFIG_NAME = "PandaTriggerWithPCAP"
 
 
 """

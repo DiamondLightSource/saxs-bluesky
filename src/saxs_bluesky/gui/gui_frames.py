@@ -27,7 +27,7 @@ class ActiveDetectorsFrame(ttk.Frame):
 
         for pulse in range(self.PULSEBLOCKS):
             active_detectors_frame_n = ttk.Frame(
-                self.pulse_frame, borderwidth=5, relief="raised"
+                self.pulse_frame, borderwidth=5, relief="ridge"
             )
 
             active_detectors_frame_n.pack(

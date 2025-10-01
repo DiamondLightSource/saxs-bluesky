@@ -6,7 +6,6 @@ import bluesky.plan_stubs as bps
 import bluesky.plans as bsp
 import bluesky.preprocessors as bpp
 import numpy as np
-from bluesky.protocols import Readable
 from bluesky.utils import MsgGenerator
 from dodal.common import inject
 from dodal.devices.motors import Motor
@@ -15,10 +14,16 @@ from dodal.plan_stubs.data_session import attach_data_session_metadata_decorator
 from ophyd_async.core import (
     DEFAULT_TIMEOUT,
     DetectorTrigger,
+    SignalR,
     StandardDetector,
     StandardFlyer,
+    StandardReadable,
     TriggerInfo,
-    wait_for_value,
+)
+from ophyd_async.epics.adcore import (
+    AreaDetector,
+    NDAttributePv,
+    NDAttributePvDbrType,
 )
 from ophyd_async.fastcs.panda import (
     HDFPanda,
@@ -26,13 +31,22 @@ from ophyd_async.fastcs.panda import (
     SeqTableInfo,
     StaticSeqTableTriggerLogic,
 )
-from ophyd_async.plan_stubs import ensure_connected, get_current_settings
+from ophyd_async.plan_stubs import (
+    apply_panda_settings,
+    apply_settings_if_different,
+    ensure_connected,
+    get_current_settings,
+    setup_ndattributes,
+    setup_ndstats_sum,
+)
 from pydantic import validate_call
 
 from saxs_bluesky.stubs.panda_stubs import (
     fly_and_collect_with_wait,
     load_settings_from_yaml,
-    upload_yaml_to_panda,
+    return_max_deadtime,
+    set_panda_pulses,
+    wait_until_complete,
 )
 from saxs_bluesky.utils.profile_groups import Group, Profile
 from saxs_bluesky.utils.utils import (
@@ -45,95 +59,12 @@ CONFIG = load_beamline_config()
 DEFAULT_PANDA = CONFIG.DEFAULT_PANDA
 FAST_DETECTORS = CONFIG.FAST_DETECTORS
 DEFAULT_BASELINE = CONFIG.DEFAULT_BASELINE
+STAMPED_PV = CONFIG.STAMPED_PV
 
 
 STORED_DETECTORS: list[StandardDetector] | list[str] | None = None
 STORED_PROFILE: Profile | None = None
 STORED_TRIGGER_INFO: TriggerInfo | None = None
-
-
-def wait_until_complete(pv_obj, waiting_value=0, timeout=None):
-    """
-    An async wrapper for the ophyd async wait_for_value function,
-    to allow it to run inside the bluesky run engine
-    Typical use case is waiting for an active pv to change to 0,
-    indicating that the run has finished, which then allows the
-    run plan to disarm all the devices.
-    """
-
-    async def _wait():
-        await wait_for_value(pv_obj, waiting_value, timeout=timeout)
-
-    yield from bps.wait_for([_wait])
-
-
-def set_panda_pulses(
-    panda: HDFPanda,
-    pulses: list[int],
-    setting: str = "arm",
-    group="arm_panda",
-):
-    """
-
-    Takes a HDFPanda and a list of integers corresponding
-
-    to the number of the pulse blocks.
-
-    Iterates through the numbered pulse blocks
-
-    and arms them and then waits for all to be armed.
-
-    """
-
-    if setting.lower() == "arm":
-        value = PandaBitMux.ONE.value
-    else:
-        value = PandaBitMux.ONE.value
-
-    for n_pulse in pulses:
-        yield from bps.abs_set(
-            panda.pulse[int(n_pulse)].enable,  # type: ignore
-            value,
-            group=group,
-        )
-
-    yield from bps.wait(group=group, timeout=DEFAULT_TIMEOUT)
-
-
-def stage_and_prepare_detectors(
-    detectors: list[StandardDetector],
-    flyer: StandardFlyer,
-    trigger_info: TriggerInfo,
-    group="det_atm",
-):
-    """
-
-    Iterates through all of the detectors specified and prepares them.
-
-    """
-
-    yield from bps.stage_all(*detectors, flyer, group=group)
-
-    for det in detectors:
-        ###this tells the detector how may triggers to expect and sets the CAN aquire on
-        yield from bps.prepare(det, trigger_info, wait=False, group=group)
-
-    yield from bps.wait(group=group, timeout=DEFAULT_TIMEOUT)
-
-
-def return_deadtime(
-    detectors: list[StandardDetector], exposure: float = 1.0
-) -> np.ndarray:
-    """
-    Given a list of connected detector devices, and an exposure time,
-    it returns an array of the deadtime for each detector
-    """
-
-    deadtime = (
-        np.array([det._controller.get_deadtime(exposure) for det in detectors])  # noqa: SLF001
-        + CONFIG.DEADTIME_BUFFER
-    )
-    return deadtime
 
 
 def generate_repeated_trigger_info(
@@ -177,8 +108,6 @@ def check_and_apply_panda_settings(panda: HDFPanda, panda_name: str) -> MsgGener
 
     someone chnaging things in EPICS which might prevent the plan from running
 
-    This mitigates that
-
     """
 
     # this is the directory where the yaml files are stored
@@ -188,28 +117,15 @@ def check_and_apply_panda_settings(panda: HDFPanda, panda_name: str) -> MsgGener
     yaml_file_name = f"{BL}_{CONFIG.CONFIG_NAME}_{panda_name}"
 
     current_panda_settings = yield from get_current_settings(panda)
-    yaml_settings = yield from load_settings_from_yaml(yaml_directory, yaml_file_name)
+    yaml_settings = yield from load_settings_from_yaml(
+        yaml_directory, yaml_file_name, panda
+    )
 
-    if current_panda_settings != yaml_settings:
-        print(
-            (
-                "Current Panda settings do not match the yaml settings, ",
-                "loading yaml settings to panda",
-            )
-        )
-        LOGGER.info(
-            (
-                "Current Panda settings do not match the yaml settings, ",
-                "loading yaml settings to panda",
-            )
-        )
-
-        print(f"{yaml_file_name}.yaml has been uploaded to PandA")
-        LOGGER.info(f"{yaml_file_name}.yaml has been uploaded to PandA")
-        ######### make sure correct yaml is loaded
-        yield from upload_yaml_to_panda(
-            yaml_directory=yaml_directory, yaml_file_name=yaml_file_name, panda=panda
-        )
+    yield from apply_settings_if_different(
+        settings=yaml_settings,
+        apply_plan=apply_panda_settings,
+        current_settings=current_panda_settings,
+    )
 
 
 def multiple_pulse_blocks():
@@ -225,18 +141,7 @@ def multiple_pulse_blocks():
     #                                 frame_timeout=None)
 
 
-def show_deadtime(detector_deadtime, active_detector_names):
-    """
-
-    Takes two iterables, detetors deadtimes and detector names,
-    and prints the deadtimes in the log
-
-    """
-
-    for dt, dn in zip(detector_deadtime, active_detector_names, strict=True):
-        LOGGER.info(f"deadtime for {dn} is {dt}")
-
-
+@validate_call(config={"arbitrary_types_allowed": True})
 def set_panda_output(
     output_type: str = "TTL",
     output: int = 1,
@@ -344,21 +249,11 @@ def configure_panda_triggering(
     for det in detectors:
         LOGGER.info(str(det))
 
-    detector_deadtime = return_deadtime(
-        detectors=list(detectors), exposure=profile.duration
-    )
-
-    max_deadtime = max(detector_deadtime)
-    # show_deadtime(detector_deadtime, max_deadtime)
+    max_deadtime = return_max_deadtime(detectors=detectors, exposure=profile.duration)
 
     # load Panda setting to panda
     if force_load:
         yield from check_and_apply_panda_settings(panda, panda.name)
-
-    # n_repeats = profile.repeats
-    # seq table should be grabbed from the panda and used instead,
-    # in order to decouple run from setup panda
-    # seq_table = profile.seq_table
 
     if profile.multiplier is not None:
         LOGGER.info(f"Pulses used: {profile.active_pulses}")
@@ -394,7 +289,8 @@ def configure_panda_triggering(
 @validate_call(config={"arbitrary_types_allowed": True})
 def run_panda_triggering(
     panda: HDFPanda = DEFAULT_PANDA,
-    baseline: list[Readable] = DEFAULT_BASELINE,
+    baseline: list[StandardReadable] = DEFAULT_BASELINE,
+    stamped_pvs: list[SignalR] = STAMPED_PV,
     metadata: dict[str, Any] | None = None,
 ) -> MsgGenerator:
     """
@@ -420,13 +316,40 @@ def run_panda_triggering(
     trigger_logic = StaticSeqTableTriggerLogic(panda_seq_table)
     flyer = StandardFlyer(trigger_logic)
 
-    # detectors = detectors + [panda]  # panda must be added so we can get HDF
-    all_devices = detectors + DEFAULT_BASELINE
+    # detectors_and_panda = detectors + [panda]  # panda must be added so we can get HDF
+
+    ###setup ndattributes and stamped pv's
+    for det in detectors:
+        if isinstance(det, AreaDetector):
+            yield from setup_ndstats_sum(det)
+
+    if len(stamped_pvs) > 0:
+        stamped_nd_pv_list: list[NDAttributePv] = []
+
+        for pv in stamped_pvs:
+            nd_pv = NDAttributePv(
+                name=pv.name, signal=pv, dbrtype=NDAttributePvDbrType.DBR_DOUBLE
+            )
+
+            stamped_nd_pv_list.append(nd_pv)
+
+        for det in detectors:
+            if isinstance(det, StandardDetector):
+                try:
+                    yield from setup_ndattributes(
+                        det._controller.driver,  # noqa
+                        stamped_nd_pv_list,
+                    )
+                    break
+                except AttributeError:
+                    LOGGER.info(f"Failed to stamp PV's to {det.name}")
+
+    ################
 
     # STAGE SETS HDF WRITER TO ON
-    yield from bps.stage_all(*all_devices, flyer, group="setup")
+    yield from bps.stage_all(*detectors, flyer, group="setup")
+    yield from bps.stage_all(*baseline, flyer, group="setup")
 
-    # yield from stage_and_prepare_detectors(list(detectors), flyer, trigger_info)
     for det in detectors:
         ###this tells the detector how may triggers to expect and sets the CAN aquir
         yield from bps.prepare(det, trigger_info, wait=True, group="setup")
@@ -456,14 +379,14 @@ def run_panda_triggering(
 
     @bpp.baseline_decorator(baseline)
     @bpp.run_decorator(md=_md)
-    def run():
+    def run_trigger_sequence():
         yield from fly_and_collect_with_wait(
             stream_name="primary",
-            detectors=list(detectors),
+            detectors=detectors,
             flyer=flyer,
         )
 
-    yield from run()
+    yield from run_trigger_sequence()
 
     # name = "run"
     # yield from bps.declare_stream(*detectors, name=name, collect=True)
@@ -482,7 +405,8 @@ def run_panda_triggering(
     )
 
     # start diabling and unstaging everything
-    yield from bps.unstage_all(*all_devices, flyer)  # stops the hdf capture mode
+    yield from bps.unstage_all(*detectors, flyer)  # stops the hdf capture mode
+    yield from bps.unstage_all(*baseline, flyer)  # stops the hdf capture mode
 
 
 def configure_and_run_panda_triggering(
@@ -517,8 +441,7 @@ def configure_and_run_panda_triggering(
         force_load=force_load,
     )
 
-    # yield from run_panda_triggering(profile,
-    # detectors=detectors, panda=panda)  # type: ignore
+    yield from run_panda_triggering(panda)
 
 
 @validate_call(config={"arbitrary_types_allowed": True})
@@ -683,7 +606,7 @@ def step_scan(
     stop: float,
     num: int,
     axis: Motor,
-    detectors: list[Readable],
+    detectors: list[StandardReadable],
 ) -> MsgGenerator:
     LOGGER.info(f"Running gda style step scan with detectors: {detectors}")
 
@@ -699,7 +622,7 @@ def step_rscan(
     stop: float,
     num: int,
     axis: Motor,
-    detectors: list[Readable],
+    detectors: list[StandardReadable],
 ) -> MsgGenerator:
     LOGGER.info(f"Running gda style rstep scan with detectors: {detectors}")
 
@@ -715,7 +638,7 @@ def centre_sample(
     stop: float,
     step: float,
     axis: Motor,
-    detectors: list[Readable] = FAST_DETECTORS,
+    detectors: list[StandardReadable] = FAST_DETECTORS,
 ) -> MsgGenerator:
     step_list = create_steps(start, stop, step)
 

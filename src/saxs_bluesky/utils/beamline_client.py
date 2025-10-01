@@ -16,6 +16,14 @@ from dodal.common import inject
 from ophyd_async.core import StandardReadable
 
 
+def load_blueapi_config(blueapi_config_path):
+    config_loader = ConfigLoader(ApplicationConfig)
+    config_loader.use_values_from_yaml(blueapi_config_path)
+    loaded_config = config_loader.load()
+
+    return loaded_config
+
+
 class BlueAPIPythonClient(BlueapiClient):
     """A simple BlueAPI client for running bluesky plans."""
 
@@ -26,10 +34,8 @@ class BlueAPIPythonClient(BlueapiClient):
         self.instrument_session = instrument_session
 
         blueapi_config_path = Path(blueapi_config_path)
+        loaded_config = load_blueapi_config(blueapi_config_path)
 
-        config_loader = ConfigLoader(ApplicationConfig)
-        config_loader.use_values_from_yaml(blueapi_config_path)
-        loaded_config = config_loader.load()
         blueapi_class = BlueapiClient.from_config(loaded_config)
         super().__init__(blueapi_class._rest, blueapi_class._events)  # noqa
 

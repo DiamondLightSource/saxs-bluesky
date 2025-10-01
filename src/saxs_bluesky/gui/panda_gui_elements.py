@@ -346,6 +346,9 @@ class ProfileTab(ttk.Frame):
 
         super().__init__(borderwidth=5)
 
+        self.table_row = 5
+        self.widths = [100, 100, 150, 150, 150, 150, 150, 150, 150]
+
         self.columnconfigure(tuple(range(60)), weight=1)
         self.rowconfigure(tuple(range(30)), weight=1)
 
@@ -471,14 +474,15 @@ class ProfileTab(ttk.Frame):
                 self, columns=COLUMN_NAMES, show="headings"
             )
 
-        table_row = 5
-        widths = [100, 100, 150, 150, 150, 150, 150, 150, 150]
-
         # add the columns headers
         for i, col in enumerate(COLUMN_NAMES):
             self.profile_config_tree.heading(i, text=col)
             self.profile_config_tree.column(
-                i, minwidth=widths[i], width=widths[i], stretch=True, anchor="w"
+                i,
+                minwidth=self.widths[i],
+                width=self.widths[i],
+                stretch=True,
+                anchor="w",
             )
 
         # Insert sample data into the Treeview
@@ -490,7 +494,7 @@ class ProfileTab(ttk.Frame):
 
         self.profile_config_tree.grid(
             column=0,
-            row=table_row,
+            row=self.table_row,
             padx=5,
             pady=5,
             columnspan=len(COLUMN_NAMES),
@@ -502,8 +506,8 @@ class ProfileTab(ttk.Frame):
         )
 
         verscrlbar.grid(
-            column=len(widths),
-            row=table_row,
+            column=len(self.widths),
+            row=self.table_row,
             padx=0,
             pady=0,
             columnspan=1,
