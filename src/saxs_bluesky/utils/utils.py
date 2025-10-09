@@ -12,6 +12,8 @@ from ophyd_async.core import StandardDetector
 
 import saxs_bluesky.beamline_configs
 
+DEFAULT_BEAMLINE = "i22"
+
 
 def get_saxs_beamline() -> str:
     """
@@ -27,7 +29,7 @@ def get_saxs_beamline() -> str:
             BLconfig = config()
             BL = BLconfig.env.metadata.instrument  # type: ignore
         except OSError as e:
-            BL = "i22"
+            BL = DEFAULT_BEAMLINE
             LOGGER.info(
                 f"No beamline is set in metadata. Beamline has defaulted to {BL}:{e}"
             )
