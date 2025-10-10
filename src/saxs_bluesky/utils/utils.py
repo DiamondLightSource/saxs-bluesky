@@ -2,13 +2,17 @@ import os
 from importlib import import_module
 
 import dodal.beamlines
+from blueapi.service.interface import config
 
 ############################################################################################
 from dodal.common import inject
+from dodal.log import LOGGER
 from dodal.utils import get_beamline_name
 from ophyd_async.core import StandardDetector
 
 import saxs_bluesky.beamline_configs
+
+DEFAULT_BEAMLINE = "i22"
 
 
 def get_saxs_beamline() -> str:
@@ -21,7 +25,15 @@ def get_saxs_beamline() -> str:
     BL = get_beamline_name(os.getenv("BEAMLINE"))  # type: ignore
 
     if BL is None:
-        BL = "i22"
+        blueapi_metadata = config().env.metadata
+        if blueapi_metadata is not None:
+            BL = blueapi_metadata.instrument
+        else:
+            BL = DEFAULT_BEAMLINE
+            LOGGER.info(
+                f"No beamline is set in metadata. Beamline has defaulted to {BL}"
+            )
+
         os.environ["BEAMLINE"] = BL
 
     return BL
