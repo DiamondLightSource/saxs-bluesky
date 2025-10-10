@@ -36,7 +36,8 @@ class BlueAPIPythonClient(BlueapiClient):
     def run(
         self,
         plan: str | Callable,
-        timeout=None,
+        timeout: float | None = None,
+        feedback: bool = True,
         **kwargs,
     ):
         """Run a bluesky plan via BlueAPI."""
@@ -51,21 +52,28 @@ class BlueAPIPythonClient(BlueapiClient):
             instrument_session=self.instrument_session,
         )
 
-        progress_bar = CliEventRenderer()
-        callback = BestEffortCallback()
+        if feedback:
+            progress_bar = CliEventRenderer()
+            callback = BestEffortCallback()
 
-        def on_event(event: AnyEvent) -> None:
-            if isinstance(event, ProgressEvent):
-                progress_bar.on_progress_event(event)
-            elif isinstance(event, DataEvent):
-                callback(event.name, event.doc)
+            def on_event(event: AnyEvent) -> None:
+                if isinstance(event, ProgressEvent):
+                    progress_bar.on_progress_event(event)
+                elif isinstance(event, DataEvent):
+                    callback(event.name, event.doc)
 
-        response = self.run_task(task, on_event=on_event, timeout=timeout)
-        if response.task_status is not None and not response.task_status.task_failed:
-            print(response)
-            print("Plan Succeeded")
-        if response.task_status is not None and response.task_status.task_failed:
-            print("Plan Failed")
+            response = self.run_task(task, on_event=on_event, timeout=timeout)
+
+            if (
+                response.task_status is not None
+                and not response.task_status.task_failed
+            ):
+                print(response)
+                print("Plan Succeeded")
+            if response.task_status is not None and response.task_status.task_failed:
+                print("Plan Failed")
+        else:
+            self.create_and_start_task(task)
 
     def return_detectors(self) -> list[StandardReadable]:
         """Return a list of StandardReadable for the current beamline."""
