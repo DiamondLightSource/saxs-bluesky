@@ -3,7 +3,13 @@ from pathlib import Path
 
 from blueapi.cli.updates import CliEventRenderer
 from blueapi.client.client import BlueapiClient
-from blueapi.client.event_bus import AnyEvent
+from blueapi.client.event_bus import AnyEvent, BlueskyStreamingError
+from blueapi.client.rest import (
+    BlueskyRemoteControlError,
+    InvalidParameters,
+    UnauthorisedAccess,
+    UnknownPlan,
+)
 from blueapi.config import (
     ApplicationConfig,
     ConfigLoader,
@@ -52,29 +58,35 @@ class BlueAPIPythonClient(BlueapiClient):
             instrument_session=self.instrument_session,
         )
 
-        if feedback:
-            progress_bar = CliEventRenderer()
-            callback = BestEffortCallback()
+        try:
+            if feedback:
+                progress_bar = CliEventRenderer()
+                callback = BestEffortCallback()
 
-            def on_event(event: AnyEvent) -> None:
-                if isinstance(event, ProgressEvent):
-                    progress_bar.on_progress_event(event)
-                elif isinstance(event, DataEvent):
-                    callback(event.name, event.doc)
+                def on_event(event: AnyEvent) -> None:
+                    if isinstance(event, ProgressEvent):
+                        progress_bar.on_progress_event(event)
+                    elif isinstance(event, DataEvent):
+                        callback(event.name, event.doc)
 
-            response = self.run_task(task, on_event=on_event, timeout=timeout)
+                resp = self.run_task(task, on_event=on_event, timeout=timeout)
 
-            if (
-                response.task_status is not None
-                and not response.task_status.task_failed
-            ):
-                print(response)
-                print("Plan Succeeded")
-            if response.task_status is not None and response.task_status.task_failed:
-                print("Plan Failed")
-        else:
-            print(task)
-            self.create_and_start_task(task)
+                if resp.task_status is not None and not resp.task_status.task_failed:
+                    print("Plan Succeeded")
+            else:
+                server_task = self.create_and_start_task(task)
+                print(server_task.task_id)
+
+        except UnknownPlan as up:
+            raise Exception(f"Plan '{plan_name}' was not recognised") from up
+        except UnauthorisedAccess as ua:
+            raise Exception("Unauthorised request") from ua
+        except InvalidParameters as ip:
+            raise Exception(ip.message()) from ip
+        except (BlueskyRemoteControlError, BlueskyStreamingError) as e:
+            raise Exception(f"server error with this message: {e}") from e
+        except ValueError as ve:
+            raise Exception(f"task could not run: {ve}") from ve
 
     def return_detectors(self) -> list[StandardReadable]:
         """Return a list of StandardReadable for the current beamline."""
