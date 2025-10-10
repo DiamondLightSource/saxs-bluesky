@@ -37,7 +37,7 @@ class BlueAPIPythonClient(BlueapiClient):
         self,
         plan: str | Callable,
         timeout: float | None = None,
-        feedback: bool = True,
+        feedback: bool = False,
         **kwargs,
     ):
         """Run a bluesky plan via BlueAPI."""
@@ -73,6 +73,7 @@ class BlueAPIPythonClient(BlueapiClient):
             if response.task_status is not None and response.task_status.task_failed:
                 print("Plan Failed")
         else:
+            print(task)
             self.create_and_start_task(task)
 
     def return_detectors(self) -> list[StandardReadable]:
