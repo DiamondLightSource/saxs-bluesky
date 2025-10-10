@@ -25,13 +25,13 @@ def get_saxs_beamline() -> str:
     BL = get_beamline_name(os.getenv("BEAMLINE"))  # type: ignore
 
     if BL is None:
-        try:
-            BLconfig = config()
-            BL = BLconfig.env.metadata.instrument  # type: ignore
-        except OSError as e:
+        blueapi_metadata = config().env.metadata
+        if blueapi_metadata is not None:
+            BL = blueapi_metadata.instrument
+        else:
             BL = DEFAULT_BEAMLINE
             LOGGER.info(
-                f"No beamline is set in metadata. Beamline has defaulted to {BL}:{e}"
+                f"No beamline is set in metadata. Beamline has defaulted to {BL}"
             )
 
         os.environ["BEAMLINE"] = BL
