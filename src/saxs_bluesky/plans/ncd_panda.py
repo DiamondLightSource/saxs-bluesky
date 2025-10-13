@@ -6,7 +6,6 @@ import bluesky.plan_stubs as bps
 import bluesky.plans as bsp
 import bluesky.preprocessors as bpp
 import numpy as np
-from bluesky.protocols import Readable
 from bluesky.utils import MsgGenerator
 from dodal.common import inject
 from dodal.devices.motors import Motor
@@ -17,6 +16,7 @@ from ophyd_async.core import (
     DetectorTrigger,
     StandardDetector,
     StandardFlyer,
+    StandardReadable,
     TriggerInfo,
     wait_for_value,
 )
@@ -394,7 +394,7 @@ def configure_panda_triggering(
 @validate_call(config={"arbitrary_types_allowed": True})
 def run_panda_triggering(
     panda: HDFPanda = DEFAULT_PANDA,
-    baseline: list[Readable] = DEFAULT_BASELINE,
+    baseline: list[StandardReadable] = DEFAULT_BASELINE,
     metadata: dict[str, Any] | None = None,
 ) -> MsgGenerator:
     """
@@ -683,7 +683,7 @@ def step_scan(
     stop: float,
     num: int,
     axis: Motor,
-    detectors: list[Readable],
+    detectors: list[StandardReadable],
 ) -> MsgGenerator:
     LOGGER.info(f"Running gda style step scan with detectors: {detectors}")
 
@@ -699,7 +699,7 @@ def step_rscan(
     stop: float,
     num: int,
     axis: Motor,
-    detectors: list[Readable],
+    detectors: list[StandardReadable],
 ) -> MsgGenerator:
     LOGGER.info(f"Running gda style rstep scan with detectors: {detectors}")
 
@@ -715,7 +715,7 @@ def centre_sample(
     stop: float,
     step: float,
     axis: Motor,
-    detectors: list[Readable] = FAST_DETECTORS,
+    detectors: list[StandardReadable] = FAST_DETECTORS,
 ) -> MsgGenerator:
     step_list = create_steps(start, stop, step)
 

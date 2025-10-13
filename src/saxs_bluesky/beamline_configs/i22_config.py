@@ -7,7 +7,6 @@ Configuration for i22 PandA beamline
 import os
 from copy import deepcopy
 
-from bluesky.protocols import Readable
 from dodal.beamlines import i22
 from dodal.common import inject
 from ophyd_async.core import StandardDetector, StandardReadable
@@ -33,7 +32,7 @@ FAST_DETECTORS: list[StandardDetector] = [
 
 DEFAULT_PANDA: HDFPanda = inject("panda1")
 
-DEFAULT_BASELINE: list[Readable] | list[StandardReadable] = [
+DEFAULT_BASELINE: list[StandardReadable] = [
     inject("fswitch"),
     inject("slits_1"),
     inject("slits_2"),
