@@ -24,7 +24,7 @@ DEFAULT_INSTRUMENT_SESSION = "cm40642-4"
 ###THESE NEED TO BE LISTS TO BE SERIALISED
 FAST_DETECTORS: list[StandardDetector] = [inject("saxs"), inject("waxs")]
 
-DEFAULT_PANDA: HDFPanda = inject("panda2")
+DEFAULT_PANDA: HDFPanda = inject("panda1")
 
 DEFAULT_BASELINE: list[StandardReadable] = [
     inject("slits_1"),
