@@ -95,4 +95,5 @@ class BlueAPIPythonClient(BlueapiClient):
 
     def change_session(self, new_session: str) -> None:
         """Change the instrument session for the client."""
+        print(f"New instrument session: {new_session}")
         self.instrument_session = new_session
