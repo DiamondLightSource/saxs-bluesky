@@ -68,7 +68,7 @@ LVDSOUT = {1: "saxs", 2: "waxs"}
 
 PULSE_CONNECTIONS = {
     1: [TTLOUT[1]],
-    2: [LVDSOUT[1], LVDSOUT[2]],
+    2: [TTLOUT[2], LVDSOUT[2]],
     3: [TTLOUT[4]],
     4: [TTLOUT[5]],
     5: [TTLOUT[6]],

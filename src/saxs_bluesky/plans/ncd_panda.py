@@ -51,6 +51,8 @@ STORED_DETECTORS: list[StandardDetector] | list[str] | None = None
 STORED_PROFILE: Profile | None = None
 STORED_TRIGGER_INFO: TriggerInfo | None = None
 
+LOGGER.info(f"saxs bluesky is using the beamline: {BL}")
+
 
 def wait_until_complete(pv_obj, waiting_value=0, timeout=None):
     """
@@ -375,6 +377,9 @@ def configure_panda_triggering(
     # set up trigger info etc
     trigger_info: TriggerInfo = profile.return_trigger_info(max_deadtime)
 
+    LOGGER.info(CONFIG.DEFAULT_SEQ)
+    LOGGER.info(panda.seq[CONFIG.DEFAULT_SEQ])
+
     ############################################################
     # flyer and prepare fly, sets the sequencers table
     trigger_logic = StaticSeqTableTriggerLogic(panda.seq[CONFIG.DEFAULT_SEQ])
@@ -384,6 +389,10 @@ def configure_panda_triggering(
     # !! wait otherwise risking _context missing error
     # change the sequence table
     yield from bps.prepare(flyer, seq_table_info, wait=True)
+
+    LOGGER.info(seq_table_info)
+    LOGGER.info(flyer)
+    LOGGER.info("Prepare done")
 
     yield from set_detectors(detectors=detectors)  # store the detectors globally
     yield from set_profile(profile=profile)  # store the profile globally
