@@ -38,11 +38,9 @@ class EditableTableview(ttk.Treeview):
 
     def close_popups(self):
         if hasattr(self, "pulse_popup"):
-            # self.pulse_popup.on_return(None)  # close previous popup
             self.pulse_popup.on_return(None)
             del self.pulse_popup
         if hasattr(self, "Popup"):
-            # self.Popup.on_return(None)  # close previous popup
             self.Popup.destroy()
             del self.Popup
 
@@ -93,8 +91,6 @@ class EditableTableview(ttk.Treeview):
             # place dropdown popup properly
 
             options = [str(e.name).upper() for e in SeqTrigger]
-
-            # options = ["True", "False"]
             self.Popup = DropdownPopup(self, rowid, int(column[1:]) - 1, text, options)
             self.Popup.place(x=x, y=y + pady, width=width, height=height, anchor="w")
 
@@ -129,8 +125,6 @@ class EditableTableview(ttk.Treeview):
 
 class DropdownPopup(ttk.Combobox):
     def __init__(self, tableview, rowid, column, text, options, **kw):
-        # ttk.Style().configure("pad.TEntry", padding="1 1 1 1")
-
         self.option_var = tkinter.StringVar()
         self.tableview: EditableTableview = tableview
         self.rowid: int = rowid
@@ -144,8 +138,6 @@ class DropdownPopup(ttk.Combobox):
         )
 
         self.current(options.index(text))
-
-        # self.event_generate('<Button-1>')
 
         self.bind("<Return>", self.on_return)
         self.bind("<<ComboboxSelected>>", self.on_return)
@@ -264,7 +256,6 @@ class CheckButtonPopup(ttk.Checkbutton):
 
         self.tableview.item(self.rowid, values=self.vals)
         self.root.destroy()
-        # del self
 
 
 class EntryPopup(ttk.Entry):
@@ -278,10 +269,6 @@ class EntryPopup(ttk.Entry):
         **kw,
     ):
         super().__init__(tableview, style="pad.TEntry", **kw)
-
-        # s = ttk.Style()
-        # s.configure("pad.TEntry", padding="1 1 1 1")
-        # s.configure("Treeview", rowheight=1000)  # repace 40 with whatever you need
 
         self.tableview = tableview
         self.rowid = rowid
@@ -326,7 +313,6 @@ class EntryPopup(ttk.Entry):
     def select_all(self, *ignore):
         """Set selection on the whole text"""
         self.selection_range(0, "end")
-
         # returns 'break' to interrupt default key-bindings
         return "break"
 
@@ -351,8 +337,6 @@ class ProfileTab(ttk.Frame):
         ### add tree view ############################################
         self.build_profile_tree()
 
-        ############################################################
-
         ##### input trigger select
         self.seq_triggers = self.profile.seq_triggers()
 
@@ -369,7 +353,6 @@ class ProfileTab(ttk.Frame):
         ).grid(column=1, row=0, padx=5, pady=5, sticky="w")
 
         ############# number of repeats box
-
         ttk.Label(self, text="No. of repeats").grid(
             column=0, row=1, padx=5, pady=5, sticky="w"
         )
@@ -382,9 +365,6 @@ class ProfileTab(ttk.Frame):
         self.repeats_entry.grid(column=1, row=1, padx=5, pady=5, sticky="w")
         # Tracing the entry and calling the above function
         self.n_repeats_entry_value.trace_add("write", self.entry_changed)
-
-        ############# plot button
-        ############# profile info
 
         self.generate_info_boxes()
 
@@ -537,7 +517,6 @@ class ProfileTab(ttk.Frame):
             self.total_time_per_repeat.grid(column=8, row=2, padx=5, pady=5, sticky="e")
 
             ### total time
-
             self.total_time_label = ttk.Label(
                 self,
                 text=f"Total time: "
