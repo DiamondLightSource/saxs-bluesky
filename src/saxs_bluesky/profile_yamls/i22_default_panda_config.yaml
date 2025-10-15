@@ -1,0 +1,17 @@
+---
+profiles:
+- repeats: 3
+  seq_trigger: IMMEDIATE
+  groups:
+  - frames: 1
+    trigger: IMMEDIATE
+    wait_time: 100
+    wait_units: MS
+    run_time: 100
+    run_units: MS
+    wait_pulses: [0, 0, 0, 0]
+    run_pulses: [1, 0, 0, 0]
+  multiplier: [1, 1, 1, 1]
+instrument: i22
+detectors: [saxs, waxs]
+instrument_session: cm40643-4

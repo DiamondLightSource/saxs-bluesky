@@ -1,16 +1,9 @@
 ---
-title: Panda Configure
-instrument_session: cm40643-4
-instrument: i22
-detectors: [saxs, waxs]
-profile-0:
-  repeats: 3
+profiles:
+- repeats: 3
   seq_trigger: IMMEDIATE
-  multiplier: [1, 2, 4, 8]
-  total_frames: 12
-  duration_per_repeat: 32.0
-  group-0:
-    frames: 1
+  groups:
+  - frames: 1
     trigger: IMMEDIATE
     wait_time: 3000
     wait_units: MS
@@ -18,11 +11,7 @@ profile-0:
     run_units: MS
     wait_pulses: [1, 0, 0, 0]
     run_pulses: [1, 0, 0, 0]
-    wait_time_s: 3.0
-    run_time_s: 3.0
-    group_duration: 6.0
-  group-1:
-    frames: 1
+  - frames: 1
     trigger: IMMEDIATE
     wait_time: 1000
     wait_units: MS
@@ -30,11 +19,7 @@ profile-0:
     run_units: MS
     wait_pulses: [0, 0, 0, 0]
     run_pulses: [1, 1, 0, 0]
-    wait_time_s: 1.0
-    run_time_s: 1.0
-    group_duration: 2.0
-  group-2:
-    frames: 8
+  - frames: 8
     trigger: IMMEDIATE
     wait_time: 1000
     wait_units: MS
@@ -42,11 +27,7 @@ profile-0:
     run_units: MS
     wait_pulses: [0, 0, 0, 0]
     run_pulses: [1, 0, 0, 0]
-    wait_time_s: 1.0
-    run_time_s: 1.0
-    group_duration: 16.0
-  group-3:
-    frames: 1
+  - frames: 1
     trigger: IMMEDIATE
     wait_time: 1000
     wait_units: MS
@@ -54,11 +35,7 @@ profile-0:
     run_units: MS
     wait_pulses: [0, 0, 0, 0]
     run_pulses: [1, 0, 0, 0]
-    wait_time_s: 1.0
-    run_time_s: 3.0
-    group_duration: 4.0
-  group-4:
-    frames: 1
+  - frames: 1
     trigger: IMMEDIATE
     wait_time: 3000
     wait_units: MS
@@ -66,17 +43,11 @@ profile-0:
     run_units: MS
     wait_pulses: [0, 0, 0, 0]
     run_pulses: [0, 0, 0, 0]
-    wait_time_s: 3.0
-    run_time_s: 1.0
-    group_duration: 4.0
-profile-1:
-  repeats: 1
-  seq_trigger: IMMEDIATE
   multiplier: [1, 2, 4, 8]
-  total_frames: 1
-  duration_per_repeat: 2
-  group-0:
-    frames: 1
+- repeats: 1
+  seq_trigger: IMMEDIATE
+  groups:
+  - frames: 1
     trigger: IMMEDIATE
     wait_time: 1
     wait_units: S
@@ -84,65 +55,43 @@ profile-1:
     run_units: S
     wait_pulses: [0, 0, 0, 0]
     run_pulses: [1, 1, 1, 1]
-    wait_time_s: 1
-    run_time_s: 1
-    group_duration: 2
-profile-2:
-  repeats: 1
-  seq_trigger: IMMEDIATE
   multiplier: [1, 2, 4, 8]
-  total_frames: 2
-  duration_per_repeat: 4
-  group-0:
-    frames: 1
-    trigger: IMMEDIATE
-    wait_time: 1
-    wait_units: S
-    run_time: 1
-    run_units: S
-    wait_pulses: [0, 0, 0, 0]
-    run_pulses: [1, 1, 1, 1]
-    wait_time_s: 1
-    run_time_s: 1
-    group_duration: 2
-  group-1:
-    frames: 1
-    trigger: IMMEDIATE
-    wait_time: 1
-    wait_units: S
-    run_time: 1
-    run_units: S
-    wait_pulses: [0, 0, 0, 0]
-    run_pulses: [1, 1, 1, 1]
-    wait_time_s: 1
-    run_time_s: 1
-    group_duration: 2
-profile-3:
-  repeats: 1
+- repeats: 1
   seq_trigger: IMMEDIATE
+  groups:
+  - frames: 1
+    trigger: IMMEDIATE
+    wait_time: 1
+    wait_units: S
+    run_time: 1
+    run_units: S
+    wait_pulses: [0, 0, 0, 0]
+    run_pulses: [1, 1, 1, 1]
+  - frames: 1
+    trigger: IMMEDIATE
+    wait_time: 1
+    wait_units: S
+    run_time: 1
+    run_units: S
+    wait_pulses: [0, 0, 0, 0]
+    run_pulses: [1, 1, 1, 1]
+  multiplier: [1, 2, 4, 8]
+- repeats: 1
+  seq_trigger: IMMEDIATE
+  groups:
+  - frames: 100
+    trigger: IMMEDIATE
+    wait_time: 0
+    wait_units: S
+    run_time: 1
+    run_units: S
+    wait_pulses: [0, 0, 0, 0]
+    run_pulses: [1, 1, 1, 1]
   multiplier: [1, 1, 1, 1]
-  total_frames: 100
-  duration_per_repeat: 100
-  group-0:
-    frames: 100
-    trigger: IMMEDIATE
-    wait_time: 0
-    wait_units: S
-    run_time: 1
-    run_units: S
-    wait_pulses: [0, 0, 0, 0]
-    run_pulses: [1, 1, 1, 1]
-    wait_time_s: 0
-    run_time_s: 1
-    group_duration: 100
-profile-4:
-  repeats: 1
+- repeats: 1
   seq_trigger: TTL1IN
-  multiplier: [1, 2, 4, 8]
-  total_frames: 100
-  duration_per_repeat: 100
-  group-0:
-    frames: 100
+  groups:
+  - frames: 100
     trigger: IMMEDIATE
     wait_time: 0
     wait_units: S
@@ -150,17 +99,11 @@ profile-4:
     run_units: S
     wait_pulses: [0, 0, 0, 0]
     run_pulses: [1, 1, 1, 1]
-    wait_time_s: 0
-    run_time_s: 1
-    group_duration: 100
-profile-5:
-  repeats: 1
-  seq_trigger: IMMEDIATE
   multiplier: [1, 2, 4, 8]
-  total_frames: 1005
-  duration_per_repeat: 5.005
-  group-0:
-    frames: 5
+- repeats: 1
+  seq_trigger: IMMEDIATE
+  groups:
+  - frames: 5
     trigger: IMMEDIATE
     wait_time: 0
     wait_units: MS
@@ -168,11 +111,7 @@ profile-5:
     run_units: MS
     wait_pulses: [0, 0, 0, 0]
     run_pulses: [1, 1, 0, 0]
-    wait_time_s: 0.0
-    run_time_s: 0.001
-    group_duration: 0.005
-  group-1:
-    frames: 500
+  - frames: 500
     trigger: IMMEDIATE
     wait_time: 0
     wait_units: MS
@@ -180,11 +119,7 @@ profile-5:
     run_units: MS
     wait_pulses: [0, 0, 0, 0]
     run_pulses: [1, 1, 0, 1]
-    wait_time_s: 0.0
-    run_time_s: 0.005
-    group_duration: 2.5
-  group-2:
-    frames: 500
+  - frames: 500
     trigger: IMMEDIATE
     wait_time: 0
     wait_units: MS
@@ -192,6 +127,7 @@ profile-5:
     run_units: MS
     wait_pulses: [0, 0, 0, 0]
     run_pulses: [1, 1, 0, 1]
-    wait_time_s: 0.0
-    run_time_s: 0.005
-    group_duration: 2.5
+  multiplier: [1, 2, 4, 8]
+instrument: i22
+detectors: [saxs, waxs]
+instrument_session: ''
