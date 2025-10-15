@@ -29,14 +29,6 @@ DEFAULT_GROUP = CONFIG.DEFAULT_GROUP
 BL = get_saxs_beamline()
 
 
-def recursive_destroy(frame):
-    for child in frame.winfo_children():
-        child.destroy()
-
-        if child.winfo_children():
-            recursive_destroy(child)
-
-
 class EditableTableview(ttk.Treeview):
     def __init__(self, profile_tab, *args, **kwargs):
         self.profile_tab = profile_tab

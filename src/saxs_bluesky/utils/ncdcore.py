@@ -1,11 +1,6 @@
-"""
-
-Useful functions
-
-"""
-
-
 class NCDCore:
+    """Useful functions"""
+
     @staticmethod
     def decimal_to_binary(n: int, bits: int = 8) -> str:
         """
