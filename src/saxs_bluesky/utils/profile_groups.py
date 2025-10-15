@@ -1,4 +1,3 @@
-import os
 from copy import deepcopy
 from pathlib import Path
 from string import ascii_lowercase
@@ -248,81 +247,25 @@ class ExperimentLoader(BaseModel):
     def read_from_yaml(cls, config_filepath: str | Path):
         """Reads an Experimental configuration, containing n profiles
         and generates a ExperimentalProfiles object"""
-        with open(config_filepath, "rb") as file:
-            print("Using config:", config_filepath)
+        with open(config_filepath) as file:
+            try:
+                model_dict = yaml.safe_load(file)
+            except yaml.YAMLError as e:
+                raise e
 
-            if not os.path.exists(config_filepath):
-                raise FileNotFoundError(f"Cannot find file: {config_filepath}")
+            model: ExperimentLoader = ExperimentLoader.model_validate(model_dict)
 
-            config = yaml.full_load(file)
-
-            instrument = config["instrument"]
-            detectors = config["detectors"]
-
-            profile_names = [f for f in config if f.startswith("profile")]
-            profiles = []
-
-            for profile_name in profile_names:
-                profile_repeats = config[profile_name]["repeats"]
-                profile_trigger = config[profile_name]["seq_trigger"]
-                multiplier = config[profile_name]["multiplier"]
-                groups = {
-                    key: config[profile_name][key]
-                    for key in config[profile_name].keys()
-                    if key.startswith("group")
-                }
-                group_list = []
-
-                for group_name in groups.keys():
-                    group = config[profile_name][group_name]
-
-                    n_group = Group(
-                        frames=group["frames"],
-                        trigger=group["trigger"],
-                        wait_time=group["wait_time"],
-                        wait_units=group["wait_units"],
-                        run_time=group["run_time"],
-                        run_units=group["run_units"],
-                        wait_pulses=group["wait_pulses"],
-                        run_pulses=group["run_pulses"],
-                    )
-
-                    group_list.append(n_group)
-
-                n_profile = Profile(
-                    repeats=profile_repeats,
-                    seq_trigger=profile_trigger,
-                    groups=group_list,
-                    multiplier=multiplier,
-                )
-
-                profiles.append(n_profile)
-
-            return cls(profiles=profiles, instrument=instrument, detectors=detectors)
-
-    def to_dict(self) -> dict:
-        exp_dict = {
-            "title": "Panda Configure",
-            "instrument": self.instrument,
-            "detectors": self.detectors,
-        }
-
-        for p, profile in enumerate(self.profiles):
-            profile_dict = profile.model_dump()
-            del profile_dict["groups"]
-
-            for g, group in enumerate(profile.groups):
-                group_dict = group.model_dump()
-                profile_dict["group-" + str(g)] = group_dict
-
-            exp_dict["profile-" + str(p)] = profile_dict
-
-        return exp_dict
+            return cls(
+                profiles=model.profiles,
+                instrument=model.instrument,
+                detectors=model.detectors,
+                instrument_session=model.instrument_session,
+            )
 
     def save_to_yaml(self, filepath: str | Path):
         print("Saving configuration to:", filepath)
 
-        config_dict = self.to_dict()
+        config_dict = self.model_dump()
 
         with open(filepath, "w") as outfile:
             yaml.dump(
