@@ -5,7 +5,7 @@ Useful functions
 """
 
 
-class ncdcore:
+class NCDCore:
     @staticmethod
     def decimal_to_binary(n: int, bits: int = 8) -> str:
         """

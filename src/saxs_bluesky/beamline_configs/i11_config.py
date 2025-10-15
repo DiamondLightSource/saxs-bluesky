@@ -1,10 +1,9 @@
 import os
 from copy import deepcopy
 
-from bluesky.protocols import Readable
 from dodal.beamlines import i11
 from dodal.common import inject
-from ophyd_async.core import StandardDetector
+from ophyd_async.core import StandardDetector, StandardReadable
 from ophyd_async.fastcs.panda import HDFPanda
 
 import saxs_bluesky.blueapi_configs
@@ -27,7 +26,7 @@ FAST_DETECTORS: list[StandardDetector] = [inject("mythen")]
 
 DEFAULT_PANDA: HDFPanda = inject("panda1")
 
-DEFAULT_BASELINE: list[Readable] = [
+DEFAULT_BASELINE: list[StandardReadable] = [
     inject("slits_1"),
     inject("slits_2"),
     inject("slits_3"),

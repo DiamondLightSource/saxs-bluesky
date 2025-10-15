@@ -1,7 +1,6 @@
 import os
 from importlib import import_module
 
-import dodal.beamlines
 from blueapi.service.interface import config
 
 ############################################################################################
@@ -22,21 +21,21 @@ def get_saxs_beamline() -> str:
     Returns:
         str: The beamline name.
     """
-    BL = get_beamline_name(os.getenv("BEAMLINE"))  # type: ignore
+    beamline = get_beamline_name(os.getenv("BEAMLINE"))  # type: ignore
 
-    if BL is None:
+    if beamline is None:
         blueapi_metadata = config().env.metadata
         if blueapi_metadata is not None:
-            BL = blueapi_metadata.instrument
+            beamline = blueapi_metadata.instrument
         else:
-            BL = DEFAULT_BEAMLINE
+            beamline = DEFAULT_BEAMLINE
             LOGGER.info(
-                f"No beamline is set in metadata. Beamline has defaulted to {BL}"
+                f"No beamline is set in metadata. Beamline has defaulted to {beamline}"
             )
 
-        os.environ["BEAMLINE"] = BL
+        os.environ["BEAMLINE"] = beamline
 
-    return BL
+    return beamline
 
 
 def load_beamline_config():
@@ -46,34 +45,35 @@ def load_beamline_config():
     Returns:
         module: The imported beamline configuration module.
     """
-    BL = get_saxs_beamline()
+    beamline = get_saxs_beamline()
 
-    BL_CONFIG = import_module(f"{saxs_bluesky.beamline_configs.__name__}.{BL}_config")
-    return BL_CONFIG
+    beamline_config = import_module(
+        f"{saxs_bluesky.beamline_configs.__name__}.{beamline}_config"
+    )
+    return beamline_config
 
 
-def return_standard_detectors(BL) -> list[StandardDetector]:
+def return_standard_detectors(beamline: str) -> list[StandardDetector]:
     """
     Attempt to return a list of standard detectors for the given beamline.
 
     Args:
-        BL: The beamline module.
+        beamline: The beamline name (e.g., "i22").
 
     Returns:
         list[StandardDetector]: List of instantiated standard detectors.
     """
     standard_detector_list = []
-    exec(f"from {dodal.beamlines.__name__} import {BL}")
+    # Import the beamline module dynamically
+    beamline_module = import_module(f"dodal.beamlines.{beamline}")
 
-    beamline_module_variables = dir(eval(BL))
-
-    for variable in beamline_module_variables:
+    for variable in dir(beamline_module):
         if variable.islower():  # only devices will be lowercase
             try:
-                object = eval(f"{BL}.{variable}")("", None)
-                if isinstance(object, StandardDetector):
+                obj = getattr(beamline_module, variable)("", None)
+                if isinstance(obj, StandardDetector):
                     standard_detector_list.append(inject(variable))
-            except:  # noqa
-                pass
+            except Exception:
+                continue
 
     return standard_detector_list

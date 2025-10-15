@@ -6,7 +6,6 @@ import bluesky.plan_stubs as bps
 import bluesky.plans as bsp
 import bluesky.preprocessors as bpp
 import numpy as np
-from bluesky.protocols import Readable
 from bluesky.utils import MsgGenerator
 from dodal.common import inject
 from dodal.devices.motors import Motor
@@ -17,6 +16,7 @@ from ophyd_async.core import (
     DetectorTrigger,
     StandardDetector,
     StandardFlyer,
+    StandardReadable,
     TriggerInfo,
     wait_for_value,
 )
@@ -50,6 +50,8 @@ DEFAULT_BASELINE = CONFIG.DEFAULT_BASELINE
 STORED_DETECTORS: list[StandardDetector] | list[str] | None = None
 STORED_PROFILE: Profile | None = None
 STORED_TRIGGER_INFO: TriggerInfo | None = None
+
+LOGGER.info(f"saxs bluesky is using the beamline: {BL}")
 
 
 def wait_until_complete(pv_obj, waiting_value=0, timeout=None):
@@ -394,7 +396,7 @@ def configure_panda_triggering(
 @validate_call(config={"arbitrary_types_allowed": True})
 def run_panda_triggering(
     panda: HDFPanda = DEFAULT_PANDA,
-    baseline: list[Readable] = DEFAULT_BASELINE,
+    baseline: list[StandardReadable] = DEFAULT_BASELINE,
     metadata: dict[str, Any] | None = None,
 ) -> MsgGenerator:
     """
@@ -622,13 +624,13 @@ def append_group(
     wait_pulses: list[int] = [0, 0, 0, 0],  # noqa
     run_pulses: list[int] = [1, 1, 1, 1],  # noqa
 ) -> MsgGenerator:
-    STORED_PROFILE = get_profile()
+    stored_profile = get_profile()
 
-    if STORED_PROFILE is None:
+    if stored_profile is None:
         LOGGER.info("No profile has been set, a blank profiles has been created")
-        STORED_PROFILE = Profile()
+        stored_profile = Profile()
 
-    STORED_PROFILE.append_group(
+    stored_profile.append_group(
         Group(
             frames=frames,
             trigger=trigger,
@@ -645,12 +647,12 @@ def append_group(
 
 
 def delete_group(n: int = 1) -> MsgGenerator:
-    STORED_PROFILE = get_profile()
+    stored_profile = get_profile()
 
-    if STORED_PROFILE is None:
+    if stored_profile is None:
         raise ValueError("No profile has been set, use set_profile")
 
-    STORED_PROFILE.delete_group(n)
+    stored_profile.delete_group(n)
 
     yield from bps.null()
 
@@ -683,7 +685,7 @@ def step_scan(
     stop: float,
     num: int,
     axis: Motor,
-    detectors: list[Readable],
+    detectors: list[StandardReadable],
 ) -> MsgGenerator:
     LOGGER.info(f"Running gda style step scan with detectors: {detectors}")
 
@@ -699,7 +701,7 @@ def step_rscan(
     stop: float,
     num: int,
     axis: Motor,
-    detectors: list[Readable],
+    detectors: list[StandardReadable],
 ) -> MsgGenerator:
     LOGGER.info(f"Running gda style rstep scan with detectors: {detectors}")
 
@@ -715,7 +717,7 @@ def centre_sample(
     stop: float,
     step: float,
     axis: Motor,
-    detectors: list[Readable] = FAST_DETECTORS,
+    detectors: list[StandardReadable] = FAST_DETECTORS,
 ) -> MsgGenerator:
     step_list = create_steps(start, stop, step)
 

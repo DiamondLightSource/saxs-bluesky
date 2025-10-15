@@ -16,7 +16,7 @@ from ophyd_async.fastcs.panda import (
 )
 from ophyd_async.fastcs.panda._block import PandaTimeUnits
 
-from saxs_bluesky.utils.ncdcore import ncdcore
+from saxs_bluesky.utils.ncdcore import NCDCore
 from saxs_bluesky.utils.plotter import ProfilePlotter
 from saxs_bluesky.utils.profile_groups import Group, Profile
 from saxs_bluesky.utils.utils import (
@@ -41,7 +41,7 @@ class EditableTableview(ttk.Treeview):
     def __init__(self, profile_tab, *args, **kwargs):
         self.profile_tab = profile_tab
         super().__init__(self.profile_tab, *args, **kwargs)
-        self.bind("<Double-1>", lambda event: self.onDoubleClick(event))
+        self.bind("<Double-1>", lambda event: self.on_double_click(event))
         self.kwargs = kwargs
 
     def close_popups(self):
@@ -54,7 +54,7 @@ class EditableTableview(ttk.Treeview):
             self.Popup.destroy()
             del self.Popup
 
-    def onDoubleClick(self, event):
+    def on_double_click(self, event):
         """Executed, when a row is double-clicked. Opens
         read-only EntryPopup above the item's column, so it is possible
         to select text"""
@@ -165,7 +165,7 @@ class DropdownPopup(ttk.Combobox):
         vals = self.tableview.item(rowid, "values")
         vals = list(vals)
 
-        selection = ncdcore.str2bool(self.option_var.get())
+        selection = NCDCore.str2bool(self.option_var.get())
 
         if selection is not None:
             vals[self.column] = selection  # type: ignore
@@ -230,7 +230,7 @@ class CheckButtonPopup(ttk.Checkbutton):
 
     def create_checkbuttons(self):
         for pulse in range(CONFIG.PULSEBLOCKS):
-            value = ncdcore.str2bool(str(self.pulse_vals[pulse]))
+            value = NCDCore.str2bool(str(self.pulse_vals[pulse]))
             if value is None:
                 raise ValueError("Pulse value is None")
             else:
@@ -239,7 +239,7 @@ class CheckButtonPopup(ttk.Checkbutton):
             self.option_var[pulse] = var
             self.option_var[pulse].set(value)
 
-            CB = ttk.Checkbutton(
+            pulse_checkbutton = ttk.Checkbutton(
                 self.root,
                 text=f"Pulse: {pulse}",
                 variable=self.option_var[pulse],
@@ -248,8 +248,8 @@ class CheckButtonPopup(ttk.Checkbutton):
                 offvalue=0,
             )
 
-            CB.grid(column=pulse, row=0, padx=5, pady=5, columnspan=1)
-            self.checkbuttons[pulse] = CB
+            pulse_checkbutton.grid(column=pulse, row=0, padx=5, pady=5, columnspan=1)
+            self.checkbuttons[pulse] = pulse_checkbutton
 
     def toggle(self, pulse):
         if self.option_var[pulse].get() == 1:
@@ -445,37 +445,37 @@ class ProfileTab(ttk.Frame):
 
         row_str = "0X" + (row.replace("I", ""))
         row_int = int(row_str, 16)  # - 1
-        self.profile.insert_group(n=row_int, Group=copy.deepcopy(DEFAULT_GROUP))
+        self.profile.insert_group(n=row_int, group=copy.deepcopy(DEFAULT_GROUP))
         self.build_profile_tree()
         self.generate_info_boxes()
 
     def append_group_button_action(self):
-        self.profile.append_group(Group=copy.deepcopy(DEFAULT_GROUP))
+        self.profile.append_group(group=copy.deepcopy(DEFAULT_GROUP))
         self.build_profile_tree()
         self.generate_info_boxes()
 
     def build_profile_tree(self):
-        COLUMN_NAMES = list(self.profile.groups[0].__dict__.keys())[0:8]
-        COLUMN_NAMES = [f.replace("_", " ").title() for f in COLUMN_NAMES]
-        COLUMN_NAMES.insert(0, "Group ID")  # Add Group ID as the first column
+        columns_names = list(self.profile.groups[0].__dict__.keys())[0:8]
+        columns_names = [f.replace("_", " ").title() for f in columns_names]
+        columns_names.insert(0, "Group ID")  # Add Group ID as the first column
 
         if not hasattr(self, "profile_config_tree"):
             self.profile_config_tree = EditableTableview(
-                self, columns=COLUMN_NAMES, show="headings"
+                self, columns=columns_names, show="headings"
             )
         else:
             self.profile_config_tree.close_popups()
             self.profile_config_tree.destroy()
             del self.profile_config_tree
             self.profile_config_tree = EditableTableview(
-                self, columns=COLUMN_NAMES, show="headings"
+                self, columns=columns_names, show="headings"
             )
 
         table_row = 5
         widths = [100, 100, 150, 150, 150, 150, 150, 150, 150]
 
         # add the columns headers
-        for i, col in enumerate(COLUMN_NAMES):
+        for i, col in enumerate(columns_names):
             self.profile_config_tree.heading(i, text=col)
             self.profile_config_tree.column(
                 i, minwidth=widths[i], width=widths[i], stretch=True, anchor="w"
@@ -484,7 +484,7 @@ class ProfileTab(ttk.Frame):
         # Insert sample data into the Treeview
         for i in range(len(self.profile.groups)):
             group_dict = self.profile.groups[i].__dict__
-            group_list = list(group_dict.values())[0 : len(COLUMN_NAMES)]
+            group_list = list(group_dict.values())[0 : len(columns_names)]
             group_list.insert(0, i)
             self.profile_config_tree.insert("", "end", values=group_list)
 
@@ -493,7 +493,7 @@ class ProfileTab(ttk.Frame):
             row=table_row,
             padx=5,
             pady=5,
-            columnspan=len(COLUMN_NAMES),
+            columnspan=len(columns_names),
             rowspan=5,
         )
 

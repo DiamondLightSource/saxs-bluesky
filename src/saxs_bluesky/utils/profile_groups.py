@@ -11,7 +11,7 @@ from ophyd_async.fastcs.panda import SeqTable, SeqTableInfo, SeqTrigger
 from pydantic import BaseModel
 
 # from pydantic.dataclasses import dataclass as pydanticdataclass
-from saxs_bluesky.utils.ncdcore import ncdcore
+from saxs_bluesky.utils.ncdcore import NCDCore
 
 """
 
@@ -43,11 +43,11 @@ class Group(BaseModel):
 
     @property
     def wait_time_s(self) -> float:
-        return self.wait_time * ncdcore.to_seconds(self.wait_units)
+        return self.wait_time * NCDCore.to_seconds(self.wait_units)
 
     @property
     def run_time_s(self) -> float:
-        return self.run_time * ncdcore.to_seconds(self.run_units)
+        return self.run_time * NCDCore.to_seconds(self.run_units)
 
     @property
     def group_duration(self) -> float:
@@ -190,14 +190,14 @@ class Profile(BaseModel):
     def number_of_events(self) -> list[int]:
         return self.triggers * self.repeats
 
-    def append_group(self, Group: Group) -> None:
-        self.groups.append(deepcopy(Group))
+    def append_group(self, group: Group) -> None:
+        self.groups.append(deepcopy(group))
 
     def delete_group(self, n: int) -> None:
         self.groups.pop(n)
 
-    def insert_group(self, n: int, Group: Group):
-        self.groups.insert(n, deepcopy(Group))
+    def insert_group(self, n: int, group: Group):
+        self.groups.insert(n, deepcopy(group))
 
     @property
     def seq_table(self) -> SeqTable:
@@ -211,9 +211,9 @@ class Profile(BaseModel):
 
     @staticmethod
     def inputs() -> list[str]:
-        TTLINS = [f"TTLIN{f + 1}" for f in range(6)]
-        LVDSINS = [f"LVDSIN{f + 1}" for f in range(2)]
-        return TTLINS + LVDSINS
+        ttl_ins = [f"TTLIN{f + 1}" for f in range(6)]
+        lvds_ins = [f"LVDSIN{f + 1}" for f in range(2)]
+        return ttl_ins + lvds_ins
 
     @staticmethod
     def seq_triggers() -> list[str]:
@@ -221,9 +221,9 @@ class Profile(BaseModel):
 
     @staticmethod
     def outputs() -> list[str]:
-        TTLOUTS = [f"TTLOUT{f + 1}" for f in range(10)]
-        LVDSOUTS = [f"LVDSOUT{f + 1}" for f in range(2)]
-        return TTLOUTS + LVDSOUTS
+        ttl_outs = [f"TTLOUT{f + 1}" for f in range(10)]
+        lvds_outs = [f"LVDSOUT{f + 1}" for f in range(2)]
+        return ttl_outs + lvds_outs
 
 
 # @pydanticdataclass
@@ -276,7 +276,7 @@ class ExperimentLoader(BaseModel):
                 for group_name in groups.keys():
                     group = config[profile_name][group_name]
 
-                    n_Group = Group(
+                    n_group = Group(
                         frames=group["frames"],
                         trigger=group["trigger"],
                         wait_time=group["wait_time"],
@@ -287,7 +287,7 @@ class ExperimentLoader(BaseModel):
                         run_pulses=group["run_pulses"],
                     )
 
-                    group_list.append(n_Group)
+                    group_list.append(n_group)
 
                 n_profile = Profile(
                     repeats=profile_repeats,

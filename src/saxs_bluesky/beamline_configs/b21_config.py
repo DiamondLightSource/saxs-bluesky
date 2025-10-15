@@ -1,10 +1,9 @@
 import os
 from copy import deepcopy
 
-from bluesky.protocols import Readable
 from dodal.beamlines import b21
 from dodal.common import inject
-from ophyd_async.core import StandardDetector
+from ophyd_async.core import StandardDetector, StandardReadable
 from ophyd_async.fastcs.panda import HDFPanda
 
 import saxs_bluesky.blueapi_configs
@@ -25,9 +24,9 @@ DEFAULT_INSTRUMENT_SESSION = "cm40642-4"
 ###THESE NEED TO BE LISTS TO BE SERIALISED
 FAST_DETECTORS: list[StandardDetector] = [inject("saxs"), inject("waxs")]
 
-DEFAULT_PANDA: HDFPanda = inject("panda2")
+DEFAULT_PANDA: HDFPanda = inject("panda1")
 
-DEFAULT_BASELINE: list[Readable] = [
+DEFAULT_BASELINE: list[StandardReadable] = [
     inject("slits_1"),
     inject("slits_2"),
     inject("slits_3"),
@@ -41,7 +40,7 @@ DEFAULT_BASELINE: list[Readable] = [
 PULSEBLOCKS = 6  # this is higher than the number of pulseblocks
 # so each connection cant have a pulseblock for mutpliers
 PULSEBLOCKASENTRYBOX = False
-PULSE_BLOCK_NAMES = ["FS", "SAXS/WAXS", "LED1", "LED2", "LED3", "LED4"]
+PULSE_BLOCK_NAMES = ["fs", "saxs/waxs", "led1", "led2", "led3", "led4"]
 THEME_NAME = "clam"  # --> ('clam', 'alt', 'default', 'classic')
 
 # PandA Wiring connections
@@ -49,27 +48,27 @@ THEME_NAME = "clam"  # --> ('clam', 'alt', 'default', 'classic')
 TTLIN = {1: "Beamstop V2F", 2: None, 3: None, 4: "TFG WAXS", 5: "TFG FS", 6: "TFG SAXS"}
 
 TTLOUT = {
-    1: "FS",
-    2: "SAXS",
-    3: "WAXS",
-    4: "LED1",
-    5: "LED2",
-    6: "LED3",
-    7: "LED4",
+    1: "fs",
+    2: "saxs",
+    3: "waxs",
+    4: "led1",
+    5: "led2",
+    6: "led3",
+    7: "led4",
     8: None,
     9: None,
-    10: "V2F Relay",
+    10: "v2f relay",
 }
 
 
 LVDSIN = {1: None, 2: None}
 
 
-LVDSOUT = {1: "SAXS LVDS Out", 2: "WAXS LVDS Out"}
+LVDSOUT = {1: "saxs", 2: "waxs"}
 
 PULSE_CONNECTIONS = {
     1: [TTLOUT[1]],
-    2: [TTLOUT[2], TTLOUT[3]],
+    2: [TTLOUT[2], LVDSOUT[2]],
     3: [TTLOUT[4]],
     4: [TTLOUT[5]],
     5: [TTLOUT[6]],
