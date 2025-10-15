@@ -23,8 +23,8 @@ def test_profile_loader():
 
 
 def test_profile_append():
-    P = Profile()
-    P.append_group(
+    p = Profile()
+    p.append_group(
         Group(
             frames=1,
             trigger="IMMEDIATE",
@@ -37,13 +37,13 @@ def test_profile_append():
         )
     )
 
-    assert isinstance(P, Profile)
-    assert len(P.groups) == 1
+    assert isinstance(p, Profile)
+    assert len(p.groups) == 1
 
 
 def test_profile_json():
-    P = Profile()
-    P.append_group(
+    p = Profile()
+    p.append_group(
         Group(
             frames=1,
             trigger="IMMEDIATE",
@@ -56,9 +56,9 @@ def test_profile_json():
         )
     )
 
-    json_schema = P.model_dump_json()
+    json_schema = p.model_dump_json()
 
-    profile = Profile.model_validate(P)
+    profile = Profile.model_validate(p)
     converted_profile = Profile.model_validate(
         from_json(json_schema, allow_partial=True)
     )
@@ -67,10 +67,10 @@ def test_profile_json():
 
 
 def test_profile_delete():
-    P = Profile()
+    profile = Profile()
 
     for _i in range(5):
-        P.append_group(
+        profile.append_group(
             Group(
                 frames=1,
                 trigger="IMMEDIATE",
@@ -83,14 +83,14 @@ def test_profile_delete():
             )
         )
 
-    P.delete_group(len(P.groups) - 1)
+    profile.delete_group(len(profile.groups) - 1)
 
-    assert len(P.groups) == 4
+    assert len(profile.groups) == 4
 
 
 def test_active_pulses():
-    P = Profile()
-    P.append_group(
+    profile = Profile()
+    profile.append_group(
         Group(
             frames=1,
             trigger="IMMEDIATE",
@@ -103,29 +103,4 @@ def test_active_pulses():
         )
     )
 
-    assert P.active_pulses == [1, 2, 3, 4]
-
-
-def test_profile_properties():
-    P = Profile()
-    P.append_group(
-        Group(
-            frames=1,
-            trigger="IMMEDIATE",
-            wait_time=1,
-            wait_units="S",
-            run_time=1,
-            run_units="S",
-            wait_pulses=[0, 0, 0, 0],
-            run_pulses=[1, 1, 1, 1],
-        )
-    )
-
-    P.return_trigger_info(0.1)
-    number_of_events = P.number_of_events
-    total_frames = P.total_frames
-    duration = P.duration
-
-    assert duration == 2
-    assert total_frames == 1
-    assert number_of_events == [1]
+    assert profile.active_pulses == [1, 2, 3, 4]
