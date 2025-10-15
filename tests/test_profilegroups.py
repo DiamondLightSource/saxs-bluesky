@@ -13,7 +13,7 @@ yaml_dir = os.path.join(
 
 
 def test_profile_loader():
-    config_filepath = os.path.join(yaml_dir, "panda_config.yaml")
+    config_filepath = os.path.join(yaml_dir, "i22_default_panda_config.yaml")
     config = ExperimentLoader.read_from_yaml(config_filepath)
 
     first_profile = config.profiles[0]
