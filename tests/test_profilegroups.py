@@ -129,3 +129,37 @@ def test_profile_properties():
     assert duration == 2
     assert total_frames == 1
     assert number_of_events == [1]
+
+
+def test_profiles_in_and_outs():
+    profile = Profile()
+
+    assert len(profile.inputs()) == 8
+    assert len(profile.outputs()) == 12
+
+
+def test_profiles_seq_triggers():
+    profile = Profile()
+
+    profile_seq_triggers = profile.seq_triggers()
+
+    assert len(profile_seq_triggers) == 13
+
+    valid_triggers = (
+        "IMMEDIATE",
+        "BITA_0",
+        "BITA_1",
+        "BITB_0",
+        "BITB_1",
+        "BITC_0",
+        "BITC_1",
+        "POSA_GT",
+        "POSA_LT",
+        "POSB_GT",
+        "POSB_LT",
+        "POSC_GT",
+        "POSC_LT",
+    )
+
+    for trig in valid_triggers:
+        assert trig in profile_seq_triggers
