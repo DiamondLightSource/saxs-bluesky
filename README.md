@@ -91,7 +91,7 @@ Certain features can be interacted though the commandline tool, some example com
 ```
 python -m saxs-bluesky --version
 python -m saxs-bluesky login
-python -m saxs-bluesky start_gui
+python -m saxs-bluesky gui
 ```
 
 
