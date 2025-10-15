@@ -33,8 +33,8 @@ def main(ctx: click.Context) -> None:
 
 @main.command(name="start_gui")
 def start_gui():
-    CONFIG = load_beamline_config()
-    PandAGUI(configuration=CONFIG.DEFAULT_EXPERIMENT)
+    config = load_beamline_config()
+    PandAGUI(configuration=config.DEFAULT_EXPERIMENT)
 
 
 @main.command(name="login")
@@ -46,10 +46,10 @@ def login():
 
 @main.command(name="save_panda")
 def save_panda():
-    RE = RunEngine()
+    RE = RunEngine()  # noqa
 
-    CONFIG = load_beamline_config()
-    panda_name = CONFIG.DEFAULT_PANDA
+    config = load_beamline_config()
+    panda_name = config.DEFAULT_PANDA
     connected_panda = return_connected_device(os.environ["BEAMLINE"], panda_name)
     yaml_name = input("Input name suffix to save:  ")
 

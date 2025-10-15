@@ -5,7 +5,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 
-from saxs_bluesky.utils.ncdcore import ncdcore
+from saxs_bluesky.utils.ncdcore import NCDCore
 from saxs_bluesky.utils.profile_groups import ExperimentLoader, Profile
 
 
@@ -47,11 +47,11 @@ class ProfilePlotter:
             run_active = group.run_pulses[pulse]
 
             for _frame in range(group.frames):
-                current_time += group.wait_time * ncdcore.to_seconds(group.wait_units)
+                current_time += group.wait_time * NCDCore.to_seconds(group.wait_units)
                 trigger_time.append(current_time)
                 signal.append(wait_active)
 
-                current_time += group.run_time * ncdcore.to_seconds(group.run_units)
+                current_time += group.run_time * NCDCore.to_seconds(group.run_units)
                 trigger_time.append(current_time)
                 signal.append(run_active)
 

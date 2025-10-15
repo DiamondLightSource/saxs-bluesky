@@ -624,13 +624,13 @@ def append_group(
     wait_pulses: list[int] = [0, 0, 0, 0],  # noqa
     run_pulses: list[int] = [1, 1, 1, 1],  # noqa
 ) -> MsgGenerator:
-    STORED_PROFILE = get_profile()
+    stored_profile = get_profile()
 
-    if STORED_PROFILE is None:
+    if stored_profile is None:
         LOGGER.info("No profile has been set, a blank profiles has been created")
-        STORED_PROFILE = Profile()
+        stored_profile = Profile()
 
-    STORED_PROFILE.append_group(
+    stored_profile.append_group(
         Group(
             frames=frames,
             trigger=trigger,
@@ -647,12 +647,12 @@ def append_group(
 
 
 def delete_group(n: int = 1) -> MsgGenerator:
-    STORED_PROFILE = get_profile()
+    stored_profile = get_profile()
 
-    if STORED_PROFILE is None:
+    if stored_profile is None:
         raise ValueError("No profile has been set, use set_profile")
 
-    STORED_PROFILE.delete_group(n)
+    stored_profile.delete_group(n)
 
     yield from bps.null()
 

@@ -26,9 +26,9 @@ class BlueAPIPythonClient(BlueapiClient):
     """A simple BlueAPI client for running bluesky plans."""
 
     def __init__(
-        self, BL: str, blueapi_config_path: str | Path, instrument_session: str
+        self, beamline: str, blueapi_config_path: str | Path, instrument_session: str
     ):
-        self.BL = BL
+        self.beamline = beamline
         self.instrument_session = instrument_session
 
         blueapi_config_path = Path(blueapi_config_path)

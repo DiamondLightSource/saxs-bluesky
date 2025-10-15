@@ -6,11 +6,11 @@ from dodal.common import inject
 
 class ActiveDetectorsFrame(ttk.Frame):
     def __init__(
-        self, window, PULSEBLOCKS, PULSE_CONNECTIONS, active_detectors, *args, **kwargs
+        self, window, pulse_blocks, pulse_connections, active_detectors, *args, **kwargs
     ):
         self.window = window
-        self.PULSEBLOCKS = PULSEBLOCKS
-        self.PULSE_CONNECTIONS = PULSE_CONNECTIONS
+        self.pulse_blocks = pulse_blocks
+        self.pulse_connections = pulse_connections
         self.active_detectors = active_detectors
 
         super().__init__(self.window, *args, **kwargs)
@@ -18,14 +18,14 @@ class ActiveDetectorsFrame(ttk.Frame):
         self.pulse_frame = ttk.Frame(self.window, borderwidth=5)
         self.pulse_frame.pack(fill="both", side="bottom", expand=True)
 
-        Outlabel = ttk.Label(self.pulse_frame, text="Enable Device")
-        Outlabel.pack(fill="both", side="top", expand=True)
+        out_label = ttk.Label(self.pulse_frame, text="Enable Device")
+        out_label.pack(fill="both", side="top", expand=True)
         self.build_active_detectors_frame()
 
     def build_active_detectors_frame(self):
         self.active_detectors_dict = {}
 
-        for pulse in range(self.PULSEBLOCKS):
+        for pulse in range(self.pulse_blocks):
             active_detectors_frame_n = ttk.Frame(
                 self.pulse_frame, borderwidth=5, relief="raised"
             )
@@ -34,17 +34,17 @@ class ActiveDetectorsFrame(ttk.Frame):
                 fill="both", expand=True, side="left", anchor="w"
             )
 
-            Pulselabel = ttk.Label(
+            pulse_label = ttk.Label(
                 active_detectors_frame_n, text=f"Pulse Group: {pulse}"
             )
 
-            Pulselabel.grid(column=0, row=0, padx=5, pady=5, sticky="w")
+            pulse_label.grid(column=0, row=0, padx=5, pady=5, sticky="w")
 
             # if pulse == 0:
-            TTLLabel = ttk.Label(active_detectors_frame_n, text="TTL:")
-            TTLLabel.grid(column=0, row=1, padx=5, pady=5, sticky="w")
+            ttl_label = ttk.Label(active_detectors_frame_n, text="TTL:")
+            ttl_label.grid(column=0, row=1, padx=5, pady=5, sticky="w")
 
-            for n, det in enumerate(self.PULSE_CONNECTIONS[pulse + 1]):
+            for n, det in enumerate(self.pulse_connections[pulse + 1]):
                 # experiment_var=tkinter.StringVar(value=self.configuration.experiment)
 
                 if det is None:

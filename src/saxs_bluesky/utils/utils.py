@@ -22,21 +22,21 @@ def get_saxs_beamline() -> str:
     Returns:
         str: The beamline name.
     """
-    BL = get_beamline_name(os.getenv("BEAMLINE"))  # type: ignore
+    beamline = get_beamline_name(os.getenv("BEAMLINE"))  # type: ignore
 
-    if BL is None:
+    if beamline is None:
         blueapi_metadata = config().env.metadata
         if blueapi_metadata is not None:
-            BL = blueapi_metadata.instrument
+            beamline = blueapi_metadata.instrument
         else:
-            BL = DEFAULT_BEAMLINE
+            beamline = DEFAULT_BEAMLINE
             LOGGER.info(
-                f"No beamline is set in metadata. Beamline has defaulted to {BL}"
+                f"No beamline is set in metadata. Beamline has defaulted to {beamline}"
             )
 
-        os.environ["BEAMLINE"] = BL
+        os.environ["BEAMLINE"] = beamline
 
-    return BL
+    return beamline
 
 
 def load_beamline_config():
@@ -46,13 +46,15 @@ def load_beamline_config():
     Returns:
         module: The imported beamline configuration module.
     """
-    BL = get_saxs_beamline()
+    beamline = get_saxs_beamline()
 
-    BL_CONFIG = import_module(f"{saxs_bluesky.beamline_configs.__name__}.{BL}_config")
-    return BL_CONFIG
+    beamline_config = import_module(
+        f"{saxs_bluesky.beamline_configs.__name__}.{beamline}_config"
+    )
+    return beamline_config
 
 
-def return_standard_detectors(BL) -> list[StandardDetector]:
+def return_standard_detectors(beamline) -> list[StandardDetector]:
     """
     Attempt to return a list of standard detectors for the given beamline.
 
@@ -63,14 +65,14 @@ def return_standard_detectors(BL) -> list[StandardDetector]:
         list[StandardDetector]: List of instantiated standard detectors.
     """
     standard_detector_list = []
-    exec(f"from {dodal.beamlines.__name__} import {BL}")
+    exec(f"from {dodal.beamlines.__name__} import {beamline}")
 
-    beamline_module_variables = dir(eval(BL))
+    beamline_module_variables = dir(eval(beamline))
 
     for variable in beamline_module_variables:
         if variable.islower():  # only devices will be lowercase
             try:
-                object = eval(f"{BL}.{variable}")("", None)
+                object = eval(f"{beamline}.{variable}")("", None)
                 if isinstance(object, StandardDetector):
                     standard_detector_list.append(inject(variable))
             except:  # noqa

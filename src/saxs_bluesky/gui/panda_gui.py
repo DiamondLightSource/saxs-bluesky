@@ -357,27 +357,27 @@ class PandAGUI:
         labels = ["TTLIN", "LVDSIN", "TTLOUT", "LVDSOUT"]
 
         for key in CONFIG.TTLIN.keys():
-            INDev = CONFIG.TTLIN[key]
+            in_devices = CONFIG.TTLIN[key]
 
             ax.scatter(0, key, color="k", s=50)
-            ax.text(0 + 0.1, key, INDev)
+            ax.text(0 + 0.1, key, in_devices)
 
         for key in CONFIG.LVDSIN.keys():
-            LVDSINDev = CONFIG.LVDSIN[key]
+            lvds_in_devices = CONFIG.LVDSIN[key]
 
             ax.scatter(1, key, color="k", s=50)
-            ax.text(1 + 0.1, key, LVDSINDev)
+            ax.text(1 + 0.1, key, lvds_in_devices)
 
         for key in CONFIG.TTLOUT.keys():
-            TTLOUTDev = CONFIG.TTLOUT[key]
+            ttl_out_devices = CONFIG.TTLOUT[key]
 
             ax.scatter(2, key, color="b", s=50)
-            ax.text(2 + 0.1, key, TTLOUTDev)
+            ax.text(2 + 0.1, key, ttl_out_devices)
 
         for key in CONFIG.LVDSOUT.keys():
-            LVDSOUTDev = CONFIG.LVDSOUT[key]
+            ldvs_out_devices = CONFIG.LVDSOUT[key]
             ax.scatter(3, key, color="b", s=50)
-            ax.text(3 + 0.1, key, LVDSOUTDev)
+            ax.text(3 + 0.1, key, ldvs_out_devices)
 
         ax.set_ylabel("I/O Connections")
         ax.grid()
@@ -647,11 +647,11 @@ class PandAGUI:
         self.info_labels = []
 
         for n, text in enumerate(text_list):
-            labelVar = tkinter.StringVar(value=text)
+            label = tkinter.StringVar(value=text)
 
             info_label = ttk.Label(
                 self.experiment_settings_frame,
-                textvariable=labelVar,
+                textvariable=label,
             )
 
             info_label.grid(column=n * 2, row=0, padx=5, pady=5, sticky="news")
@@ -661,7 +661,7 @@ class PandAGUI:
                 text=seperator,
             ).grid(column=(n * 2) + 1, row=0, padx=5, pady=5, sticky="news")
 
-            self.info_labels.append(labelVar)
+            self.info_labels.append(label)
 
         return None
 
