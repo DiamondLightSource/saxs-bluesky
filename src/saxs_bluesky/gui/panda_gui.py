@@ -340,7 +340,7 @@ class PandAGUI:
             self.commit_config()
             self.configuration.save_to_yaml(panda_config_yaml.name)
 
-            config_dict = self.configuration.to_dict()
+            config_dict = self.configuration.model_dump()
 
             with open(panda_config_yaml.name.replace("yaml", "json"), "w") as fpo:
                 json.dump(config_dict, fpo, indent=2)
