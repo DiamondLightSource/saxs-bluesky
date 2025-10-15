@@ -26,10 +26,15 @@ class BlueAPIPythonClient(BlueapiClient):
     """A simple BlueAPI client for running bluesky plans."""
 
     def __init__(
-        self, beamline: str, blueapi_config_path: str | Path, instrument_session: str
+        self,
+        beamline: str,
+        blueapi_config_path: str | Path,
+        instrument_session: str,
+        callback: bool = False,
     ):
         self.beamline = beamline
         self.instrument_session = instrument_session
+        self.callback = callback
 
         blueapi_config_path = Path(blueapi_config_path)
 
@@ -43,7 +48,6 @@ class BlueAPIPythonClient(BlueapiClient):
         self,
         plan: str | Callable,
         timeout: float | None = None,
-        feedback: bool = False,
         **kwargs,
     ):
         """Run a bluesky plan via BlueAPI."""
@@ -59,7 +63,7 @@ class BlueAPIPythonClient(BlueapiClient):
         )
 
         try:
-            if feedback:
+            if self.callback:
                 progress_bar = CliEventRenderer()
                 callback = BestEffortCallback()
 
