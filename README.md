@@ -68,20 +68,22 @@ To use this in an experiment we can do this through the BlueAPIPythonClient, alo
 
 ```python
 
-from saxs_bluesky.utils.beamline_client import BlueAPIPythonClient
+from saxs_bluesky.beamline_configs.i22 import CLIENT
 from saxs_bluesky.plans.ncd_panda import configure_panda_triggering, run_panda_triggering
 
 blueapi_config_path = "PATH_TO_CONFIG"
 
-client = BlueAPIPythonClient(BL="i22", blueapi_config_path=blueapi_config_path, instrument_session="cm12345-1")
+CLIENT = BlueAPIPythonClient(BL="i22",
+                            blueapi_config_path=blueapi_config_path,
+                            instrument_session="cm12345-1")
 
-client.run(
+CLIENT.run(
     configure_panda_triggering,
     profile=my_profile,
     detectors=["saxs", "waxs"], #whatever StandardDetectors that are created for the beamline
 ) #to load all the data onto the panda and the detctors
 
-client.run(run_panda_triggering) #to actually tun the experiment
+CLIENT.run(run_panda_triggering) #to actually tun the experiment
 
 
 ```
