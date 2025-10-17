@@ -71,11 +71,7 @@ To use this in an experiment we can do this through the BlueAPIPythonClient, alo
 from saxs_bluesky.beamline_configs.i22 import CLIENT
 from saxs_bluesky.plans.ncd_panda import configure_panda_triggering, run_panda_triggering
 
-blueapi_config_path = "PATH_TO_CONFIG"
-
-CLIENT = BlueAPIPythonClient(BL="i22",
-                            blueapi_config_path=blueapi_config_path,
-                            instrument_session="cm12345-1")
+CLIENT.change_session("cm12345-1") # defaults to commissioning. Change the instrument session to your experiment
 
 CLIENT.run(
     configure_panda_triggering,
