@@ -22,6 +22,7 @@ from saxs_bluesky._version import __version__
 from saxs_bluesky.gui.gui_frames import ActiveDetectorsFrame
 from saxs_bluesky.gui.panda_gui_elements import ProfileTab
 from saxs_bluesky.gui.step_gui import StepWidget
+from saxs_bluesky.logging.bluesky_logpanel import BlueskyLogPanel
 from saxs_bluesky.plans.ncd_panda import (
     configure_panda_triggering,
     log_detectors,
@@ -463,6 +464,9 @@ class PandAGUI:
             list(self.active_detectors_frame.get_active_detectors()), self.client
         )
 
+    def open_log_panel(self):
+        BlueskyLogPanel(beamline=BL)
+
     def show_active_detectors(self):
         active_detectors = self.active_detectors_frame.get_active_detectors()
         print(active_detectors)
@@ -565,6 +569,15 @@ class PandAGUI:
         )
         profile_print.grid(
             column=2, row=18, padx=5, pady=5, columnspan=1, sticky="news"
+        )
+
+        profile_print = ttk.Button(
+            self.run_frame,
+            text="Open Log Panel",
+            command=self.open_log_panel,
+        )
+        profile_print.grid(
+            column=2, row=19, padx=5, pady=5, columnspan=1, sticky="news"
         )
 
         return None
