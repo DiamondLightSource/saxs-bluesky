@@ -33,6 +33,7 @@ DEFAULT_BASELINE: list[StandardReadable] = [
     inject("slits_5"),
     inject("slits_6"),
     inject("synchrotron"),
+    inject("it"),
 ]
 
 
@@ -41,7 +42,6 @@ PULSEBLOCKS = 6  # this is higher than the number of pulseblocks
 # so each connection cant have a pulseblock for mutpliers
 PULSEBLOCKASENTRYBOX = False
 PULSE_BLOCK_NAMES = ["fs", "saxs/waxs", "led1", "led2", "led3", "led4"]
-THEME_NAME = "clam"  # --> ('clam', 'alt', 'default', 'classic')
 
 # PandA Wiring connections
 
