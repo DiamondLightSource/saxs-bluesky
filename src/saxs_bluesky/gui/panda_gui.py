@@ -18,7 +18,6 @@ import matplotlib.pyplot as plt
 from bluesky.plans import count
 from ttkthemes import ThemedTk
 
-import saxs_bluesky.blueapi_configs
 from saxs_bluesky._version import __version__
 from saxs_bluesky.gui.gui_frames import ActiveDetectorsFrame
 from saxs_bluesky.gui.panda_gui_elements import ProfileTab
@@ -29,7 +28,6 @@ from saxs_bluesky.plans.ncd_panda import (
     run_panda_triggering,
     set_detectors,
 )
-from saxs_bluesky.utils.beamline_client import BlueAPIPythonClient
 from saxs_bluesky.utils.profile_groups import ExperimentLoader
 from saxs_bluesky.utils.utils import (
     get_saxs_beamline,
@@ -42,7 +40,7 @@ BL = get_saxs_beamline()
 
 CONFIG = load_beamline_config()
 DEFAULT_PROFILE = CONFIG.DEFAULT_PROFILE
-
+CLIENT = CONFIG.CLIENT
 ############################################################################################
 
 
@@ -82,11 +80,7 @@ class PandAGUI:
         else:
             self.instrument_session = self.configuration.instrument_session
 
-        blueapi_config_path = f"{os.path.dirname(saxs_bluesky.blueapi_configs.__file__)}/{BL}_blueapi_config.yaml"  # noqa
-
-        self.client = BlueAPIPythonClient(
-            BL, blueapi_config_path, self.instrument_session
-        )
+        self.client = CLIENT
 
         self.window = ThemedTk(theme="arc")
         self.window.wm_resizable(True, True)
