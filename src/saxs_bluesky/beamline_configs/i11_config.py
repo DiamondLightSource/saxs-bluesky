@@ -41,7 +41,6 @@ PULSEBLOCKS = 4  # this is higher than the number of pulseblocks
 # so each connection cant have a pulseblock for mutpliers
 PULSEBLOCKASENTRYBOX = False
 PULSE_BLOCK_NAMES = ["mythen", "None", "None", "None"]
-THEME_NAME = "clam"  # --> ('clam', 'alt', 'default', 'classic')
 
 # PandA Wiring connections
 

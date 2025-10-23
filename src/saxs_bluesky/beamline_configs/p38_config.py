@@ -35,7 +35,6 @@ DEFAULT_BASELINE: list[StandardReadable] = []
 PULSEBLOCKS = 4
 PULSEBLOCKASENTRYBOX = False
 PULSE_BLOCK_NAMES = ["FS", "DETS/TETS", "OAV", "Fluro"]
-THEME_NAME = "clam"  # --> ('clam', 'alt', 'default', 'classic')
 
 # PandA Wiring connections
 
