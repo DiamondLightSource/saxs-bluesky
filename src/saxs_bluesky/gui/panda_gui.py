@@ -57,10 +57,9 @@ class PandAGUI:
         elif (self.panda_config_yaml is None) and (configuration is not None):
             self.configuration = configuration
         else:
-            print(
+            raise Exception(
                 "Must pass either panda_config_yaml or configuration object. Not both"
             )
-            quit()
 
         if ask_instrument_session and self.configuration.instrument_session is not None:
             self.instrument_session = self.request_instrument_session()
