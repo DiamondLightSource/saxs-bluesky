@@ -110,7 +110,6 @@ DEFAULT_GROUP = Group(
 
 DEFAULT_PROFILE = Profile(
     repeats=1,
-    seq_trigger="IMMEDIATE",
     groups=[deepcopy(DEFAULT_GROUP)],
     multiplier=[1, 1, 1, 1],
 )

@@ -15,20 +15,17 @@ from tkinter import filedialog, messagebox, ttk
 from tkinter.simpledialog import askstring
 
 import matplotlib.pyplot as plt
-from bluesky.plans import count
 from ttkthemes import ThemedTk
 
 from saxs_bluesky._version import __version__
-from saxs_bluesky.gui.gui_frames import ActiveDetectorsFrame
+from saxs_bluesky.gui.gui_frames import ActiveDetectorsFrame, ClientControlPanel
 from saxs_bluesky.gui.panda_gui_elements import ProfileTab
-from saxs_bluesky.gui.step_gui import StepWidget
 from saxs_bluesky.logging.bluesky_logpanel import BlueskyLogPanel
 from saxs_bluesky.plans.ncd_panda import (
     configure_panda_triggering,
-    log_detectors,
     run_panda_triggering,
-    set_detectors,
 )
+from saxs_bluesky.utils.beamline_client import BlueAPIPythonClient
 from saxs_bluesky.utils.profile_groups import ExperimentLoader
 from saxs_bluesky.utils.utils import (
     get_saxs_beamline,
@@ -54,17 +51,8 @@ class PandAGUI:
         start: bool = True,
     ):
         self.panda_config_yaml = panda_config_yaml
-        self.default_config_path = os.path.join(
-            os.path.dirname(os.path.realpath(__file__)),
-            "profile_yamls",
-            "default_panda_config.yaml",
-        )
 
-        if (self.panda_config_yaml is None) and (configuration is None):
-            self.configuration = ExperimentLoader.read_from_yaml(
-                self.default_config_path
-            )
-        elif (self.panda_config_yaml is not None) and (configuration is None):
+        if (self.panda_config_yaml is not None) and (configuration is None):
             self.configuration = ExperimentLoader.read_from_yaml(self.panda_config_yaml)
         elif (self.panda_config_yaml is None) and (configuration is not None):
             self.configuration = configuration
@@ -81,7 +69,7 @@ class PandAGUI:
         else:
             self.instrument_session = self.configuration.instrument_session
 
-        self.client = CLIENT
+        self.client: BlueAPIPythonClient = CLIENT
 
         self.window = ThemedTk(theme="arc")
         self.window.wm_resizable(True, True)
@@ -93,7 +81,7 @@ class PandAGUI:
 
         self.always_visible_frame = ttk.Frame(self.window, borderwidth=5)
         self.always_visible_frame.pack(fill="both", side="bottom", expand=True)
-        self.build_blueapi_frame()
+        # self.build_dev_frame()
 
         self.notebook = ttk.Notebook(self.always_visible_frame)
         self.notebook.pack(fill="none", side="top", expand=False)
@@ -140,8 +128,8 @@ class PandAGUI:
         menubar = tkinter.Menu(self.window)
         filemenu = tkinter.Menu(menubar, tearoff=0)
         filemenu.add_command(label="New", command=self.open_new_window)
-        filemenu.add_command(label="Open", command=self.load_config)
-        filemenu.add_command(label="Save", command=self.save_config)
+        filemenu.add_command(label="Load Profiles", command=self.load_config)
+        filemenu.add_command(label="Save Profiles", command=self.save_config)
         filemenu.add_separator()
         filemenu.add_command(label="Exit", command=self.window.quit)
         menubar.add_cascade(label="File", menu=filemenu)
@@ -152,6 +140,8 @@ class PandAGUI:
 
         show_menu = tkinter.Menu(menubar, tearoff=0)
         show_menu.add_command(label="Show Wiring", command=self.show_wiring_config)
+        show_menu.add_command(label="Log Panel", command=self.show_log_panel)
+        show_menu.add_command(label="Dev Panel", command=self.show_dev_panel)
         menubar.add_cascade(label="Show", menu=show_menu)
 
         instr_menu = tkinter.Menu(menubar, tearoff=0)
@@ -235,7 +225,8 @@ class PandAGUI:
         self.client.change_session(self.instrument_session)
 
     def open_new_window(self):
-        PandAGUI()
+        self.window.destroy()
+        PandAGUI(configuration=CONFIG.DEFAULT_EXPERIMENT)
 
     def show_about(self):
         messagebox.showinfo("About", __version__)
@@ -382,17 +373,13 @@ class PandAGUI:
         ax.set_xticklabels(labels, rotation=90)
         plt.show()
 
-    def get_plans(self):
-        plans = self.client.get_plans().plans
+    def show_dev_panel(self):
+        self.client_control_panel = ClientControlPanel(
+            BL, self.client, self.active_detectors_frame.get_active_detectors
+        )
 
-        for plan in plans:
-            print(plan.name, "\n")
-
-    def get_devices(self):
-        devices = self.client.get_devices().devices
-
-        for dev in devices:
-            print(dev, "\n\n")
+    def show_log_panel(self):
+        BlueskyLogPanel(beamline=BL)
 
     def get_profile_index(self):
         index = int(self.notebook.index("current"))
@@ -426,188 +413,32 @@ class PandAGUI:
         except ConnectionError:
             print("Could not upload profile to panda")
 
-    def set_detectors_plan(self):
-        # params = {
-        #     "detectors": list(self.active_detectors_frame.get_active_detectors()),
-        # }
-
-        try:
-            self.client.run(
-                set_detectors,
-                detectors=list(self.active_detectors_frame.get_active_detectors()),
-                timeout=1,
-            )
-        except ConnectionError:
-            print("Could not upload profile to panda")
-
-    def log_detectors_plan(self):
-        try:
-            self.client.run(log_detectors)
-        except ConnectionError:
-            print("Could not upload profile to panda")
-
-    def count_detectors(self):
-        # params = {
-        #     "detectors": list(self.active_detectors_frame.get_active_detectors()),
-        # }
-
-        try:
-            self.client.run(
-                count,
-                detectors=list(self.active_detectors_frame.get_active_detectors()),
-            )
-        except ConnectionError:
-            print("Could not upload profile to panda")
-
-    def open_step_widget(self):
-        StepWidget(
-            list(self.active_detectors_frame.get_active_detectors()), self.client
-        )
-
-    def open_log_panel(self):
-        BlueskyLogPanel(beamline=BL)
-
-    def show_active_detectors(self):
-        active_detectors = self.active_detectors_frame.get_active_detectors()
-        print(active_detectors)
-
-    def build_blueapi_frame(self):
-        self.run_frame = ttk.Frame(self.always_visible_frame, borderwidth=5)
-
-        self.run_frame.pack(fill="y", expand=True, side="right")
-        get_plans_button = ttk.Button(
-            self.run_frame, text="Get Plans", command=self.get_plans
-        )
-        get_plans_button.grid(
-            column=2, row=1, padx=5, pady=5, columnspan=1, sticky="news"
-        )
-
-        get_devices_button = ttk.Button(
-            self.run_frame, text="Get Devices", command=self.get_devices
-        )
-        get_devices_button.grid(
-            column=2, row=3, padx=5, pady=5, columnspan=1, sticky="news"
-        )
-
-        stop_plans_button = ttk.Button(
-            self.run_frame, text="Stop Plan", command=self.client.stop
-        )
-        stop_plans_button.grid(
-            column=2, row=5, padx=5, pady=5, columnspan=1, sticky="news"
-        )
-
-        pause_plans_button = ttk.Button(
-            self.run_frame, text="Pause Plan", command=self.client.pause
-        )
-        pause_plans_button.grid(
-            column=2, row=7, padx=5, pady=5, columnspan=1, sticky="news"
-        )
-
-        resume_plans_button = ttk.Button(
-            self.run_frame, text="Resume Plan", command=self.client.resume
-        )
-        resume_plans_button.grid(
-            column=2,
-            row=9,
-            padx=5,
-            pady=5,
-            columnspan=1,
-            sticky="news",
-        )
-
-        reload_env_button = ttk.Button(
-            self.run_frame, text="Reload Env", command=self.client.reload_environment
-        )
-        reload_env_button.grid(
-            column=2, row=12, padx=5, pady=5, columnspan=1, sticky="news"
-        )
-
-        set_det_button = ttk.Button(
-            self.run_frame, text="Set dets", command=self.set_detectors_plan
-        )
-        set_det_button.grid(
-            column=2, row=13, padx=5, pady=5, columnspan=1, sticky="news"
-        )
-
-        show_det_button = ttk.Button(
-            self.run_frame, text="Log dets", command=self.log_detectors_plan
-        )
-        show_det_button.grid(
-            column=2, row=14, padx=5, pady=5, columnspan=1, sticky="news"
-        )
-
-        step_widget_button = ttk.Button(
-            self.run_frame, text="Open Step Widget", command=self.open_step_widget
-        )
-        step_widget_button.grid(
-            column=2, row=15, padx=5, pady=5, columnspan=1, sticky="news"
-        )
-
-        count_det_button = ttk.Button(
-            self.run_frame, text="Count Detector", command=self.count_detectors
-        )
-        count_det_button.grid(
-            column=2, row=16, padx=5, pady=5, columnspan=1, sticky="news"
-        )
-
-        active_det_button = ttk.Button(
-            self.run_frame,
-            text="Show Active Detectors",
-            command=self.show_active_detectors,
-        )
-        active_det_button.grid(
-            column=2, row=17, padx=5, pady=5, columnspan=1, sticky="news"
-        )
-
-        def print_prof():
-            self.get_profile_tab().print_profile_button_action()
-
-        profile_print = ttk.Button(
-            self.run_frame,
-            text="Print Profile",
-            command=print_prof,
-        )
-        profile_print.grid(
-            column=2, row=18, padx=5, pady=5, columnspan=1, sticky="news"
-        )
-
-        profile_print = ttk.Button(
-            self.run_frame,
-            text="Open Log Panel",
-            command=self.open_log_panel,
-        )
-        profile_print.grid(
-            column=2, row=19, padx=5, pady=5, columnspan=1, sticky="news"
-        )
-
-        return None
-
     def build_global_settings_frame(self, side: str = "left"):
         self.global_settings_frame = ttk.Frame(self.always_visible_frame, borderwidth=5)
 
         self.global_settings_frame.pack(fill="x", expand=True, side="bottom")
 
-        # add a load/save/configure button
-        load_button = ttk.Button(
-            self.global_settings_frame, text="Load", command=self.load_config
-        )
+        # # add a load/save/configure button
+        # load_button = ttk.Button(
+        #     self.global_settings_frame, text="Load", command=self.load_config
+        # )
 
-        save_button = ttk.Button(
-            self.global_settings_frame, text="Save", command=self.save_config
-        )
+        # save_button = ttk.Button(
+        #     self.global_settings_frame, text="Save", command=self.save_config
+        # )
 
         configure_button = ttk.Button(
             self.global_settings_frame,
-            text="Upload to PandA",
+            text="Configure PandA",
             command=self.configure_panda,
         )
 
         run_plan_button = ttk.Button(
-            self.global_settings_frame, text="Trigger PandA", command=self.run_plan
+            self.global_settings_frame, text="Start PandA", command=self.run_plan
         )
 
-        load_button.pack(fill="both", expand=True, side=side)  # type: ignore
-        save_button.pack(fill="both", expand=True, side=side)  # type: ignore
+        # load_button.pack(fill="both", expand=True, side=side)  # type: ignore
+        # save_button.pack(fill="both", expand=True, side=side)  # type: ignore
         configure_button.pack(fill="both", expand=True, side=side)  # type: ignore
         run_plan_button.pack(fill="both", expand=True, side=side)  # type: ignore
 
@@ -699,7 +530,7 @@ class PandAGUI:
 
         appendrow_button = ttk.Button(
             self.profile_edit_frame,
-            text="Add Group",
+            text="Append Group",
             command=append,
         )
 
@@ -708,7 +539,7 @@ class PandAGUI:
 
         discardrow_button = ttk.Button(
             self.profile_edit_frame,
-            text="Discard Group",
+            text="Delete End Group",
             command=discard,
         )
 

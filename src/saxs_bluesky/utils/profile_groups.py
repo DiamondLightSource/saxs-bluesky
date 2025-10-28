@@ -99,7 +99,7 @@ class Group(BaseModel):
 class Profile(BaseModel):
     """A basemodel for all the information needed to configure the PandA triggering.
     Repeats are the number of times the who sequence table is run
-    Seq trigger must be set to either immediate or one of the panda trigger types.
+    # Seq trigger must be set to either immediate or one of the panda trigger types.
     A group is effectively a line in the sequencer table
     Multiplier is use when the PandA is set up for triggering different
     sets of detetcors at different rates
@@ -107,7 +107,7 @@ class Profile(BaseModel):
     The information can also be used to configure it in the gui"""
 
     repeats: int = 1
-    seq_trigger: str = "Immediate"
+    # seq_trigger: str = "Immediate"
     groups: list[Group] = []
     multiplier: list[int] | None = None
 

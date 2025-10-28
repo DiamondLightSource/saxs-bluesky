@@ -361,25 +361,25 @@ class ProfileTab(ttk.Frame):
 
         ############################################################
 
-        ##### input trigger select
-        self.seq_triggers = self.profile.seq_triggers()
+        # ##### input trigger select
+        # self.seq_triggers = self.profile.seq_triggers()
 
-        ttk.Label(self, text="Seq Trigger").grid(
-            column=0, row=0, padx=5, pady=5, sticky="w"
-        )
+        # ttk.Label(self, text="Seq Trigger").grid(
+        #     column=0, row=0, padx=5, pady=5, sticky="w"
+        # )
 
-        self.clicked_start_trigger = tkinter.StringVar()
-        ttk.OptionMenu(
-            self,
-            self.clicked_start_trigger,
-            self.profile.seq_trigger,
-            *self.seq_triggers,
-        ).grid(column=1, row=0, padx=5, pady=5, sticky="w")
+        # self.clicked_start_trigger = tkinter.StringVar()
+        # ttk.OptionMenu(
+        #     self,
+        #     self.clicked_start_trigger,
+        #     self.profile.seq_trigger,
+        #     *self.seq_triggers,
+        # ).grid(column=1, row=0, padx=5, pady=5, sticky="w")
 
         ############# number of repeats box
 
         ttk.Label(self, text="No. of repeats").grid(
-            column=0, row=1, padx=5, pady=5, sticky="w"
+            column=0, row=0, padx=5, pady=5, sticky="w"
         )
 
         self.n_repeats_entry_value = tkinter.IntVar(self, value=self.profile.repeats)
@@ -387,7 +387,7 @@ class ProfileTab(ttk.Frame):
             self, width=15, textvariable=self.n_repeats_entry_value
         )
 
-        self.repeats_entry.grid(column=1, row=1, padx=5, pady=5, sticky="w")
+        self.repeats_entry.grid(column=1, row=0, padx=5, pady=5, sticky="w")
         # Tracing the entry and calling the above function
         self.n_repeats_entry_value.trace_add("write", self.entry_changed)
 
@@ -405,8 +405,8 @@ class ProfileTab(ttk.Frame):
             column=8, row=0, padx=5, pady=5, columnspan=1, sticky="nes"
         )
 
-    def get_start_value(self):
-        return self.clicked_start_trigger.get()
+    # def get_start_value(self):
+    #     return self.clicked_start_trigger.get()
 
     def get_n_repeats_value(self):
         return int(self.n_repeats_entry_value.get())
@@ -578,13 +578,13 @@ class ProfileTab(ttk.Frame):
             group_list.append(n_group)
 
         repeats = self.get_n_repeats_value()
-        profile_trigger = self.get_start_value()
+        # profile_trigger = self.get_start_value()
 
         multipliers = self.get_multipliers()
 
         new_profile = Profile(
             repeats=repeats,
-            seq_trigger=profile_trigger,
+            # seq_trigger=profile_trigger,
             groups=group_list,
             multiplier=multipliers,
         )

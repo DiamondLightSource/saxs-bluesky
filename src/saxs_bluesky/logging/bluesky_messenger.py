@@ -49,6 +49,7 @@ class RabbitMQMessenger:
         self.port = port
 
         if not self.port:
+            print("No port specified, defaulting to 61613")
             self.port = 61613
 
         self.username = username
@@ -56,21 +57,25 @@ class RabbitMQMessenger:
         self.auto_connect = auto_connect
         self.destination = destination
 
-        if not self.destination:
-            self.destination = [
-                "/topic/public.worker.event",
-                "/topic/gda.messages.scan",
-            ]
-            # /topic/public.worker.event blueapi
-            # defined here https://github.com/DiamondLightSource/blueapi/blob/77129d132d5481b9d6adad3fe15c02d581aff9f7/docs/reference/asyncapi.yaml#L4
+        self.default_destination = [
+            "/topic/public.worker.event",
+            "/topic/gda.messages.scan",
+        ]
+        # /topic/public.worker.event blueapi
+        # defined here https://github.com/DiamondLightSource/blueapi/blob/77129d132d5481b9d6adad3fe15c02d581aff9f7/docs/reference/asyncapi.yaml#L4
 
-            # "/topic/gda.messages.scan"  # nexus file converter
-            # defined here: https://gitlab.diamond.ac.uk/daq/d2acq/services/nexus-file-converter/-/blob/master/src/main/resources/application.yaml
+        # "/topic/gda.messages.scan"  # nexus file converter
+        # defined here: https://gitlab.diamond.ac.uk/daq/d2acq/services/nexus-file-converter/-/blob/master/src/main/resources/application.yaml
+
+        if not self.destination:
+            print(f"No destination specified, defaulting to {self.default_destination}")
+            self.destination = self.default_destination
 
         if not self.host and not self.beamline:
             raise ValueError("Either host or beamline must be provided")
 
         elif not self.host and self.beamline:
+            print("Host not specified, constructing from beamline name")
             self.host = f"{self.beamline}-rabbitmq-daq.diamond.ac.uk"
 
         self.messages = deque()
@@ -83,6 +88,8 @@ class RabbitMQMessenger:
             self.subscribe()
 
     def connect(self):
+        print("Connecting..")
+
         self.conn = stomp.Connection(
             host_and_ports=[(self.host, self.port)], auto_content_length=False
         )
@@ -153,7 +160,15 @@ class RabbitMQMessenger:
 
 
 if __name__ == "__main__":
-    messenger = RabbitMQMessenger(
-        beamline="i22", port=61613, username="guest", password="guest"
+    # messenger = RabbitMQMessenger(
+    #     beamline="i22", port=61613, username="guest", password="guest"
+    # )
+    # messenger.listen()
+
+    m = RabbitMQMessenger(
+        host="i22-control",
+        port=61613,
+        destination=None,
+        auto_connect=True,
     )
-    messenger.listen()
+    m.listen()
