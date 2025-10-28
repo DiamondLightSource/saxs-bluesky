@@ -607,9 +607,7 @@ def create_profile(
 ) -> MsgGenerator:
     global STORED_PROFILE
 
-    STORED_PROFILE = Profile(
-        repeats=repeats, seq_trigger=seq_trigger, multiplier=multiplier
-    )
+    STORED_PROFILE = Profile(repeats=repeats, multiplier=multiplier)
 
     yield from bps.null()
 
