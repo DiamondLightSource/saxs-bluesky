@@ -6,7 +6,14 @@ from saxs_bluesky.logging.bluesky_messenger import MessageUnpacker, RabbitMQMess
 
 
 class BlueskyLogPanel:
-    def __init__(self, start: bool = True, update_interval=0.025, **kwargs):
+    def __init__(
+        self,
+        start: bool = True,
+        update_interval=0.025,
+        rabbitmq_messenger: RabbitMQMessenger | None = None,
+        window: Tk | None = None,
+        **kwargs,
+    ):
         """A simple log panel to display bluesky messages from RabbitMQ."""
 
         self.update_interval = update_interval  # seconds
@@ -16,14 +23,16 @@ class BlueskyLogPanel:
 
         ################# GUI SETUP #################
 
-        self.window = Tk()
+        self.window = window if window is not None else Tk()
         self.window.title("Bluesky Log Panel")
 
         self.window.wm_resizable(True, True)
         self.window.minsize(1400, 400)
         self.style = ttk.Style(self.window)
 
-        if len(kwargs) > 0:
+        if rabbitmq_messenger is not None:
+            self.messenger = rabbitmq_messenger
+        elif len(kwargs) > 0:
             self.messenger = RabbitMQMessenger(**kwargs)
 
         self.logs = Text(self.window, state="disabled", font=("Helvetica", 10))
@@ -42,9 +51,12 @@ class BlueskyLogPanel:
         self.window.bind("<Destroy>", self.on_destroy)
 
         if start:
-            self.window.update_idletasks()
-            self.window.update()
-            self.run_listener()
+            self.run_loop()
+
+    def run_loop(self):
+        self.window.update_idletasks()
+        self.window.update()
+        self.run_listener()
 
     def log_message(self, message: str, timestamp: bool = True):
         if timestamp:
