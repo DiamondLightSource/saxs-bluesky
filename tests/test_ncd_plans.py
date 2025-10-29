@@ -124,5 +124,6 @@ def test_panda_configure(
             profile=valid_profile,
             panda=panda,
             detectors=detectors,  # type: ignore
+            ensure_panda_connected=False,
         )
     )

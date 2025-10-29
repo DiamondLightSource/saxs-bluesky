@@ -306,6 +306,7 @@ def configure_panda_triggering(
         "List of str of the detector names, eg. saxs, waxs, i0, it",
     ] = FAST_DETECTORS,
     panda: HDFPanda = DEFAULT_PANDA,
+    ensure_panda_connected=True,
     force_load: bool = False,
 ) -> MsgGenerator:
     """
@@ -322,12 +323,12 @@ def configure_panda_triggering(
     Stage must come before prepare
 
     """
-
-    try:
-        yield from ensure_connected(panda)  # ensure the panda is connected
-    except Exception as e:
-        LOGGER.error(f"Failed to connect to PandA: {e}")
-        raise
+    if ensure_panda_connected:
+        try:
+            yield from ensure_connected(panda)  # ensure the panda is connected
+        except Exception as e:
+            LOGGER.error(f"Failed to connect to PandA: {e}")
+            raise
 
     LOGGER.info("Using the following detectors:")
     LOGGER.info("")
