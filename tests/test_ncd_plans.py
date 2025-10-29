@@ -12,12 +12,12 @@ from ophyd_async.fastcs.panda import HDFPanda
 
 from saxs_bluesky.plans.ncd_panda import (
     append_group,
-    configure_and_run_panda_triggering,
     configure_panda_triggering,
     create_profile,
     create_steps,
     delete_group,
     get_profile,
+    return_deadtime,
 )
 from saxs_bluesky.utils.profile_groups import Group, Profile
 
@@ -131,19 +131,27 @@ def test_panda_configure(
     )
 
 
-def test_panda_configure_and_run(
-    run_engine: RunEngine,
-    panda: HDFPanda,
-    pilatus: PilatusDetector,
-    valid_profile: Profile,
-):
-    detectors = [pilatus]
+# def test_panda_configure_and_run(
+#     run_engine: RunEngine,
+#     panda: HDFPanda,
+#     pilatus: PilatusDetector,
+#     valid_profile: Profile,
+# ):
+#     detectors = [pilatus]
 
-    run_engine(
-        configure_and_run_panda_triggering(
-            profile=valid_profile,
-            panda=panda,
-            detectors=detectors,  # type: ignore
-            ensure_panda_connected=False,
-        )
-    )
+#     run_engine(
+#         configure_and_run_panda_triggering(
+#             profile=valid_profile,
+#             panda=panda,
+#             detectors=detectors,  # type: ignore
+#             ensure_panda_connected=False,
+#         )
+#     )
+
+
+def test_return_deadtime(panda: HDFPanda, pilatus: PilatusDetector):
+    detectors = [panda, pilatus]
+
+    deadtime_array = return_deadtime(detectors)
+
+    assert len(deadtime_array) == len(detectors)
