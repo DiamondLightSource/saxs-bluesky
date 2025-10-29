@@ -1,4 +1,5 @@
 import tkinter
+from itertools import product
 from tkinter import ttk
 
 from bluesky.plans import count
@@ -8,6 +9,10 @@ from saxs_bluesky.gui.step_gui import StepWidget
 from saxs_bluesky.logging.bluesky_logpanel import BlueskyLogPanel
 from saxs_bluesky.plans.ncd_panda import log_detectors, set_detectors
 from saxs_bluesky.utils.beamline_client import BlueAPIPythonClient
+
+ROWS = range(0, 10, 2)
+COLS = range(0, 6, 2)
+ROW_COL = product(ROWS, COLS)
 
 
 class ActiveDetectorsFrame(ttk.Frame):
@@ -92,13 +97,15 @@ class ActiveDetectorsFrame(ttk.Frame):
 
 
 class ClientControlPanel:
-    def __init__(self, beamline, client, get_active_detectors):
+    def __init__(
+        self, beamline: str, client: BlueAPIPythonClient, get_active_detectors
+    ):
         self.beamline = beamline
         self.get_active_detectors = get_active_detectors
         self.window = tkinter.Tk()
         self.client: BlueAPIPythonClient = client
 
-        self.window.minsize(600, 600)
+        self.window.minsize(400, 300)
         self.window.title("Client Control Panel")
 
         self.build_dev_frame()
@@ -107,97 +114,143 @@ class ClientControlPanel:
         self.run_frame = ttk.Frame(self.window, borderwidth=5)
 
         self.run_frame.pack(fill="y", expand=True, side="right")
-        get_plans_button = ttk.Button(
-            self.run_frame, text="Get Plans", command=self.get_plans
-        )
-        get_plans_button.grid(
-            column=2, row=1, padx=5, pady=5, columnspan=1, sticky="news"
-        )
 
-        get_devices_button = ttk.Button(
-            self.run_frame, text="Get Devices", command=self.get_devices
-        )
-        get_devices_button.grid(
-            column=2, row=3, padx=5, pady=5, columnspan=1, sticky="news"
-        )
-
-        stop_plans_button = ttk.Button(
-            self.run_frame, text="Stop Plan", command=self.client.stop
-        )
-        stop_plans_button.grid(
-            column=2, row=5, padx=5, pady=5, columnspan=1, sticky="news"
-        )
-
-        pause_plans_button = ttk.Button(
-            self.run_frame, text="Pause Plan", command=self.client.pause
-        )
-        pause_plans_button.grid(
-            column=2, row=7, padx=5, pady=5, columnspan=1, sticky="news"
-        )
-
-        resume_plans_button = ttk.Button(
-            self.run_frame, text="Resume Plan", command=self.client.resume
-        )
-        resume_plans_button.grid(
-            column=2,
-            row=9,
+        row_col = next(ROW_COL)
+        ttk.Button(self.run_frame, text="Get Plans", command=self.get_plans).grid(
+            row=row_col[0],
+            column=row_col[1],
             padx=5,
             pady=5,
             columnspan=1,
             sticky="news",
         )
 
-        reload_env_button = ttk.Button(
+        row_col = next(ROW_COL)
+        ttk.Button(self.run_frame, text="Get Devices", command=self.get_devices).grid(
+            row=row_col[0],
+            column=row_col[1],
+            padx=5,
+            pady=5,
+            columnspan=1,
+            sticky="news",
+        )
+
+        row_col = next(ROW_COL)
+        ttk.Button(self.run_frame, text="Stop Plan", command=self.client.stop).grid(
+            row=row_col[0],
+            column=row_col[1],
+            padx=5,
+            pady=5,
+            columnspan=1,
+            sticky="news",
+        )
+
+        row_col = next(ROW_COL)
+        ttk.Button(self.run_frame, text="Pause Plan", command=self.client.pause).grid(
+            row=row_col[0],
+            column=row_col[1],
+            padx=5,
+            pady=5,
+            columnspan=1,
+            sticky="news",
+        )
+
+        row_col = next(ROW_COL)
+        ttk.Button(self.run_frame, text="Resume Plan", command=self.client.resume).grid(
+            row=row_col[0],
+            column=row_col[1],
+            padx=5,
+            pady=5,
+            columnspan=1,
+            sticky="news",
+        )
+
+        row_col = next(ROW_COL)
+        ttk.Button(
             self.run_frame, text="Reload Env", command=self.client.reload_environment
-        )
-        reload_env_button.grid(
-            column=2, row=12, padx=5, pady=5, columnspan=1, sticky="news"
+        ).grid(
+            row=row_col[0],
+            column=row_col[1],
+            padx=5,
+            pady=5,
+            columnspan=1,
+            sticky="news",
         )
 
-        set_det_button = ttk.Button(
+        ######################################################################
+        row_col = next(ROW_COL)
+        ttk.Button(
             self.run_frame, text="Set dets", command=self.set_detectors_plan
-        )
-        set_det_button.grid(
-            column=2, row=13, padx=5, pady=5, columnspan=1, sticky="news"
+        ).grid(
+            row=row_col[0],
+            column=row_col[1],
+            padx=5,
+            pady=5,
+            columnspan=1,
+            sticky="news",
         )
 
-        show_det_button = ttk.Button(
+        row_col = next(ROW_COL)
+        ttk.Button(
             self.run_frame, text="Log dets", command=self.log_detectors_plan
+        ).grid(
+            row=row_col[0],
+            column=row_col[1],
+            padx=5,
+            pady=5,
+            columnspan=1,
+            sticky="news",
         )
-        show_det_button.grid(
-            column=2, row=14, padx=5, pady=5, columnspan=1, sticky="news"
-        )
-
-        step_widget_button = ttk.Button(
+        row_col = next(ROW_COL)
+        ttk.Button(
             self.run_frame, text="Open Step Widget", command=self.open_step_widget
-        )
-        step_widget_button.grid(
-            column=2, row=15, padx=5, pady=5, columnspan=1, sticky="news"
+        ).grid(
+            row=row_col[0],
+            column=row_col[1],
+            padx=5,
+            pady=5,
+            columnspan=1,
+            sticky="news",
         )
 
-        count_det_button = ttk.Button(
+        row_col = next(ROW_COL)
+        ttk.Button(
             self.run_frame, text="Count Detector", command=self.count_detectors
-        )
-        count_det_button.grid(
-            column=2, row=16, padx=5, pady=5, columnspan=1, sticky="news"
+        ).grid(
+            row=row_col[0],
+            column=row_col[1],
+            padx=5,
+            pady=5,
+            columnspan=1,
+            sticky="news",
         )
 
-        active_det_button = ttk.Button(
+        row_col = next(ROW_COL)
+        ttk.Button(
             self.run_frame,
-            text="Show Active Detectors",
+            text="Show Active Dets",
             command=self.show_active_detectors,
-        )
-        active_det_button.grid(
-            column=2, row=17, padx=5, pady=5, columnspan=1, sticky="news"
+        ).grid(
+            row=row_col[0],
+            column=row_col[1],
+            padx=5,
+            pady=5,
+            columnspan=1,
+            sticky="news",
         )
 
-        profile_print = ttk.Button(
+        row_col = next(ROW_COL)
+        ttk.Button(
             self.run_frame,
             text="Open Log Panel",
             command=self.open_log_panel,
-        )
-        profile_print.grid(
-            column=2, row=19, padx=5, pady=5, columnspan=1, sticky="news"
+        ).grid(
+            row=row_col[0],
+            column=row_col[1],
+            padx=5,
+            pady=5,
+            columnspan=1,
+            sticky="news",
         )
 
         return None

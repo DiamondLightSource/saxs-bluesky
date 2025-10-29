@@ -19,7 +19,7 @@ from saxs_bluesky.utils.profile_groups import ExperimentLoader, Group, Profile
 BL = i22.BL
 
 
-DEFAULT_INSTRUMENT_SESSION = "cm40643-4"
+DEFAULT_INSTRUMENT_SESSION = "cm40643-5"
 
 ###THESE NEED TO BE LISTS TO BE SERIALISED
 
@@ -105,11 +105,18 @@ DEFAULT_GROUP = Group(
     run_pulses=[1, 1, 1, 1],
 )
 
+# WHEN IT'S POSSIBLE TO RUN THE DIFFERENT DETECTORS AT DIFFERENT RATES USE THIS
+
+# DEFAULT_PROFILE = Profile(
+#     repeats=1,
+#     groups=[deepcopy(DEFAULT_GROUP)],
+#     multiplier=[1, 1, 1, 1],
+# )
 
 DEFAULT_PROFILE = Profile(
     repeats=1,
     groups=[deepcopy(DEFAULT_GROUP)],
-    multiplier=[1, 1, 1, 1],
+    multiplier=None,
 )
 
 DEFAULT_EXPERIMENT = ExperimentLoader(
