@@ -1,14 +1,36 @@
 import json
 import time
 from collections import deque
+from unittest.mock import Mock
 
 import pytest
+from stomp.connect import StompConnection11 as Connection  # type: ignore
 
 from saxs_bluesky.logging.bluesky_messenger import (
     MessageUnpacker,
     RabbitMQMessenger,
     ScanListener,
 )
+
+
+@pytest.fixture
+def mock_connection() -> Mock:
+    return Mock(spec=Connection)
+
+
+@pytest.fixture
+def connected_messenger(mock_connection: Mock) -> RabbitMQMessenger:
+    connected_messenger = RabbitMQMessenger(
+        host="http://localhost",
+        beamline="ixx",
+        port=8080,
+        auto_connect=False,
+    )
+    connected_messenger.conn = mock_connection
+    connected_messenger.connect()
+    connected_messenger.subscribe()
+
+    return connected_messenger
 
 
 def test_message_unpacker():
@@ -65,6 +87,7 @@ def test_messenger_no_port_default():
         beamline="ixx",
         destination="/queue/test",
         auto_connect=False,
+        port=None,
     )
     assert messenger.port == 61613
 
@@ -104,3 +127,24 @@ def test_messenger_fails_without_host_or_beamline():
         RabbitMQMessenger(
             auto_connect=False,
         )
+
+
+def test_messenger_listener():
+    messenger = RabbitMQMessenger(
+        beamline="ixx",
+        auto_connect=False,
+    )
+
+    messenger.listen(max_iter=5, interval=0.01)
+
+
+def test_messenger_send(connected_messenger: RabbitMQMessenger):
+    connected_messenger.listen(max_iter=5, interval=0.01)
+    connected_messenger.send_start("/path/to/file")
+    connected_messenger.send_update("/path/to/file")
+    connected_messenger.send_finished("/path/to/file")
+
+
+def test_messenger_disconnect(connected_messenger: RabbitMQMessenger):
+    connected_messenger.listen(max_iter=5, interval=0.01)
+    connected_messenger.disconnect()

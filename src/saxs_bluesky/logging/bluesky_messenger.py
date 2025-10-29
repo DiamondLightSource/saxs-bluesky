@@ -84,16 +84,19 @@ class RabbitMQMessenger:
         self.run = True
 
         if self.auto_connect:
+            self.setup_connection()
             self.connect()
             self.subscribe()
 
-    def connect(self):
-        print("Connecting..")
-
+    def setup_connection(self):
         self.conn = stomp.Connection(
             host_and_ports=[(self.host, self.port)], auto_content_length=False
         )
+
         self.conn.set_listener("scan_listener", self.scan_listener)
+
+    def connect(self):
+        print("Connecting..")
 
         if self.username and self.password:
             self.conn.connect(self.username, self.password, wait=True)
@@ -147,13 +150,13 @@ class RabbitMQMessenger:
     def get_message(self):
         return self.scan_listener.messages.popleft()
 
-    def listen(self, max_iter: int = 50):
+    def listen(self, max_iter: int = 50, interval: float | int = 1.0):
         c = 0
 
         while (self.run is True) and (c < max_iter):
             if self.scan_listener.messages:
                 print("Processing message:", self.scan_listener.messages.popleft())
-            sleep(1)
+            sleep(interval)
             c += 1
             if c > max_iter:
                 break
