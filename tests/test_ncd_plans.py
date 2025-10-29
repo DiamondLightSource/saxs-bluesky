@@ -47,6 +47,27 @@ set_path_provider(
 
 @pytest.fixture
 def valid_profile() -> Profile:
+    valid_profile = Profile()
+
+    for _ in range(3):
+        valid_profile.append_group(
+            Group(
+                frames=1,
+                trigger="IMMEDIATE",
+                wait_time=1,
+                wait_units="S",
+                run_time=1,
+                run_units="S",
+                wait_pulses=[0, 0, 0, 0],
+                run_pulses=[1, 1, 1, 1],
+            )
+        )
+
+    return valid_profile
+
+
+@pytest.fixture
+def valid_profile_with_multiplier() -> Profile:
     valid_profile = Profile(multiplier=[1, 2, 4, 8])
 
     for _ in range(3):
@@ -113,7 +134,11 @@ def test_profile_manipulation(run_engine: RunEngine):
     ([1, 5, 1], [1, 5, 0.1], [1, 5, None], [1, None, None], [5, 1, 0.1]),
 )
 def test_create_steps(start, stop, step):
-    create_steps(start, stop, step)
+    steps = create_steps(start, stop, step)
+    assert len(steps) > 0
+
+    if step:
+        assert len(steps) > 1
 
 
 def test_panda_configure(
@@ -162,10 +187,10 @@ def test_return_deadtime(panda: HDFPanda, pilatus: PilatusDetector):
 
 
 def test_generate_repeated_trigger_info(
-    valid_profile: Profile,
+    valid_profile_with_multiplier: Profile,
 ):
     trigger_info_list = generate_repeated_trigger_info(
-        profile=valid_profile, max_deadtime=0.1, livetime=1
+        profile=valid_profile_with_multiplier, max_deadtime=0.1, livetime=1
     )
 
     assert len(trigger_info_list) > 1
