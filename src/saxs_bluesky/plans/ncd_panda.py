@@ -133,7 +133,8 @@ def return_deadtime(
 
     deadtime = (
         np.array([det._controller.get_deadtime(exposure) for det in detectors])  # noqa: SLF001
-        + CONFIG.DEADTIME_BUFFER
+        + 20e-6  # Buffer added to deadtime to handle minor discrepencies between det
+        # and panda clocks
     )
     return deadtime
 

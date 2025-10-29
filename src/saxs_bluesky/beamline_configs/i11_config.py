@@ -81,9 +81,7 @@ PULSE_CONNECTIONS = {
 
 """
 
-# Buffer added to deadtime to handle minor discrepencies between detector
-# and panda clocks
-DEADTIME_BUFFER = 20e-6
+
 # default sequencer is this one, b21 currently uses seq 1 for somthing else
 DEFAULT_SEQ = 1
 
