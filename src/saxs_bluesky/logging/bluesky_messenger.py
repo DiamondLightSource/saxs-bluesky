@@ -159,16 +159,16 @@ class RabbitMQMessenger:
                 break
 
 
-if __name__ == "__main__":
-    # messenger = RabbitMQMessenger(
-    #     beamline="i22", port=61613, username="guest", password="guest"
-    # )
-    # messenger.listen()
+# if __name__ == "__main__":
+#     # messenger = RabbitMQMessenger(
+#     #     beamline="i22", port=61613, username="guest", password="guest"
+#     # )
+#     # messenger.listen()
 
-    m = RabbitMQMessenger(
-        host="i22-control",
-        port=61613,
-        destination=None,
-        auto_connect=True,
-    )
-    m.listen()
+#     m = RabbitMQMessenger(
+#         host="i22-control",
+#         port=61613,
+#         destination=None,
+#         auto_connect=True,
+#     )
+#     m.listen()
