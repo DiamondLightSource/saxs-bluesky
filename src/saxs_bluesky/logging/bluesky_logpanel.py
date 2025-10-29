@@ -53,10 +53,10 @@ class BlueskyLogPanel:
         if start:
             self.run_loop()
 
-    def run_loop(self):
+    def run_loop(self, maxiter=None):
         self.window.update_idletasks()
         self.window.update()
-        self.run_listener()
+        self.run_listener(maxiter=maxiter)
 
     def log_message(self, message: str, timestamp: bool = True):
         if timestamp:
@@ -70,8 +70,9 @@ class BlueskyLogPanel:
         self.logs.insert("end", log_entry, "log")
         self.logs.config(state="disabled")  # stops user editing
 
-    def run_listener(self):
-        while self.run:
+    def run_listener(self, maxiter=None):
+        iter = 0
+        while (self.run) and (iter < maxiter if maxiter is not None else True):
             if not self.messenger.scan_listener.messages:
                 pass
             else:
@@ -91,6 +92,8 @@ class BlueskyLogPanel:
             time.sleep(self.update_interval)
             self.window.update_idletasks()
             self.window.update()
+            if maxiter is not None:
+                iter += 1
 
     def on_destroy(self, event):
         self.run = False
