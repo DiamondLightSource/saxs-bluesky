@@ -1,5 +1,3 @@
-import os
-from pathlib import Path
 from typing import Annotated, Any
 
 import bluesky.plan_stubs as bps
@@ -27,14 +25,12 @@ from ophyd_async.fastcs.panda import (
 )
 from ophyd_async.plan_stubs import (
     ensure_connected,
-    get_current_settings,
 )
 from pydantic import validate_call
 
 from saxs_bluesky.stubs.panda_stubs import (
+    check_and_apply_panda_settings,
     fly_and_collect_with_wait,
-    load_settings_from_yaml,
-    upload_yaml_to_panda,
     wait_until_complete,
 )
 from saxs_bluesky.utils.profile_groups import Group, Profile
@@ -90,25 +86,25 @@ def set_panda_pulses(
     yield from bps.wait(group=group, timeout=DEFAULT_TIMEOUT)
 
 
-def stage_and_prepare_detectors(
-    detectors: list[StandardDetector],
-    flyer: StandardFlyer,
-    trigger_info: TriggerInfo,
-    group="det_atm",
-):
-    """
+# def stage_and_prepare_detectors(
+#     detectors: list[StandardDetector],
+#     flyer: StandardFlyer,
+#     trigger_info: TriggerInfo,
+#     group="det_atm",
+# ):
+#     """
 
-    Iterates through all of the detectors specified and prepares them.
+#     Iterates through all of the detectors specified and prepares them.
 
-    """
+#     """
 
-    yield from bps.stage_all(*detectors, flyer, group=group)
+#     yield from bps.stage_all(*detectors, flyer, group=group)
 
-    for det in detectors:
-        ###this tells the detector how may triggers to expect and sets the CAN aquire on
-        yield from bps.prepare(det, trigger_info, wait=False, group=group)
+#     for det in detectors:
+#         ###this tells the detector how may triggers to expect and sets the CAN aquire
+#         yield from bps.prepare(det, trigger_info, wait=False, group=group)
 
-    yield from bps.wait(group=group, timeout=DEFAULT_TIMEOUT)
+#     yield from bps.wait(group=group, timeout=DEFAULT_TIMEOUT)
 
 
 def return_deadtime(
@@ -153,54 +149,6 @@ def generate_repeated_trigger_info(
             repeated_trigger_info.append(trigger_info)
 
     return repeated_trigger_info
-
-
-def check_and_apply_panda_settings(panda: HDFPanda, panda_name: str) -> MsgGenerator:
-    """
-
-    Checks the settings currently on the PandA
-
-    - if different they will be overwritten with the ones
-
-    specified in the CONFIG.CONFIG_NAME
-
-    Settings may have changed due to Malcolm or
-
-    someone chnaging things in EPICS which might prevent the plan from running
-
-    This mitigates that
-
-    """
-
-    # this is the directory where the yaml files are stored
-    yaml_directory = os.path.join(
-        os.path.dirname(Path(__file__).parent), "ophyd_panda_yamls"
-    )
-    yaml_file_name = f"{BL}_{CONFIG.CONFIG_NAME}_{panda_name}"
-
-    current_panda_settings = yield from get_current_settings(panda)
-    yaml_settings = yield from load_settings_from_yaml(yaml_directory, yaml_file_name)
-
-    if current_panda_settings != yaml_settings:
-        print(
-            (
-                "Current Panda settings do not match the yaml settings, ",
-                "loading yaml settings to panda",
-            )
-        )
-        LOGGER.info(
-            (
-                "Current Panda settings do not match the yaml settings, ",
-                "loading yaml settings to panda",
-            )
-        )
-
-        print(f"{yaml_file_name}.yaml has been uploaded to PandA")
-        LOGGER.info(f"{yaml_file_name}.yaml has been uploaded to PandA")
-        ######### make sure correct yaml is loaded
-        yield from upload_yaml_to_panda(
-            yaml_directory=yaml_directory, yaml_file_name=yaml_file_name, panda=panda
-        )
 
 
 def set_panda_output(
@@ -316,7 +264,9 @@ def configure_panda_triggering(
 
     # load Panda setting to panda
     if force_load:
-        yield from check_and_apply_panda_settings(panda, panda.name)
+        yield from check_and_apply_panda_settings(
+            panda, BL, CONFIG.SETTINGS_NAME, panda.name
+        )
 
     # n_repeats = profile.repeats
     # seq table should be grabbed from the panda and used instead,
@@ -389,7 +339,6 @@ def run_panda_triggering(
     # STAGE SETS HDF WRITER TO ON
     yield from bps.stage_all(*all_devices, flyer, group="setup")
 
-    # yield from stage_and_prepare_detectors(list(detectors), flyer, trigger_info)
     for det in detectors:
         ###this tells the detector how may triggers to expect and sets the CAN aquir
         yield from bps.prepare(det, trigger_info, wait=True, group="setup")

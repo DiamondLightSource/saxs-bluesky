@@ -86,7 +86,7 @@ PULSE_CONNECTIONS = {
 """
 
 DEFAULT_SEQ = 1  # default sequencer is this one, pandas can have 2
-CONFIG_NAME = "PandaTrigger"
+SETTINGS_NAME = "PandaTrigger"
 
 
 """

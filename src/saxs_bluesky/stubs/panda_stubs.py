@@ -1,3 +1,6 @@
+import os
+from pathlib import Path
+
 import bluesky.plan_stubs as bps
 from bluesky.utils import MsgGenerator, short_uid
 from dodal.beamlines import module_name_for_beamline
@@ -12,10 +15,10 @@ from ophyd_async.core import (
 from ophyd_async.fastcs.panda import HDFPanda, PcompInfo, SeqTableInfo
 from ophyd_async.plan_stubs import (
     apply_panda_settings,
+    apply_settings_if_different,
     retrieve_settings,
     store_settings,
 )
-from ophyd_async.plan_stubs._wait_for_awaitable import wait_for_awaitable
 
 
 def return_connected_device(beamline: str, device_name: str):
@@ -104,15 +107,19 @@ def fly_and_collect_with_wait(
     yield from bps.sleep(2)
 
 
-def load_settings_from_yaml(yaml_directory: str, yaml_file_name: str):
-    provider = YamlSettingsProvider(yaml_directory)
-    settings = yield from wait_for_awaitable(provider.retrieve(yaml_file_name))
+def get_settings_dir_and_name(
+    beamline: str, settings_name: str, panda_name: str
+) -> tuple:
+    yaml_directory = os.path.join(
+        os.path.dirname(Path(__file__).parent), "ophyd_panda_yamls"
+    )
+    yaml_file_name = f"{beamline}_{settings_name}_{panda_name}"
 
-    return settings
+    return yaml_directory, yaml_file_name
 
 
-def upload_yaml_to_panda(
-    yaml_directory: str, yaml_file_name: str, panda: HDFPanda
+def check_and_apply_panda_settings(
+    panda: HDFPanda, beamline: str, settings_name: str, panda_name: str
 ) -> MsgGenerator:
     """
 
@@ -123,9 +130,23 @@ def upload_yaml_to_panda(
 
     """
 
+    yaml_directory, yaml_file_name = get_settings_dir_and_name(
+        beamline=beamline, settings_name=settings_name, panda_name=panda_name
+    )
+
+    yield from load_settings_to_panda(yaml_directory, yaml_file_name, panda)
+
+
+def load_settings_to_panda(
+    yaml_directory: str, yaml_file_name: str, panda: HDFPanda
+) -> MsgGenerator:
+    """
+    load settings to panda if different
+    """
+
     provider = YamlSettingsProvider(yaml_directory)
     settings = yield from retrieve_settings(provider, yaml_file_name, panda)
-    yield from apply_panda_settings(settings)
+    yield from apply_settings_if_different(settings, apply_panda_settings)
 
 
 def save_device_to_yaml(

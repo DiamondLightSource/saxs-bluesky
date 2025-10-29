@@ -16,9 +16,11 @@ from saxs_bluesky.plans.ncd_panda import (
     create_profile,
     create_steps,
     delete_group,
+    generate_repeated_trigger_info,
     get_profile,
     return_deadtime,
 )
+from saxs_bluesky.stubs.panda_stubs import get_settings_dir_and_name
 from saxs_bluesky.utils.profile_groups import Group, Profile
 
 #     get_trigger_info,
@@ -43,7 +45,7 @@ set_path_provider(
 
 @pytest.fixture
 def valid_profile() -> Profile:
-    valid_profile = Profile()
+    valid_profile = Profile(multiplier=[1, 2, 4, 8])
 
     for _ in range(3):
         valid_profile.append_group(
@@ -155,3 +157,23 @@ def test_return_deadtime(panda: HDFPanda, pilatus: PilatusDetector):
     deadtime_array = return_deadtime(detectors)
 
     assert len(deadtime_array) == len(detectors)
+
+
+def test_generate_repeated_trigger_info(
+    valid_profile: Profile,
+):
+    trigger_info_list = generate_repeated_trigger_info(
+        profile=valid_profile, max_deadtime=0.1, livetime=1
+    )
+
+    assert len(trigger_info_list) > 1
+
+
+def test_get_settings_dir_and_name():
+    beamline = "i22"
+    settings_name = "PandaTrigger"
+    panda_name = "panda1"
+
+    yaml_dir, yaml_name = get_settings_dir_and_name(beamline, settings_name, panda_name)
+
+    assert yaml_name == f"{beamline}_{settings_name}_{panda_name}"

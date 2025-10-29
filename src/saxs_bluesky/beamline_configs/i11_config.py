@@ -84,8 +84,7 @@ PULSE_CONNECTIONS = {
 
 # default sequencer is this one, b21 currently uses seq 1 for somthing else
 DEFAULT_SEQ = 1
-
-CONFIG_NAME = "PandaTrigge"
+SETTINGS_NAME = "PandaTrigge"
 
 
 """
