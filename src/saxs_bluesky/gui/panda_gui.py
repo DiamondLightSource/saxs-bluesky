@@ -137,17 +137,21 @@ class PandAGUI:
         config_menu.add_command(label="Edit Config", command=self.open_settings)
         menubar.add_cascade(label="Config", menu=config_menu)
 
-        show_menu = tkinter.Menu(menubar, tearoff=0)
-        show_menu.add_command(label="Show Wiring", command=self.show_wiring_config)
-        show_menu.add_command(label="Log Panel", command=self.show_log_panel)
-        show_menu.add_command(label="Dev Panel", command=self.show_dev_panel)
-        menubar.add_cascade(label="Show", menu=show_menu)
+        config_menu = tkinter.Menu(menubar, tearoff=0)
+        config_menu.add_command(label="Login", command=self.authenticate)
+        menubar.add_cascade(label="Login", menu=config_menu)
 
         instr_menu = tkinter.Menu(menubar, tearoff=0)
         instr_menu.add_command(
             label="Change Instrument Session", command=self.change_intrument_session
         )
         menubar.add_cascade(label="Inst Session", menu=instr_menu)
+
+        show_menu = tkinter.Menu(menubar, tearoff=0)
+        show_menu.add_command(label="Show Wiring", command=self.show_wiring_config)
+        show_menu.add_command(label="Log Panel", command=self.show_log_panel)
+        show_menu.add_command(label="Dev Panel", command=self.show_dev_panel)
+        menubar.add_cascade(label="Show", menu=show_menu)
 
         theme_menu = tkinter.Menu(menubar, tearoff=0)
         theme_menu.add_command(
@@ -335,6 +339,9 @@ class PandAGUI:
             os.system(f"gedit {CONFIG.__file__} &")
         except FileNotFoundError as e:
             print(e)
+
+    def authenticate(self):
+        os.system(f"blueapi -c {CONFIG.BLUEAPI_CONFIG_PATH} login &")
 
     def show_wiring_config(self):
         fig, ax = plt.subplots(1, 1, figsize=(16, 8))
