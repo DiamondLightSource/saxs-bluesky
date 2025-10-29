@@ -25,6 +25,7 @@ def test_message_unpacker():
     unpacked_message = MessageUnpacker.unpack_dict(sample_message)
 
     assert isinstance(unpacked_message, deque)
+    assert "time: " in unpacked_message[1]
 
 
 def test_scan_messenger():
