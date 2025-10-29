@@ -101,5 +101,5 @@ class BlueskyLogPanel:
         self.messenger.disconnect()
 
 
-if __name__ == "__main__":
-    BlueskyLogPanel(beamline="i22")
+# if __name__ == "__main__":
+#     BlueskyLogPanel(beamline="i22")
