@@ -215,19 +215,6 @@ def check_and_apply_panda_settings(panda: HDFPanda, panda_name: str) -> MsgGener
         )
 
 
-def multiple_pulse_blocks():
-    pass
-    # for pulse in CONFIG.PULSEBLOCKS
-    #   get the pulse block, find out what is attached to it
-    #   set the multiplier and possibly duration accordingly
-    #   for det in detectors_on_pulse_block:
-    #       trigger_info = TriggerInfo(number_of_triggers=n_triggers*n_repeats,
-    #                                   trigger=DetectorTrigger.CONSTANT_GATE,
-    #                                  deadtime=max_deadtime,
-    #                                  multiplier=1,
-    #                                 frame_timeout=None)
-
-
 def show_deadtime(detector_deadtime, active_detector_names):
     """
 
@@ -520,8 +507,7 @@ def configure_and_run_panda_triggering(
         force_load=force_load,
     )
 
-    # yield from run_panda_triggering(profile,
-    # detectors=detectors, panda=panda)  # type: ignore
+    yield from run_panda_triggering()
 
 
 @validate_call(config={"arbitrary_types_allowed": True})
