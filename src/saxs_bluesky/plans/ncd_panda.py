@@ -18,7 +18,6 @@ from ophyd_async.core import (
     StandardFlyer,
     StandardReadable,
     TriggerInfo,
-    wait_for_value,
 )
 from ophyd_async.fastcs.panda import (
     HDFPanda,
@@ -26,13 +25,17 @@ from ophyd_async.fastcs.panda import (
     SeqTableInfo,
     StaticSeqTableTriggerLogic,
 )
-from ophyd_async.plan_stubs import ensure_connected, get_current_settings
+from ophyd_async.plan_stubs import (
+    ensure_connected,
+    get_current_settings,
+)
 from pydantic import validate_call
 
 from saxs_bluesky.stubs.panda_stubs import (
     fly_and_collect_with_wait,
     load_settings_from_yaml,
     upload_yaml_to_panda,
+    wait_until_complete,
 )
 from saxs_bluesky.utils.profile_groups import Group, Profile
 from saxs_bluesky.utils.utils import (
@@ -52,21 +55,6 @@ STORED_PROFILE: Profile | None = None
 STORED_TRIGGER_INFO: TriggerInfo | None = None
 
 LOGGER.info(f"saxs bluesky is using the beamline: {BL}")
-
-
-def wait_until_complete(pv_obj, waiting_value=0, timeout=None):
-    """
-    An async wrapper for the ophyd async wait_for_value function,
-    to allow it to run inside the bluesky run engine
-    Typical use case is waiting for an active pv to change to 0,
-    indicating that the run has finished, which then allows the
-    run plan to disarm all the devices.
-    """
-
-    async def _wait():
-        await wait_for_value(pv_obj, waiting_value, timeout=timeout)
-
-    yield from bps.wait_for([_wait])
 
 
 def set_panda_pulses(
@@ -215,18 +203,6 @@ def check_and_apply_panda_settings(panda: HDFPanda, panda_name: str) -> MsgGener
         )
 
 
-def show_deadtime(detector_deadtime, active_detector_names):
-    """
-
-    Takes two iterables, detetors deadtimes and detector names,
-    and prints the deadtimes in the log
-
-    """
-
-    for dt, dn in zip(detector_deadtime, active_detector_names, strict=True):
-        LOGGER.info(f"deadtime for {dn} is {dt}")
-
-
 def set_panda_output(
     output_type: str = "TTL",
     output: int = 1,
@@ -324,11 +300,7 @@ def configure_panda_triggering(
 
     """
     if ensure_panda_connected:
-        try:
-            yield from ensure_connected(panda)  # ensure the panda is connected
-        except Exception as e:
-            LOGGER.error(f"Failed to connect to PandA: {e}")
-            raise
+        yield from ensure_connected(panda)  # ensure the panda is connected
 
     LOGGER.info("Using the following detectors:")
     LOGGER.info("")
@@ -489,6 +461,7 @@ def configure_and_run_panda_triggering(
         "List of str of the detector names, eg. saxs, waxs, i0, it",
     ] = FAST_DETECTORS,
     panda: HDFPanda = DEFAULT_PANDA,
+    ensure_panda_connected: bool = True,
     force_load: bool = True,
 ) -> MsgGenerator:
     """
@@ -505,6 +478,7 @@ def configure_and_run_panda_triggering(
         profile=profile,
         detectors=detectors,
         panda=panda,
+        ensure_panda_connected=ensure_panda_connected,
         force_load=force_load,
     )
 

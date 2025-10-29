@@ -1,8 +1,14 @@
 import bluesky.plan_stubs as bps
 from bluesky.utils import MsgGenerator, short_uid
 from dodal.beamlines import module_name_for_beamline
+from dodal.log import LOGGER
 from dodal.utils import AnyDevice, make_all_devices, make_device
-from ophyd_async.core import StandardDetector, StandardFlyer, YamlSettingsProvider
+from ophyd_async.core import (
+    StandardDetector,
+    StandardFlyer,
+    YamlSettingsProvider,
+    wait_for_value,
+)
 from ophyd_async.fastcs.panda import HDFPanda, PcompInfo, SeqTableInfo
 from ophyd_async.plan_stubs import (
     apply_panda_settings,
@@ -136,3 +142,30 @@ def save_device_to_yaml(
 
     provider = YamlSettingsProvider(yaml_directory)
     yield from store_settings(provider, yaml_file_name, device)
+
+
+def show_deadtime(detector_deadtime, active_detector_names):
+    """
+
+    Takes two iterables, detetors deadtimes and detector names,
+    and prints the deadtimes in the log
+
+    """
+
+    for dt, dn in zip(detector_deadtime, active_detector_names, strict=True):
+        LOGGER.info(f"deadtime for {dn} is {dt}")
+
+
+def wait_until_complete(pv_obj, waiting_value=0, timeout=None):
+    """
+    An async wrapper for the ophyd async wait_for_value function,
+    to allow it to run inside the bluesky run engine
+    Typical use case is waiting for an active pv to change to 0,
+    indicating that the run has finished, which then allows the
+    run plan to disarm all the devices.
+    """
+
+    async def _wait():
+        await wait_for_value(pv_obj, waiting_value, timeout=timeout)
+
+    yield from bps.wait_for([_wait])

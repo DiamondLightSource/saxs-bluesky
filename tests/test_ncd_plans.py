@@ -12,6 +12,7 @@ from ophyd_async.fastcs.panda import HDFPanda
 
 from saxs_bluesky.plans.ncd_panda import (
     append_group,
+    configure_and_run_panda_triggering,
     configure_panda_triggering,
     create_profile,
     create_steps,
@@ -121,6 +122,24 @@ def test_panda_configure(
 
     run_engine(
         configure_panda_triggering(
+            profile=valid_profile,
+            panda=panda,
+            detectors=detectors,  # type: ignore
+            ensure_panda_connected=False,
+        )
+    )
+
+
+def test_panda_configure_and_run(
+    run_engine: RunEngine,
+    panda: HDFPanda,
+    pilatus: PilatusDetector,
+    valid_profile: Profile,
+):
+    detectors = [pilatus]
+
+    run_engine(
+        configure_and_run_panda_triggering(
             profile=valid_profile,
             panda=panda,
             detectors=detectors,  # type: ignore
