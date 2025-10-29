@@ -2,6 +2,8 @@ import json
 import time
 from collections import deque
 
+import pytest
+
 from saxs_bluesky.logging.bluesky_messenger import (
     MessageUnpacker,
     RabbitMQMessenger,
@@ -45,7 +47,7 @@ def test_messenger_creation():
     messenger = RabbitMQMessenger(
         host="localhost",
         beamline="test_beamline",
-        port=61613,
+        port=11111,
         username="user",
         password="pass",
         destination="/queue/test",
@@ -53,5 +55,52 @@ def test_messenger_creation():
     )
 
     assert messenger.host == "localhost"
-    assert messenger.port == 61613
+    assert messenger.port == 11111
     assert messenger.beamline == "test_beamline"
+
+
+def test_messenger_no_port_default():
+    messenger = RabbitMQMessenger(
+        host="localhost",
+        beamline="ixx",
+        destination="/queue/test",
+        auto_connect=False,
+    )
+    assert messenger.port == 61613
+
+
+def test_messenger_destination_default():
+    messenger = RabbitMQMessenger(
+        host="localhost",
+        beamline="ixx",
+        auto_connect=False,
+    )
+    assert messenger.destination == [
+        "/topic/public.worker.event",
+        "/topic/gda.messages.scan",
+    ]
+
+
+def test_messenger_host_default():
+    messenger = RabbitMQMessenger(
+        beamline="ixx",
+        auto_connect=False,
+    )
+    assert messenger.host == "ixx-rabbitmq-daq.diamond.ac.uk"
+
+
+def test_messenger_stops():
+    messenger = RabbitMQMessenger(
+        auto_connect=False,
+        host="localhost",
+    )
+    assert messenger.run
+    messenger.stop()
+    assert not messenger.run
+
+
+def test_messenger_fails_without_host_or_beamline():
+    with pytest.raises(ValueError):
+        RabbitMQMessenger(
+            auto_connect=False,
+        )
