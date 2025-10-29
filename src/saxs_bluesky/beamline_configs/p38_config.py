@@ -16,7 +16,7 @@ import saxs_bluesky.blueapi_configs
 from saxs_bluesky.utils.beamline_client import BlueAPIPythonClient
 from saxs_bluesky.utils.profile_groups import ExperimentLoader, Group, Profile
 
-DEFAULT_INSTRUMENT_SESSION = "cm40643-4"
+DEFAULT_INSTRUMENT_SESSION = "cm40643-5"
 
 BL = p38.BL
 

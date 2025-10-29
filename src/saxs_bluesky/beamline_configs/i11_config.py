@@ -19,7 +19,7 @@ Configuration for b21 PandA beamline
 
 """
 
-DEFAULT_INSTRUMENT_SESSION = "cm40625-4"
+DEFAULT_INSTRUMENT_SESSION = "cm40625-5"
 
 ###THESE NEED TO BE LISTS TO BE SERIALISED
 FAST_DETECTORS: list[StandardDetector] = [inject("mythen")]
