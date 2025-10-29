@@ -1,6 +1,5 @@
-import unittest
 from tkinter import Tk
-from unittest.mock import MagicMock, Mock  # type: ignore
+from unittest.mock import Mock, patch  # type: ignore
 
 import pytest
 from stomp.connect import StompConnection11 as Connection  # type: ignore
@@ -17,8 +16,39 @@ def mock_connection() -> Mock:
 
 
 @pytest.fixture
-def mock_tkinter() -> MagicMock:
-    return MagicMock(spec=Tk)
+def mock_text() -> Mock:
+    text_mock = Mock()
+    text_mock.pack = Mock()
+    text_mock.tag_config = Mock()
+    text_mock.configure = Mock()
+    return text_mock
+
+
+@pytest.fixture
+def mock_scrollbar() -> Mock:
+    scrollbar_mock = Mock()
+    scrollbar_mock.pack = Mock()
+    return scrollbar_mock
+
+
+@pytest.fixture
+def mock_style() -> Mock:
+    return Mock()
+
+
+@pytest.fixture
+def mock_tkinter(mock_text: Mock, mock_scrollbar: Mock, mock_style: Mock) -> Mock:
+    tk_mock = Mock(spec=Tk)
+    tk_mock.title = Mock()
+    tk_mock.wm_resizable = Mock()
+    tk_mock.minsize = Mock()
+    tk_mock.bind = Mock()
+
+    # Setup Text widget mocking
+    def setup_mocks():
+        return tk_mock
+
+    return setup_mocks()
 
 
 @pytest.fixture
@@ -36,11 +66,38 @@ def connected_messenger(mock_connection: Mock) -> RabbitMQMessenger:
     return connected_messenger
 
 
-@pytest.fixture
-def connected_logpanel(
+# @pytest.fixture
+# def connected_logpanel(
+#     connected_messenger: RabbitMQMessenger,
+#     mock_tkinter: Tk,
+# ) -> BlueskyLogPanel:
+#     connected_logpanel = BlueskyLogPanel(
+#         beamline="ixx",
+#         start=False,
+#         rabbitmq_messenger=connected_messenger,
+#         window=mock_tkinter,
+#     )
+
+#     return connected_logpanel
+
+
+@patch("saxs_bluesky.logging.bluesky_logpanel.Text")
+@patch("saxs_bluesky.logging.bluesky_logpanel.ttk.Style")
+@patch("saxs_bluesky.logging.bluesky_logpanel.ttk.Scrollbar")
+def test_logpanel_initialization(
+    mock_scrollbar: Mock,
+    mock_style: Mock,
+    mock_text: Mock,
     connected_messenger: RabbitMQMessenger,
-    mock_tkinter: Tk,
-) -> BlueskyLogPanel:
+    mock_tkinter: Mock,
+) -> None:
+    # Configure text widget mock
+    mock_text.return_value = Mock()
+    mock_text.return_value.pack = Mock()
+    mock_text.return_value.tag_config = Mock()
+    mock_text.return_value.configure = Mock()
+
+    # Create the log panel
     connected_logpanel = BlueskyLogPanel(
         beamline="ixx",
         start=False,
@@ -48,15 +105,19 @@ def connected_logpanel(
         window=mock_tkinter,
     )
 
-    return connected_logpanel
+    assert isinstance(connected_logpanel, BlueskyLogPanel)
 
+    # Verify basic initialization
+    assert connected_logpanel.run is True
+    assert connected_logpanel.update_interval == 0.025
+    assert connected_logpanel.messenger == connected_messenger
+    assert connected_logpanel.window == mock_tkinter
 
-@unittest.mock.patch("tkinter.Tk")  # type: ignore
-def test_logpanel_initialization(connected_logpanel: BlueskyLogPanel):
-    # assert isinstance(connected_logpanel, BlueskyLogPanel)
-    assert connected_logpanel.messenger is not None
-    assert connected_logpanel.logs is not None
-    assert connected_logpanel.scrollbar is not None
+    # Verify window configuration
+    mock_tkinter.title.assert_called_once_with("Bluesky Log Panel")
+    mock_tkinter.wm_resizable.assert_called_once_with(True, True)
+    mock_tkinter.minsize.assert_called_once_with(1400, 400)
 
-    connected_logpanel.run_loop()
+    # Test cleanup
     connected_logpanel.on_destroy(None)
+    assert not connected_logpanel.run  # verify run flag is set to False
