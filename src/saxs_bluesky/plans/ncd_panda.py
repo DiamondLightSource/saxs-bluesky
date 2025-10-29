@@ -462,7 +462,7 @@ def configure_and_run_panda_triggering(
     ] = FAST_DETECTORS,
     panda: HDFPanda = DEFAULT_PANDA,
     ensure_panda_connected: bool = True,
-    force_load: bool = True,
+    force_load: bool = False,
 ) -> MsgGenerator:
     """
 

@@ -126,6 +126,7 @@ def test_panda_configure(
             panda=panda,
             detectors=detectors,  # type: ignore
             ensure_panda_connected=False,
+            force_load=False,
         )
     )
 
