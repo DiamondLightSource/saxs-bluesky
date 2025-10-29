@@ -6,7 +6,7 @@ import pytest
 from bluesky import RunEngine
 from dodal.common.beamlines.beamline_utils import get_path_provider, set_path_provider
 from dodal.common.visit import LocalDirectoryServiceClient, StaticVisitPathProvider
-from ophyd_async.core import init_devices
+from ophyd_async.core import TriggerInfo, init_devices
 from ophyd_async.epics.adpilatus import PilatusDetector
 from ophyd_async.fastcs.panda import HDFPanda
 
@@ -18,7 +18,9 @@ from saxs_bluesky.plans.ncd_panda import (
     delete_group,
     generate_repeated_trigger_info,
     get_profile,
+    get_trigger_info,
     return_deadtime,
+    set_trigger_info,
 )
 from saxs_bluesky.stubs.panda_stubs import get_settings_dir_and_name
 from saxs_bluesky.utils.profile_groups import Group, Profile
@@ -177,3 +179,19 @@ def test_get_settings_dir_and_name():
     yaml_dir, yaml_name = get_settings_dir_and_name(beamline, settings_name, panda_name)
 
     assert yaml_name == f"{beamline}_{settings_name}_{panda_name}"
+
+
+def test_set_and_get_trigger_info(run_engine: RunEngine):
+    trigger_info = TriggerInfo(number_of_events=10, deadtime=0.1, livetime=1)
+
+    def test_trig():
+        yield from set_trigger_info(trigger_info)
+        returned_trigger_info = get_trigger_info()
+
+        assert returned_trigger_info is not None
+
+        assert returned_trigger_info.number_of_events == 10
+        assert returned_trigger_info.deadtime == 0.1
+        assert returned_trigger_info.livetime == 1
+
+    run_engine(test_trig())
