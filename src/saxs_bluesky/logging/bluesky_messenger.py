@@ -158,8 +158,6 @@ class RabbitMQMessenger:
                 print("Processing message:", self.scan_listener.messages.popleft())
             sleep(interval)
             c += 1
-            if c > max_iter:
-                break
 
 
 # if __name__ == "__main__":

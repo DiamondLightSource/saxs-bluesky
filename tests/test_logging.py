@@ -135,6 +135,7 @@ def test_messenger_listener():
         auto_connect=False,
     )
 
+    messenger.scan_listener.messages.append({"body": "test message"})
     messenger.listen(max_iter=5, interval=0.01)
 
 
@@ -143,6 +144,7 @@ def test_messenger_send(connected_messenger: RabbitMQMessenger):
     connected_messenger.send_start("/path/to/file")
     connected_messenger.send_update("/path/to/file")
     connected_messenger.send_finished("/path/to/file")
+    connected_messenger.send_file("/path/to/file")
 
 
 def test_messenger_disconnect(connected_messenger: RabbitMQMessenger):
