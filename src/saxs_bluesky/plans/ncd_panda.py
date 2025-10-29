@@ -657,7 +657,8 @@ def create_steps(start: float, stop: float | None, step: float | None):
         step_list = list(np.arange(start, stop, step))
         step_list = [i.item() for i in step_list]
 
-    # LOGGER.info(f"Steps: {step_list}")
+    for n, step in enumerate(step_list):
+        LOGGER.info(f"Step {n}: {step}")
 
     return step_list
 
