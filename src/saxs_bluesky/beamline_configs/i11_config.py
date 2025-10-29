@@ -85,7 +85,7 @@ PULSE_CONNECTIONS = {
 # and panda clocks
 DEADTIME_BUFFER = 20e-6
 # default sequencer is this one, b21 currently uses seq 1 for somthing else
-DEFAULT_SEQ = 2
+DEFAULT_SEQ = 1
 
 CONFIG_NAME = "PandaTrigge"
 
