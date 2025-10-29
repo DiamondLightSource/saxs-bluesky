@@ -19,7 +19,7 @@ from saxs_bluesky.utils.profile_groups import ExperimentLoader, Group, Profile
 BL = i22.BL
 
 
-DEFAULT_INSTRUMENT_SESSION = "cm40643-4"
+DEFAULT_INSTRUMENT_SESSION = "cm40643-5"
 
 ###THESE NEED TO BE LISTS TO BE SERIALISED
 
@@ -85,7 +85,6 @@ PULSE_CONNECTIONS = {
 # ncd plan parameters
 """
 
-DEADTIME_BUFFER = 20e-6  # Buffer added to deadtime to handle minor discrepencies between detector and panda clocks #noqa
 DEFAULT_SEQ = 1  # default sequencer is this one, pandas can have 2
 CONFIG_NAME = "PandaTrigger"
 
@@ -105,12 +104,18 @@ DEFAULT_GROUP = Group(
     run_pulses=[1, 1, 1, 1],
 )
 
+# WHEN IT'S POSSIBLE TO RUN THE DIFFERENT DETECTORS AT DIFFERENT RATES USE THIS
+
+# DEFAULT_PROFILE = Profile(
+#     repeats=1,
+#     groups=[deepcopy(DEFAULT_GROUP)],
+#     multiplier=[1, 1, 1, 1],
+# )
 
 DEFAULT_PROFILE = Profile(
     repeats=1,
-    seq_trigger="IMMEDIATE",
     groups=[deepcopy(DEFAULT_GROUP)],
-    multiplier=[1, 1, 1, 1],
+    multiplier=None,
 )
 
 DEFAULT_EXPERIMENT = ExperimentLoader(
@@ -120,7 +125,9 @@ DEFAULT_EXPERIMENT = ExperimentLoader(
     instrument_session=DEFAULT_INSTRUMENT_SESSION,
 )
 
-blueapi_config_path = (
+BLUEAPI_CONFIG_PATH = (
     f"{os.path.dirname(saxs_bluesky.blueapi_configs.__file__)}/{BL}_blueapi_config.yaml"
 )
-CLIENT = BlueAPIPythonClient(BL, blueapi_config_path, DEFAULT_INSTRUMENT_SESSION)
+CLIENT = BlueAPIPythonClient(
+    BL, BLUEAPI_CONFIG_PATH, DEFAULT_INSTRUMENT_SESSION, callback=True
+)

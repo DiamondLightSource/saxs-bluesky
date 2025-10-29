@@ -16,7 +16,7 @@ import saxs_bluesky.blueapi_configs
 from saxs_bluesky.utils.beamline_client import BlueAPIPythonClient
 from saxs_bluesky.utils.profile_groups import ExperimentLoader, Group, Profile
 
-DEFAULT_INSTRUMENT_SESSION = "cm40643-4"
+DEFAULT_INSTRUMENT_SESSION = "cm40643-5"
 
 BL = p38.BL
 
@@ -35,7 +35,6 @@ DEFAULT_BASELINE: list[StandardReadable] = []
 PULSEBLOCKS = 4
 PULSEBLOCKASENTRYBOX = False
 PULSE_BLOCK_NAMES = ["FS", "DETS/TETS", "OAV", "Fluro"]
-THEME_NAME = "clam"  # --> ('clam', 'alt', 'default', 'classic')
 
 # PandA Wiring connections
 
@@ -74,7 +73,6 @@ PULSE_CONNECTIONS = {
 # ncd plan parameters
 """
 
-DEADTIME_BUFFER = 20e-6  # Buffer added to deadtime to handle minor discrepencies between detector and panda clocks #noqa
 DEFAULT_SEQ = 1  # default sequencer is this one, pandas can have 2
 CONFIG_NAME = "PandaTrigger"
 
@@ -97,7 +95,6 @@ DEFAULT_GROUP = Group(
 
 DEFAULT_PROFILE = Profile(
     repeats=1,
-    seq_trigger="IMMEDIATE",
     groups=[deepcopy(DEFAULT_GROUP)],
     multiplier=[1, 1, 1, 1],
 )
@@ -110,7 +107,7 @@ DEFAULT_EXPERIMENT = ExperimentLoader(
 )
 
 
-blueapi_config_path = (
+BLUEAPI_CONFIG_PATH = (
     f"{os.path.dirname(saxs_bluesky.blueapi_configs.__file__)}/{BL}_blueapi_config.yaml"
 )
-CLIENT = BlueAPIPythonClient(BL, blueapi_config_path, DEFAULT_INSTRUMENT_SESSION)
+CLIENT = BlueAPIPythonClient(BL, BLUEAPI_CONFIG_PATH, DEFAULT_INSTRUMENT_SESSION)

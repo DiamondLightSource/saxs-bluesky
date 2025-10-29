@@ -133,7 +133,8 @@ def return_deadtime(
 
     deadtime = (
         np.array([det._controller.get_deadtime(exposure) for det in detectors])  # noqa: SLF001
-        + CONFIG.DEADTIME_BUFFER
+        + 20e-6  # Buffer added to deadtime to handle minor discrepencies between det
+        # and panda clocks
     )
     return deadtime
 
@@ -212,19 +213,6 @@ def check_and_apply_panda_settings(panda: HDFPanda, panda_name: str) -> MsgGener
         yield from upload_yaml_to_panda(
             yaml_directory=yaml_directory, yaml_file_name=yaml_file_name, panda=panda
         )
-
-
-def multiple_pulse_blocks():
-    pass
-    # for pulse in CONFIG.PULSEBLOCKS
-    #   get the pulse block, find out what is attached to it
-    #   set the multiplier and possibly duration accordingly
-    #   for det in detectors_on_pulse_block:
-    #       trigger_info = TriggerInfo(number_of_triggers=n_triggers*n_repeats,
-    #                                   trigger=DetectorTrigger.CONSTANT_GATE,
-    #                                  deadtime=max_deadtime,
-    #                                  multiplier=1,
-    #                                 frame_timeout=None)
 
 
 def show_deadtime(detector_deadtime, active_detector_names):
@@ -519,8 +507,7 @@ def configure_and_run_panda_triggering(
         force_load=force_load,
     )
 
-    # yield from run_panda_triggering(profile,
-    # detectors=detectors, panda=panda)  # type: ignore
+    yield from run_panda_triggering()
 
 
 @validate_call(config={"arbitrary_types_allowed": True})
@@ -607,9 +594,7 @@ def create_profile(
 ) -> MsgGenerator:
     global STORED_PROFILE
 
-    STORED_PROFILE = Profile(
-        repeats=repeats, seq_trigger=seq_trigger, multiplier=multiplier
-    )
+    STORED_PROFILE = Profile(repeats=repeats, multiplier=multiplier)
 
     yield from bps.null()
 
@@ -672,7 +657,8 @@ def create_steps(start: float, stop: float | None, step: float | None):
         step_list = list(np.arange(start, stop, step))
         step_list = [i.item() for i in step_list]
 
-    # LOGGER.info(f"Steps: {step_list}")
+    for n, step in enumerate(step_list):
+        LOGGER.info(f"Step {n}: {step}")
 
     return step_list
 

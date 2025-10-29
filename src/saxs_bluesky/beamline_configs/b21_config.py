@@ -19,7 +19,7 @@ Configuration for b21 PandA beamline
 
 """
 
-DEFAULT_INSTRUMENT_SESSION = "cm40642-4"
+DEFAULT_INSTRUMENT_SESSION = "cm40642-5"
 
 ###THESE NEED TO BE LISTS TO BE SERIALISED
 FAST_DETECTORS: list[StandardDetector] = [inject("saxs"), inject("waxs")]
@@ -33,6 +33,7 @@ DEFAULT_BASELINE: list[StandardReadable] = [
     inject("slits_5"),
     inject("slits_6"),
     inject("synchrotron"),
+    inject("it"),
 ]
 
 
@@ -41,7 +42,6 @@ PULSEBLOCKS = 6  # this is higher than the number of pulseblocks
 # so each connection cant have a pulseblock for mutpliers
 PULSEBLOCKASENTRYBOX = False
 PULSE_BLOCK_NAMES = ["fs", "saxs/waxs", "led1", "led2", "led3", "led4"]
-THEME_NAME = "clam"  # --> ('clam', 'alt', 'default', 'classic')
 
 # PandA Wiring connections
 
@@ -82,9 +82,6 @@ PULSE_CONNECTIONS = {
 
 """
 
-# Buffer added to deadtime to handle minor discrepencies between detector
-# and panda clocks
-DEADTIME_BUFFER = 20e-6
 # default sequencer is this one, b21 currently uses seq 1 for somthing else
 DEFAULT_SEQ = 2
 
@@ -111,7 +108,6 @@ DEFAULT_GROUP = Group(
 
 DEFAULT_PROFILE = Profile(
     repeats=1,
-    seq_trigger="IMMEDIATE",
     groups=[deepcopy(DEFAULT_GROUP)],
     multiplier=None,
 )
@@ -124,7 +120,7 @@ DEFAULT_EXPERIMENT = ExperimentLoader(
 )
 
 
-blueapi_config_path = (
+BLUEAPI_CONFIG_PATH = (
     f"{os.path.dirname(saxs_bluesky.blueapi_configs.__file__)}/{BL}_blueapi_config.yaml"
 )
-CLIENT = BlueAPIPythonClient(BL, blueapi_config_path, DEFAULT_INSTRUMENT_SESSION)
+CLIENT = BlueAPIPythonClient(BL, BLUEAPI_CONFIG_PATH, DEFAULT_INSTRUMENT_SESSION)
