@@ -260,7 +260,6 @@ def configure_panda_triggering(
     )
 
     max_deadtime = max(detector_deadtime)
-    # show_deadtime(detector_deadtime, max_deadtime)
 
     # load Panda setting to panda
     if force_load:

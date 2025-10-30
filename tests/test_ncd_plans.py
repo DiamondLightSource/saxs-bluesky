@@ -1,4 +1,5 @@
 from pathlib import Path
+from unittest.mock import MagicMock, patch
 
 import pytest
 from bluesky import RunEngine
@@ -23,6 +24,7 @@ from saxs_bluesky.plans.ncd_panda import (
 )
 from saxs_bluesky.stubs.panda_stubs import (
     get_settings_dir_and_name,
+    log_deadtime,
     make_beamline_devices,
     return_module_name,
 )
@@ -237,3 +239,13 @@ def test_make_beamline_devices():
     saxs_standard_detector = beamline_devices["saxs"]
 
     assert isinstance(saxs_standard_detector, StandardDetector)
+
+
+@patch("saxs_bluesky.stubs.panda_stubs.LOGGER")
+def test_log_deadtime(patch_logger: MagicMock):
+    log_deadtime(["saxs", "waxs"], [0.1, 0.2])
+
+    last_log = patch_logger.mock_calls[-1].args[0]
+
+    assert "waxs" in last_log
+    assert "0.2" in last_log

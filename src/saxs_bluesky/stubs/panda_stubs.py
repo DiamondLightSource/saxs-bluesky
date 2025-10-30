@@ -1,5 +1,7 @@
 import os
+from collections.abc import Iterable
 from pathlib import Path
+from typing import Any
 
 import bluesky.plan_stubs as bps
 from bluesky.utils import MsgGenerator, short_uid
@@ -165,7 +167,9 @@ def save_device_to_yaml(
     yield from store_settings(provider, yaml_file_name, device)
 
 
-def show_deadtime(detector_deadtime, active_detector_names):
+def log_deadtime(
+    active_detector_names: Iterable[Any], detector_deadtime: Iterable[Any]
+):
     """
 
     Takes two iterables, detetors deadtimes and detector names,
