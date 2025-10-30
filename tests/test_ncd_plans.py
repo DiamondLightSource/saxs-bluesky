@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -24,9 +25,11 @@ from saxs_bluesky.plans.ncd_panda import (
 )
 from saxs_bluesky.stubs.panda_stubs import (
     get_settings_dir_and_name,
+    load_settings_to_panda,
     log_deadtime,
     make_beamline_devices,
     return_module_name,
+    save_device_to_yaml,
 )
 from saxs_bluesky.utils.profile_groups import Group, Profile
 
@@ -36,6 +39,12 @@ set_path_provider(
         Path("/dls/ixx/data/2025/cm12356-1/"),
         client=LocalDirectoryServiceClient(),
     )
+)
+
+SAXS_bluesky_ROOT = Path(__file__)
+
+YAML_DIR = os.path.join(
+    SAXS_bluesky_ROOT.parent.parent, "src", "saxs_bluesky", "profile_yamls"
 )
 
 
@@ -249,3 +258,11 @@ def test_log_deadtime(patch_logger: MagicMock):
 
     assert "waxs" in last_log
     assert "0.2" in last_log
+
+
+def test_save_load_panda_settings(run_engine: RunEngine, panda: HDFPanda):
+    def save_load():
+        yield from save_device_to_yaml(YAML_DIR, "test", panda)
+        yield from load_settings_to_panda(YAML_DIR, "test", panda)
+
+    run_engine(save_load())
