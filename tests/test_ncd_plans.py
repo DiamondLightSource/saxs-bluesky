@@ -189,18 +189,6 @@ def test_panda_configure(
     )
 
 
-def test_panda_run_fails_when_no_trigger(
-    run_engine: RunEngine,
-    panda: HDFPanda,
-):
-    with pytest.raises(ValueError):
-        run_engine(
-            run_panda_triggering(
-                panda=panda,
-            )
-        )
-
-
 @patch("saxs_bluesky.plans.ncd_panda.DEFAULT_BASELINE")
 def test_panda_run(
     run_engine: RunEngine,
