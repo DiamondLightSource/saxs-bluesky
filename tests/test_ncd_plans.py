@@ -1,12 +1,10 @@
 from pathlib import Path
 
 import pytest
-
-# import pytest_asyncio
 from bluesky import RunEngine
 from dodal.common.beamlines.beamline_utils import get_path_provider, set_path_provider
 from dodal.common.visit import LocalDirectoryServiceClient, StaticVisitPathProvider
-from ophyd_async.core import TriggerInfo, init_devices
+from ophyd_async.core import StandardDetector, TriggerInfo, init_devices
 from ophyd_async.epics.adpilatus import PilatusDetector
 from ophyd_async.fastcs.panda import HDFPanda
 
@@ -23,19 +21,12 @@ from saxs_bluesky.plans.ncd_panda import (
     return_deadtime,
     set_trigger_info,
 )
-from saxs_bluesky.stubs.panda_stubs import get_settings_dir_and_name
+from saxs_bluesky.stubs.panda_stubs import (
+    get_settings_dir_and_name,
+    make_beamline_devices,
+    return_module_name,
+)
 from saxs_bluesky.utils.profile_groups import Group, Profile
-
-#     get_trigger_info,
-#     log_detectors,
-#     set_detectors,
-#     set_profile,
-#     set_trigger_info,
-# )
-
-
-# @pytest.fixture
-# def path_provider():
 
 set_path_provider(
     StaticVisitPathProvider(
@@ -228,3 +219,21 @@ def test_get_output_device():
 
     assert isinstance(output, int)
     assert isinstance(output_type, str)
+
+
+def test_return_module_name():
+    beamline = "i22"
+
+    module_name = return_module_name(beamline)
+
+    assert module_name == f"dodal.beamlines.{beamline}"
+
+
+def test_make_beamline_devices():
+    beamline = "i22"
+
+    beamline_devices = make_beamline_devices(beamline)
+
+    saxs_standard_detector = beamline_devices["saxs"]
+
+    assert isinstance(saxs_standard_detector, StandardDetector)
