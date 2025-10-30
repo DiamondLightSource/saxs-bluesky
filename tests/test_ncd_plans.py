@@ -8,7 +8,7 @@ from bluesky import RunEngine
 from dodal.common.beamlines.beamline_utils import get_path_provider, set_path_provider
 from dodal.common.visit import LocalDirectoryServiceClient, StaticVisitPathProvider
 from dodal.devices.motors import Motor
-from ophyd_async.core import StandardDetector, TriggerInfo, init_devices
+from ophyd_async.core import AsyncStatus, StandardDetector, TriggerInfo, init_devices
 from ophyd_async.epics.adpilatus import PilatusDetector
 from ophyd_async.fastcs.panda import HDFPanda
 
@@ -23,6 +23,9 @@ from saxs_bluesky.plans.ncd_panda import (
     get_profile,
     get_trigger_info,
     return_deadtime,
+    run_panda_triggering,
+    set_detectors,
+    set_profile,
     set_trigger_info,
 )
 from saxs_bluesky.stubs.panda_stubs import (
@@ -36,18 +39,19 @@ from saxs_bluesky.stubs.panda_stubs import (
 )
 from saxs_bluesky.utils.profile_groups import Group, Profile
 
-set_path_provider(
-    StaticVisitPathProvider(
-        "ixx",
-        Path("/dls/ixx/data/2025/cm12356-1/"),
-        client=LocalDirectoryServiceClient(),
-    )
-)
-
 SAXS_bluesky_ROOT = Path(__file__)
 
 YAML_DIR = os.path.join(
     SAXS_bluesky_ROOT.parent.parent, "src", "saxs_bluesky", "profile_yamls"
+)
+
+
+set_path_provider(
+    StaticVisitPathProvider(
+        "ixx",
+        Path(os.path.dirname(__file__)),
+        client=LocalDirectoryServiceClient(),
+    )
 )
 
 
@@ -98,10 +102,17 @@ def run_engine() -> RunEngine:
     return RunEngine()
 
 
+@AsyncStatus.wrap
+async def mock_prepare(value: TriggerInfo):
+    pass
+
+
 @pytest.fixture
 async def panda() -> HDFPanda:
     async with init_devices(connect=True, mock=True):
         panda = HDFPanda(prefix="ixx-test-panda", path_provider=get_path_provider())
+
+    panda.prepare = mock_prepare
 
     return panda
 
@@ -112,6 +123,8 @@ async def pilatus() -> PilatusDetector:
         pilatus = PilatusDetector(
             prefix="ixx-test-pilatus", path_provider=get_path_provider()
         )
+
+    pilatus.prepare = mock_prepare
 
     return pilatus
 
@@ -176,22 +189,34 @@ def test_panda_configure(
     )
 
 
-# def test_panda_configure_and_run(
-#     run_engine: RunEngine,
-#     panda: HDFPanda,
-#     pilatus: PilatusDetector,
-#     valid_profile: Profile,
-# ):
-#     detectors = [pilatus]
+def test_panda_run_fails_when_no_trigger(
+    run_engine: RunEngine,
+    panda: HDFPanda,
+):
+    with pytest.raises(ValueError):
+        run_engine(
+            run_panda_triggering(
+                panda=panda,
+            )
+        )
 
-#     run_engine(
-#         configure_and_run_panda_triggering(
-#             profile=valid_profile,
-#             panda=panda,
-#             detectors=detectors,  # type: ignore
-#             ensure_panda_connected=False,
-#         )
-#     )
+
+@patch("saxs_bluesky.plans.ncd_panda.DEFAULT_BASELINE")
+def test_panda_run(
+    run_engine: RunEngine,
+    panda: HDFPanda,
+    pilatus: PilatusDetector,
+    valid_profile: Profile,
+):
+    detectors = [pilatus]
+
+    def run_plan():
+        yield from set_profile(valid_profile)
+        yield from set_trigger_info(valid_profile.return_trigger_info(0.1))
+        yield from set_detectors(detectors=detectors)  # type: ignore
+        yield from run_panda_triggering(panda=panda)
+
+    run_engine(run_plan())
 
 
 def test_return_deadtime(panda: HDFPanda, pilatus: PilatusDetector):
