@@ -17,6 +17,7 @@ from saxs_bluesky.plans.ncd_panda import (
     create_steps,
     delete_group,
     generate_repeated_trigger_info,
+    get_output,
     get_profile,
     get_trigger_info,
     return_deadtime,
@@ -220,3 +221,10 @@ def test_set_and_get_trigger_info(run_engine: RunEngine):
         assert returned_trigger_info.livetime == 1
 
     run_engine(test_trig())
+
+
+def test_get_output_device():
+    output_type, output = get_output("saxs")
+
+    assert isinstance(output, int)
+    assert isinstance(output_type, str)

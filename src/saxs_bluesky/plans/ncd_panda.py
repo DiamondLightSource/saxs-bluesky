@@ -185,7 +185,7 @@ def get_output(device: str) -> tuple[str | None, int | None]:
             output_type = "TTL"
             output = out
 
-    for out in CONFIG.CONFIG.LVDSOUT.keys():
+    for out in CONFIG.LVDSOUT.keys():
         if device == CONFIG.TTLOUT[out].upper():
             output_type = "TTL"
             output = out
