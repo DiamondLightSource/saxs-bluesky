@@ -10,10 +10,6 @@ from saxs_bluesky.logging.bluesky_logpanel import BlueskyLogPanel
 from saxs_bluesky.plans.ncd_panda import log_detectors, set_detectors
 from saxs_bluesky.utils.beamline_client import BlueAPIPythonClient
 
-ROWS = range(0, 10, 2)
-COLS = range(0, 6, 2)
-ROW_COL = product(ROWS, COLS)
-
 
 class ActiveDetectorsFrame(ttk.Frame):
     def __init__(
@@ -111,6 +107,10 @@ class ClientControlPanel:
         self.build_dev_frame()
 
     def build_dev_frame(self):
+        ROWS = range(0, 10, 2)  # noqa
+        COLS = range(0, 6, 2)  # noqa
+        ROW_COL = product(ROWS, COLS)  # noqa
+
         self.run_frame = ttk.Frame(self.window, borderwidth=5)
 
         self.run_frame.pack(fill="y", expand=True, side="right")
