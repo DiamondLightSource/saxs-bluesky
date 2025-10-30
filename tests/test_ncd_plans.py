@@ -2,10 +2,12 @@ import os
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+import bluesky.plan_stubs as bps
 import pytest
 from bluesky import RunEngine
 from dodal.common.beamlines.beamline_utils import get_path_provider, set_path_provider
 from dodal.common.visit import LocalDirectoryServiceClient, StaticVisitPathProvider
+from dodal.devices.motors import Motor
 from ophyd_async.core import StandardDetector, TriggerInfo, init_devices
 from ophyd_async.epics.adpilatus import PilatusDetector
 from ophyd_async.fastcs.panda import HDFPanda
@@ -30,6 +32,7 @@ from saxs_bluesky.stubs.panda_stubs import (
     make_beamline_devices,
     return_module_name,
     save_device_to_yaml,
+    wait_until_complete,
 )
 from saxs_bluesky.utils.profile_groups import Group, Profile
 
@@ -96,7 +99,7 @@ def run_engine() -> RunEngine:
 
 
 @pytest.fixture
-async def panda(run_engine: RunEngine) -> HDFPanda:
+async def panda() -> HDFPanda:
     async with init_devices(connect=True, mock=True):
         panda = HDFPanda(prefix="ixx-test-panda", path_provider=get_path_provider())
 
@@ -104,13 +107,23 @@ async def panda(run_engine: RunEngine) -> HDFPanda:
 
 
 @pytest.fixture
-async def pilatus(run_engine: RunEngine) -> PilatusDetector:
+async def pilatus() -> PilatusDetector:
     async with init_devices(connect=True, mock=True):
         pilatus = PilatusDetector(
             prefix="ixx-test-pilatus", path_provider=get_path_provider()
         )
 
     return pilatus
+
+
+@pytest.fixture
+async def motor() -> Motor:
+    async with init_devices(connect=True, mock=True):
+        motor = Motor(prefix="ixx-test-motor")
+        motor.set(0)
+        motor.velocity.set(1)
+
+    return motor
 
 
 def test_profile_manipulation(run_engine: RunEngine):
@@ -266,3 +279,12 @@ def test_save_load_panda_settings(run_engine: RunEngine, panda: HDFPanda):
         yield from load_settings_to_panda(YAML_DIR, "test", panda)
 
     run_engine(save_load())
+
+
+def test_wait_until_complete(run_engine: RunEngine, motor: Motor):
+    def complete():
+        yield from bps.abs_set(motor, 1)
+        yield from wait_until_complete(motor, 0)
+        yield from bps.abs_set(motor, 0)
+
+    run_engine(complete())
