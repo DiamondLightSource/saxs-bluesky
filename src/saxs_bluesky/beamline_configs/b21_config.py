@@ -85,7 +85,7 @@ PULSE_CONNECTIONS = {
 # default sequencer is this one, b21 currently uses seq 1 for somthing else
 DEFAULT_SEQ = 2
 
-CONFIG_NAME = "PandaTriggerWithCounterAndPCAP"
+SETTINGS_NAME = "PandaTriggerWithCounterAndPCAP"
 
 
 """

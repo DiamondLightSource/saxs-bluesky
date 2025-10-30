@@ -1,5 +1,3 @@
-import os
-from pathlib import Path
 from typing import Annotated, Any
 
 import bluesky.plan_stubs as bps
@@ -18,7 +16,6 @@ from ophyd_async.core import (
     StandardFlyer,
     StandardReadable,
     TriggerInfo,
-    wait_for_value,
 )
 from ophyd_async.fastcs.panda import (
     HDFPanda,
@@ -26,13 +23,15 @@ from ophyd_async.fastcs.panda import (
     SeqTableInfo,
     StaticSeqTableTriggerLogic,
 )
-from ophyd_async.plan_stubs import ensure_connected, get_current_settings
+from ophyd_async.plan_stubs import (
+    ensure_connected,
+)
 from pydantic import validate_call
 
 from saxs_bluesky.stubs.panda_stubs import (
+    check_and_apply_panda_settings,
     fly_and_collect_with_wait,
-    load_settings_from_yaml,
-    upload_yaml_to_panda,
+    wait_until_complete,
 )
 from saxs_bluesky.utils.profile_groups import Group, Profile
 from saxs_bluesky.utils.utils import (
@@ -52,21 +51,6 @@ STORED_PROFILE: Profile | None = None
 STORED_TRIGGER_INFO: TriggerInfo | None = None
 
 LOGGER.info(f"saxs bluesky is using the beamline: {BL}")
-
-
-def wait_until_complete(pv_obj, waiting_value=0, timeout=None):
-    """
-    An async wrapper for the ophyd async wait_for_value function,
-    to allow it to run inside the bluesky run engine
-    Typical use case is waiting for an active pv to change to 0,
-    indicating that the run has finished, which then allows the
-    run plan to disarm all the devices.
-    """
-
-    async def _wait():
-        await wait_for_value(pv_obj, waiting_value, timeout=timeout)
-
-    yield from bps.wait_for([_wait])
 
 
 def set_panda_pulses(
@@ -102,25 +86,25 @@ def set_panda_pulses(
     yield from bps.wait(group=group, timeout=DEFAULT_TIMEOUT)
 
 
-def stage_and_prepare_detectors(
-    detectors: list[StandardDetector],
-    flyer: StandardFlyer,
-    trigger_info: TriggerInfo,
-    group="det_atm",
-):
-    """
+# def stage_and_prepare_detectors(
+#     detectors: list[StandardDetector],
+#     flyer: StandardFlyer,
+#     trigger_info: TriggerInfo,
+#     group="det_atm",
+# ):
+#     """
 
-    Iterates through all of the detectors specified and prepares them.
+#     Iterates through all of the detectors specified and prepares them.
 
-    """
+#     """
 
-    yield from bps.stage_all(*detectors, flyer, group=group)
+#     yield from bps.stage_all(*detectors, flyer, group=group)
 
-    for det in detectors:
-        ###this tells the detector how may triggers to expect and sets the CAN aquire on
-        yield from bps.prepare(det, trigger_info, wait=False, group=group)
+#     for det in detectors:
+#         ###this tells the detector how may triggers to expect and sets the CAN aquire
+#         yield from bps.prepare(det, trigger_info, wait=False, group=group)
 
-    yield from bps.wait(group=group, timeout=DEFAULT_TIMEOUT)
+#     yield from bps.wait(group=group, timeout=DEFAULT_TIMEOUT)
 
 
 def return_deadtime(
@@ -167,66 +151,6 @@ def generate_repeated_trigger_info(
     return repeated_trigger_info
 
 
-def check_and_apply_panda_settings(panda: HDFPanda, panda_name: str) -> MsgGenerator:
-    """
-
-    Checks the settings currently on the PandA
-
-    - if different they will be overwritten with the ones
-
-    specified in the CONFIG.CONFIG_NAME
-
-    Settings may have changed due to Malcolm or
-
-    someone chnaging things in EPICS which might prevent the plan from running
-
-    This mitigates that
-
-    """
-
-    # this is the directory where the yaml files are stored
-    yaml_directory = os.path.join(
-        os.path.dirname(Path(__file__).parent), "ophyd_panda_yamls"
-    )
-    yaml_file_name = f"{BL}_{CONFIG.CONFIG_NAME}_{panda_name}"
-
-    current_panda_settings = yield from get_current_settings(panda)
-    yaml_settings = yield from load_settings_from_yaml(yaml_directory, yaml_file_name)
-
-    if current_panda_settings != yaml_settings:
-        print(
-            (
-                "Current Panda settings do not match the yaml settings, ",
-                "loading yaml settings to panda",
-            )
-        )
-        LOGGER.info(
-            (
-                "Current Panda settings do not match the yaml settings, ",
-                "loading yaml settings to panda",
-            )
-        )
-
-        print(f"{yaml_file_name}.yaml has been uploaded to PandA")
-        LOGGER.info(f"{yaml_file_name}.yaml has been uploaded to PandA")
-        ######### make sure correct yaml is loaded
-        yield from upload_yaml_to_panda(
-            yaml_directory=yaml_directory, yaml_file_name=yaml_file_name, panda=panda
-        )
-
-
-def show_deadtime(detector_deadtime, active_detector_names):
-    """
-
-    Takes two iterables, detetors deadtimes and detector names,
-    and prints the deadtimes in the log
-
-    """
-
-    for dt, dn in zip(detector_deadtime, active_detector_names, strict=True):
-        LOGGER.info(f"deadtime for {dn} is {dt}")
-
-
 def set_panda_output(
     output_type: str = "TTL",
     output: int = 1,
@@ -261,7 +185,7 @@ def get_output(device: str) -> tuple[str | None, int | None]:
             output_type = "TTL"
             output = out
 
-    for out in CONFIG.CONFIG.LVDSOUT.keys():
+    for out in CONFIG.LVDSOUT.keys():
         if device == CONFIG.TTLOUT[out].upper():
             output_type = "TTL"
             output = out
@@ -306,6 +230,7 @@ def configure_panda_triggering(
         "List of str of the detector names, eg. saxs, waxs, i0, it",
     ] = FAST_DETECTORS,
     panda: HDFPanda = DEFAULT_PANDA,
+    ensure_panda_connected=True,
     force_load: bool = False,
 ) -> MsgGenerator:
     """
@@ -322,12 +247,8 @@ def configure_panda_triggering(
     Stage must come before prepare
 
     """
-
-    try:
+    if ensure_panda_connected:
         yield from ensure_connected(panda)  # ensure the panda is connected
-    except Exception as e:
-        LOGGER.error(f"Failed to connect to PandA: {e}")
-        raise
 
     LOGGER.info("Using the following detectors:")
     LOGGER.info("")
@@ -339,11 +260,12 @@ def configure_panda_triggering(
     )
 
     max_deadtime = max(detector_deadtime)
-    # show_deadtime(detector_deadtime, max_deadtime)
 
     # load Panda setting to panda
     if force_load:
-        yield from check_and_apply_panda_settings(panda, panda.name)
+        yield from check_and_apply_panda_settings(
+            panda, BL, CONFIG.SETTINGS_NAME, panda.name
+        )
 
     # n_repeats = profile.repeats
     # seq table should be grabbed from the panda and used instead,
@@ -416,7 +338,6 @@ def run_panda_triggering(
     # STAGE SETS HDF WRITER TO ON
     yield from bps.stage_all(*all_devices, flyer, group="setup")
 
-    # yield from stage_and_prepare_detectors(list(detectors), flyer, trigger_info)
     for det in detectors:
         ###this tells the detector how may triggers to expect and sets the CAN aquir
         yield from bps.prepare(det, trigger_info, wait=True, group="setup")
@@ -488,7 +409,8 @@ def configure_and_run_panda_triggering(
         "List of str of the detector names, eg. saxs, waxs, i0, it",
     ] = FAST_DETECTORS,
     panda: HDFPanda = DEFAULT_PANDA,
-    force_load: bool = True,
+    ensure_panda_connected: bool = True,
+    force_load: bool = False,
 ) -> MsgGenerator:
     """
 
@@ -504,6 +426,7 @@ def configure_and_run_panda_triggering(
         profile=profile,
         detectors=detectors,
         panda=panda,
+        ensure_panda_connected=ensure_panda_connected,
         force_load=force_load,
     )
 
