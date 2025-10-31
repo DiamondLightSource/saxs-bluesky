@@ -68,8 +68,10 @@ class BlueAPIPythonClient(BlueapiClient):
         """Run a bluesky plan via BlueAPI."""
         if isinstance(plan, str):
             plan_name = plan
-        else:
+        elif hasattr(plan, "__name__"):
             plan_name = plan.__name__
+        else:
+            raise ValueError("Must be a str or a bluesky plan")
 
         task = TaskRequest(
             name=plan_name,
