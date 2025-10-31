@@ -108,6 +108,7 @@ class BlueAPIPythonClient(BlueapiClient):
         else:
             server_task = self.create_and_start_task(task)
             print(f"{plan_name} task sent as {server_task.task_id}")
+            return
 
     def return_detectors(self) -> list[StandardReadable]:
         """Return a list of StandardReadable for the current beamline."""
