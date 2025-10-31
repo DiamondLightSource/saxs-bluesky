@@ -18,7 +18,7 @@ group = Group(
     wait_units="MS",
     run_time=100,
     run_units="MS",
-    wait_pulses=[0, 0, 0, 0],
+    wait_pulses=[1, 0, 0, 0],
     run_pulses=[1, 1, 1, 1],
 )
 

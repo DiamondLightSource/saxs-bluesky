@@ -14,11 +14,11 @@ my_profile = Profile(
 group = Group(
     frames=1,
     trigger="IMMEDIATE",
-    wait_time=1,
-    wait_units="S",
+    wait_time=10,
+    wait_units="MS",
     run_time=1,
     run_units="S",
-    wait_pulses=[0, 0, 0, 0],
+    wait_pulses=[1, 0, 0, 0],
     run_pulses=[1, 1, 1, 1],
 )
 
