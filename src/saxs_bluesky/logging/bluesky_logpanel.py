@@ -49,6 +49,7 @@ class BlueskyLogPanel:
         self.logs.configure(yscrollcommand=self.scrollbar.set)
 
         self.window.bind("<Destroy>", self.on_destroy)
+        self.logs.bind("<Key>", lambda e: self.ctrl_event(e))
 
         if start:
             self.run_loop()
@@ -99,6 +100,18 @@ class BlueskyLogPanel:
         self.run = False
         print("Shutting down messenger...")
         self.messenger.disconnect()
+
+    def ctrl_event(self, event):
+        if event.state == 4 and event.keysym == "c":
+            content = self.logs.selection_get()
+            self.window.clipboard_clear()
+            self.window.clipboard_append(content)
+            return "break"
+        elif event.state == 4 and event.keysym == "v":
+            self.logs.insert("end", self.window.selection_get(selection="CLIPBOARD"))
+            return "break"
+        else:
+            return "break"
 
 
 # if __name__ == "__main__":

@@ -35,28 +35,29 @@ This package can be used within GDA or seperately from GDA. To use it seperately
 
 from saxs_bluesky.utils.profile_groups import Group, Profile
 
-my_profile = Profile(repeats=1,seq_trigger="IMMEDIATE",groups=[]) #currently has no 'groups' - ie line in seq table
+my_profile = Profile(repeats=1,groups=[]) #currently has no 'groups' - ie line in seq table
 
 #now we create a group
 group = Group(
     frames=1,
-    trigger="IMMEDIATE"
-    wait_time=1,
-    wait_units="S",
-    run_time=1,
-    run_units="S",
+    trigger="IMMEDIATE",
+    wait_time=10,
+    wait_units="MS",
+    run_time=100,
+    run_units="MS",
     wait_pulses=[0, 0, 0, 0],
     run_pulses=[1, 1, 1, 1],
 )
 
+
 my_profile.append_group(group)
 
 #now we have a profile with a single group. We can add more, delete them and have a look etc
-print(my_profile.duration)
-print(my_pfoile.total_frames)
+print(f"Duration of profile: {my_profile.duration} seconds")
+print(f"Number of frames: {my_profile.total_frames}")
 
 #you may also plot the PandA triggering sequencer
-from saxs_bluesky.utils.utils import ProfilePlotter
+from saxs_bluesky.utils.plotter import ProfilePlotter
 
 plotter = ProfilePlotter(my_profile)
 plotter.plot_pulses()
@@ -68,7 +69,7 @@ To use this in an experiment we can do this through the BlueAPIPythonClient, alo
 
 ```python
 
-from saxs_bluesky.beamline_configs.i22 import CLIENT
+from saxs_bluesky.beamline_configs.i22_config import CLIENT
 from saxs_bluesky.plans.ncd_panda import configure_panda_triggering, run_panda_triggering
 
 CLIENT.change_session("cm12345-1") # defaults to commissioning. Change the instrument session to your experiment
