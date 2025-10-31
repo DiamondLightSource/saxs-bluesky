@@ -95,3 +95,27 @@ def test_blueapi_python_client_without_callback_run(
         client_without_callback._events.__exit__ = Mock(return_value=None)
 
         client_without_callback.run(configure_panda_triggering)
+
+
+@pytest.mark.parametrize(
+    "plan",
+    ([1], [1], [1], [1], [5]),
+)
+def test_run_fails_with_invalid_paraneters(client: BlueAPIPythonClient, plan):
+    # Patch instance methods so run executes but no re calls happen.
+    with (
+        patch.object(client, "run_task", return_value=Mock()),
+        patch.object(
+            client, "create_and_start_task", return_value=Mock(task_id="t-fake")
+        ),
+        patch.object(client, "create_task", return_value=Mock(task_id="t-fake")),
+        patch.object(client, "start_task", return_value=Mock(task_id="t-fake")),
+    ):
+        assert client._events is not None
+        # Ensure the mocked event client can be used as a context manager if run uses it
+        client._events.__enter__ = Mock(return_value=client._events)
+        client._events.__exit__ = Mock(return_value=None)
+
+        # Call run while the instance methods are patched
+        with pytest.raises(Exception):  # noqa
+            client.run(plan)
