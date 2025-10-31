@@ -8,8 +8,8 @@ from stomp.connect import StompConnection11 as Connection  # type: ignore
 
 from saxs_bluesky.logging.bluesky_messenger import (
     MessageUnpacker,
-    RabbitMQMessenger,
     ScanListener,
+    StompMessenger,
 )
 
 
@@ -19,8 +19,8 @@ def mock_connection() -> Mock:
 
 
 @pytest.fixture
-def connected_messenger(mock_connection: Mock) -> RabbitMQMessenger:
-    connected_messenger = RabbitMQMessenger(
+def connected_messenger(mock_connection: Mock) -> StompMessenger:
+    connected_messenger = StompMessenger(
         host="http://localhost",
         beamline="ixx",
         port=8080,
@@ -66,7 +66,7 @@ def test_scan_messenger():
 
 
 def test_messenger_creation():
-    messenger = RabbitMQMessenger(
+    messenger = StompMessenger(
         host="localhost",
         beamline="test_beamline",
         port=11111,
@@ -82,7 +82,7 @@ def test_messenger_creation():
 
 
 def test_messenger_no_port_default():
-    messenger = RabbitMQMessenger(
+    messenger = StompMessenger(
         host="localhost",
         beamline="ixx",
         destination="/queue/test",
@@ -93,7 +93,7 @@ def test_messenger_no_port_default():
 
 
 def test_messenger_destination_default():
-    messenger = RabbitMQMessenger(
+    messenger = StompMessenger(
         host="localhost",
         beamline="ixx",
         auto_connect=False,
@@ -105,7 +105,7 @@ def test_messenger_destination_default():
 
 
 def test_messenger_host_default():
-    messenger = RabbitMQMessenger(
+    messenger = StompMessenger(
         beamline="ixx",
         auto_connect=False,
     )
@@ -113,7 +113,7 @@ def test_messenger_host_default():
 
 
 def test_messenger_stops():
-    messenger = RabbitMQMessenger(
+    messenger = StompMessenger(
         auto_connect=False,
         host="localhost",
     )
@@ -124,13 +124,13 @@ def test_messenger_stops():
 
 def test_messenger_fails_without_host_or_beamline():
     with pytest.raises(ValueError):
-        RabbitMQMessenger(
+        StompMessenger(
             auto_connect=False,
         )
 
 
 def test_messenger_listener():
-    messenger = RabbitMQMessenger(
+    messenger = StompMessenger(
         beamline="ixx",
         auto_connect=False,
     )
@@ -139,7 +139,7 @@ def test_messenger_listener():
     messenger.listen(max_iter=5, interval=0.01)
 
 
-def test_messenger_send(connected_messenger: RabbitMQMessenger):
+def test_messenger_send(connected_messenger: StompMessenger):
     connected_messenger.listen(max_iter=5, interval=0.01)
     connected_messenger.send_start("/path/to/file")
     connected_messenger.send_update("/path/to/file")
@@ -147,6 +147,6 @@ def test_messenger_send(connected_messenger: RabbitMQMessenger):
     connected_messenger.send_file("/path/to/file")
 
 
-def test_messenger_disconnect(connected_messenger: RabbitMQMessenger):
+def test_messenger_disconnect(connected_messenger: StompMessenger):
     connected_messenger.listen(max_iter=5, interval=0.01)
     connected_messenger.disconnect()

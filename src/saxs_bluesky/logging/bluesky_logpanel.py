@@ -2,7 +2,7 @@ import time
 from datetime import datetime
 from tkinter import Text, Tk, ttk
 
-from saxs_bluesky.logging.bluesky_messenger import MessageUnpacker, RabbitMQMessenger
+from saxs_bluesky.logging.bluesky_messenger import MessageUnpacker, StompMessenger
 
 
 class BlueskyLogPanel:
@@ -10,7 +10,7 @@ class BlueskyLogPanel:
         self,
         start: bool = True,
         update_interval=0.025,
-        rabbitmq_messenger: RabbitMQMessenger | None = None,
+        rabbitmq_messenger: StompMessenger | None = None,
         window: Tk | None = None,
         **kwargs,
     ):
@@ -33,7 +33,7 @@ class BlueskyLogPanel:
         if rabbitmq_messenger is not None:
             self.messenger = rabbitmq_messenger
         elif len(kwargs) > 0:
-            self.messenger = RabbitMQMessenger(**kwargs)
+            self.messenger = StompMessenger(**kwargs)
 
         self.logs = Text(self.window, state="disabled", font=("Helvetica", 10))
         self.logs.pack(fill="both", expand=True, side="left", anchor="w")
@@ -49,6 +49,7 @@ class BlueskyLogPanel:
         self.logs.configure(yscrollcommand=self.scrollbar.set)
 
         self.window.bind("<Destroy>", self.on_destroy)
+        self.logs.bind("<Key>", lambda e: self.ctrl_event(e))
 
         if start:
             self.run_loop()
@@ -99,6 +100,18 @@ class BlueskyLogPanel:
         self.run = False
         print("Shutting down messenger...")
         self.messenger.disconnect()
+
+    def ctrl_event(self, event):
+        if event.state == 4 and event.keysym == "c":
+            content = self.logs.selection_get()
+            self.window.clipboard_clear()
+            self.window.clipboard_append(content)
+            return "break"
+        elif event.state == 4 and event.keysym == "v":
+            self.logs.insert("end", self.window.selection_get(selection="CLIPBOARD"))
+            return "break"
+        else:
+            return "break"
 
 
 # if __name__ == "__main__":
