@@ -15,15 +15,9 @@ if Version(__version__) > Version("1.6.1"):
         UnknownPlanError,
     )
 else:
-    from blueapi.client.rest import (
-        InvalidParameters as InvalidParametersError,
-    )
-    from blueapi.client.rest import (
-        UnauthorisedAccess as UnauthorisedAccessError,
-    )
-    from blueapi.client.rest import (
-        UnknownPlan as UnknownPlanError,
-    )
+    from blueapi.client.rest import InvalidParameters as InvalidParametersError
+    from blueapi.client.rest import UnauthorisedAccess as UnauthorisedAccessError
+    from blueapi.client.rest import UnknownPlan as UnknownPlanError
 
 from blueapi.config import (
     ApplicationConfig,
