@@ -6,9 +6,9 @@ from blueapi.client.client import BlueapiClient
 from blueapi.client.event_bus import AnyEvent, BlueskyStreamingError
 from blueapi.client.rest import (
     BlueskyRemoteControlError,
-    InvalidParameters,
-    UnauthorisedAccess,
-    UnknownPlan,
+    InvalidParametersError,
+    UnauthorisedAccessError,
+    UnknownPlanError,
 )
 from blueapi.config import (
     ApplicationConfig,
@@ -81,11 +81,11 @@ class BlueAPIPythonClient(BlueapiClient):
                 server_task = self.create_and_start_task(task)
                 print(server_task.task_id)
 
-        except UnknownPlan as up:
+        except UnknownPlanError as up:
             raise Exception(f"Plan '{plan_name}' was not recognised") from up
-        except UnauthorisedAccess as ua:
+        except UnauthorisedAccessError as ua:
             raise Exception("Unauthorised request") from ua
-        except InvalidParameters as ip:
+        except InvalidParametersError as ip:
             raise Exception(ip.message()) from ip
         except (BlueskyRemoteControlError, BlueskyStreamingError) as e:
             raise Exception(f"server error with this message: {e}") from e
