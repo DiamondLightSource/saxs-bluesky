@@ -51,46 +51,47 @@ def test_blueapi_python_client_change_session(client: BlueAPIPythonClient):
 
 
 def test_blueapi_python_client_run(client: BlueAPIPythonClient):
-    # Patch high-level BlueapiClient methods so run executes but no calls happen.
+    # Patch instance methods so run executes but no re calls happen.
     with (
-        patch("blueapi.client.client.BlueapiClient.run_task", return_value=Mock()),
-        patch(
-            "blueapi.client.client.BlueapiClient.create_and_start_task",
-            return_value=Mock(task_id="t-fake"),
+        patch.object(client, "run_task", return_value=Mock()),
+        patch.object(
+            client, "create_and_start_task", return_value=Mock(task_id="t-fake")
         ),
-        patch(
-            "blueapi.client.client.BlueapiClient.create_task",
-            return_value=Mock(task_id="t-fake"),
-        ),
-        patch(
-            "blueapi.client.client.BlueapiClient.start_task",
-            return_value=Mock(task_id="t-fake"),
-        ),
+        patch.object(client, "create_task", return_value=Mock(task_id="t-fake")),
+        patch.object(client, "start_task", return_value=Mock(task_id="t-fake")),
     ):
-        # Ensure the mocked event client can be used as a context manager if run uses
+        assert client._events is not None
+        # Ensure the mocked event client can be used as a context manager if run uses it
+        client._events.__enter__ = Mock(return_value=client._events)
+        client._events.__exit__ = Mock(return_value=None)
 
+        # Call run while the instance methods are patched
         client.run(configure_panda_triggering)
 
 
 def test_blueapi_python_client_without_callback_run(
     client_without_callback: BlueAPIPythonClient,
 ):
-    # Patch high-level BlueapiClient methods so run executes but no calls happen
+    # Patch instance methods so run executes but no calls happen
     with (
-        patch("blueapi.client.client.BlueapiClient.run_task", return_value=Mock()),
-        patch(
-            "blueapi.client.client.BlueapiClient.create_and_start_task",
+        patch.object(client_without_callback, "run_task", return_value=Mock()),
+        patch.object(
+            client_without_callback,
+            "create_and_start_task",
             return_value=Mock(task_id="t-fake"),
         ),
-        patch(
-            "blueapi.client.client.BlueapiClient.create_task",
-            return_value=Mock(task_id="t-fake"),
+        patch.object(
+            client_without_callback, "create_task", return_value=Mock(task_id="t-fake")
         ),
-        patch(
-            "blueapi.client.client.BlueapiClient.start_task",
-            return_value=Mock(task_id="t-fake"),
+        patch.object(
+            client_without_callback, "start_task", return_value=Mock(task_id="t-fake")
         ),
     ):
-        # Ensure the mocked event client can be used as a context manager if run
+        # Ensure the mocked event client can be used as a context manager if run uses it
+        client_without_callback._events = Mock(EventBusClient)
+        client_without_callback._events.__enter__ = Mock(
+            return_value=client_without_callback._events
+        )
+        client_without_callback._events.__exit__ = Mock(return_value=None)
 
         client_without_callback.run(configure_panda_triggering)
