@@ -5,12 +5,10 @@ from blueapi._version import __version__
 from blueapi.cli.updates import CliEventRenderer
 from blueapi.client.client import BlueapiClient
 from blueapi.client.event_bus import AnyEvent, BlueskyStreamingError
-from blueapi.client.rest import (
-    BlueskyRemoteControlError,
-)
+from blueapi.client.rest import BlueskyRemoteControlError
 from packaging.version import Version
 
-if Version(__version__) > Version("1.6.0"):
+if Version(__version__) > Version("1.6.1"):
     from blueapi.client.rest import (
         InvalidParametersError,
         UnauthorisedAccessError,
