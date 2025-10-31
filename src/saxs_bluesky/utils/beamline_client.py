@@ -72,9 +72,8 @@ class BlueAPIPythonClient(BlueapiClient):
             params=kwargs,
             instrument_session=self.instrument_session,
         )
-
-        try:
-            if self.callback:
+        if self.callback:
+            try:
                 progress_bar = CliEventRenderer()
                 callback = BestEffortCallback()
 
@@ -92,20 +91,21 @@ class BlueAPIPythonClient(BlueapiClient):
                     and (not resp.task_status.task_failed)
                 ):
                     print(f"{plan_name} succeeded")
-            else:
-                server_task = self.create_and_start_task(task)
-                print(f"{plan_name} task sent as {server_task.task_id}")
 
-        except UnknownPlanError as up:
-            raise Exception(f"Plan '{plan_name}' was not recognised: {up}") from up
-        except UnauthorisedAccessError as ua:
-            raise Exception(f"Unauthorised request {ua}") from ua
-        except InvalidParametersError as ip:
-            raise Exception(f"{ip.message()}: {ip}") from ip
-        except (BlueskyRemoteControlError, BlueskyStreamingError) as e:
-            raise Exception(f"server error with this message: {e}") from e
-        except ValueError as ve:
-            raise Exception(f"task could not run: {ve}") from ve
+            except UnknownPlanError as up:
+                raise Exception(f"Plan '{plan_name}' was not recognised: {up}") from up
+            except UnauthorisedAccessError as ua:
+                raise Exception(f"Unauthorised request {ua}") from ua
+            except InvalidParametersError as ip:
+                raise Exception(f"{ip.message()}: {ip}") from ip
+            except (BlueskyRemoteControlError, BlueskyStreamingError) as e:
+                raise Exception(f"server error with this message: {e}") from e
+            except ValueError as ve:
+                raise Exception(f"task could not run: {ve}") from ve
+
+        else:
+            server_task = self.create_and_start_task(task)
+            print(f"{plan_name} task sent as {server_task.task_id}")
 
     def return_detectors(self) -> list[StandardReadable]:
         """Return a list of StandardReadable for the current beamline."""
