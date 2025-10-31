@@ -1,15 +1,32 @@
 from collections.abc import Callable
 from pathlib import Path
 
+from blueapi._version import __version__
 from blueapi.cli.updates import CliEventRenderer
 from blueapi.client.client import BlueapiClient
 from blueapi.client.event_bus import AnyEvent, BlueskyStreamingError
 from blueapi.client.rest import (
     BlueskyRemoteControlError,
-    InvalidParametersError,
-    UnauthorisedAccessError,
-    UnknownPlanError,
 )
+from packaging.version import Version
+
+if Version(__version__) > Version("1.6.0"):
+    from blueapi.client.rest import (
+        InvalidParametersError,
+        UnauthorisedAccessError,
+        UnknownPlanError,
+    )
+else:
+    from blueapi.client.rest import (
+        InvalidParameters as InvalidParametersError,
+    )
+    from blueapi.client.rest import (
+        UnauthorisedAccess as UnauthorisedAccessError,
+    )
+    from blueapi.client.rest import (
+        UnknownPlan as UnknownPlanError,
+    )
+
 from blueapi.config import (
     ApplicationConfig,
     ConfigLoader,
