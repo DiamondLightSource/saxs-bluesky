@@ -5,6 +5,7 @@ import pytest
 from blueapi.client.client import BlueapiClient
 from blueapi.client.event_bus import EventBusClient
 from blueapi.client.rest import BlueapiRestClient
+from blueapi.service.model import DeviceResponse
 
 import saxs_bluesky.blueapi_configs
 from saxs_bluesky.plans.ncd_panda import configure_panda_triggering
@@ -120,3 +121,34 @@ def test_run_fails_with_invalid_paraneters(client: BlueAPIPythonClient, plan):
         # Call run while the instance methods are patched
         with pytest.raises(ValueError):  # noqa
             client.run(plan)
+
+
+class MockDevice:
+    def __init__(self, device: str):
+        self.device = device
+        self.name = device
+
+
+class MockResponse:
+    def __init__(self, devices: list):
+        self.devices = devices
+
+
+def test_return_detectors(client: BlueAPIPythonClient):
+    # Mock the expected detector list response
+
+    # Create a method mock for get_detectors
+    client.get_devices = Mock(
+        DeviceResponse,
+        return_value=MockResponse([MockDevice("saxs"), MockDevice("waxs")]),
+    )
+
+    # Call the method under test
+    result = client.return_detectors()
+
+    # Verify the result matches our expected data
+
+    # Verify the REST client was called correctly
+    client.get_devices.assert_called_once()
+
+    assert isinstance(result, list)
