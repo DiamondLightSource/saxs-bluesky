@@ -99,7 +99,7 @@ def test_blueapi_python_client_without_callback_run(
 
 @pytest.mark.parametrize(
     "plan",
-    ([1], [1], [1], [1], [5]),
+    (["invalid"], [None], [1]),
 )
 def test_run_fails_with_invalid_paraneters(client: BlueAPIPythonClient, plan):
     # Patch instance methods so run executes but no re calls happen.
