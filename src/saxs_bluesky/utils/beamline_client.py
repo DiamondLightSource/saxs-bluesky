@@ -92,6 +92,8 @@ class BlueAPIPythonClient(BlueapiClient):
                 ):
                     print(f"{plan_name} succeeded")
 
+                return
+
             except UnknownPlanError as up:
                 raise Exception(f"Plan '{plan_name}' was not recognised: {up}") from up
             except UnauthorisedAccessError as ua:
