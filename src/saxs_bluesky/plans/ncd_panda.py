@@ -230,7 +230,7 @@ def configure_panda_triggering(
         "List of str of the detector names, eg. saxs, waxs, i0, it",
     ] = FAST_DETECTORS,
     panda: HDFPanda = DEFAULT_PANDA,
-    ensure_panda_connected=True,
+    ensure_panda_connected: bool = True,
     force_load: bool = False,
 ) -> MsgGenerator:
     """
