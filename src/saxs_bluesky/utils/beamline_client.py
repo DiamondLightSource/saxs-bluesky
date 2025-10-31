@@ -92,18 +92,22 @@ class BlueAPIPythonClient(BlueapiClient):
 
                 resp = self.run_task(task, on_event=on_event, timeout=timeout)
 
-                if resp.task_status is not None and not resp.task_status.task_failed:
-                    print("Plan Succeeded")
+                if (
+                    (resp.task_status is not None)
+                    and (resp.task_status.task_complete)
+                    and (not resp.task_status.task_failed)
+                ):
+                    print(f"{plan_name} succeeded")
             else:
                 server_task = self.create_and_start_task(task)
-                print(server_task.task_id)
+                print(f"{plan_name} task sent as {server_task.task_id}")
 
         except UnknownPlanError as up:
-            raise Exception(f"Plan '{plan_name}' was not recognised") from up
+            raise Exception(f"Plan '{plan_name}' was not recognised: {up}") from up
         except UnauthorisedAccessError as ua:
-            raise Exception("Unauthorised request") from ua
+            raise Exception(f"Unauthorised request {ua}") from ua
         except InvalidParametersError as ip:
-            raise Exception(ip.message()) from ip
+            raise Exception(f"{ip.message()}: {ip}") from ip
         except (BlueskyRemoteControlError, BlueskyStreamingError) as e:
             raise Exception(f"server error with this message: {e}") from e
         except ValueError as ve:
