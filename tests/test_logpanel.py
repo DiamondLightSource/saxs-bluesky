@@ -6,8 +6,14 @@ from stomp.connect import StompConnection11 as Connection
 
 from saxs_bluesky.logging.bluesky_logpanel import BlueskyLogPanel
 from saxs_bluesky.logging.bluesky_messenger import (
-    RabbitMQMessenger,
+    StompMessenger,
 )
+
+
+class MockEvent:
+    def __init__(self, state, keysym):
+        self.state = state
+        self.keysym = keysym
 
 
 @pytest.fixture
@@ -28,8 +34,8 @@ def mock_tkinter() -> Mock:
 
 
 @pytest.fixture
-def connected_messenger(mock_connection: Mock) -> RabbitMQMessenger:
-    connected_messenger = RabbitMQMessenger(
+def connected_messenger(mock_connection: Mock) -> StompMessenger:
+    connected_messenger = StompMessenger(
         host="http://localhost",
         beamline="ixx",
         port=8080,
@@ -42,16 +48,17 @@ def connected_messenger(mock_connection: Mock) -> RabbitMQMessenger:
     return connected_messenger
 
 
+@pytest.fixture(autouse=True)
 @patch("saxs_bluesky.logging.bluesky_logpanel.Text")
 @patch("saxs_bluesky.logging.bluesky_logpanel.ttk.Style")
 @patch("saxs_bluesky.logging.bluesky_logpanel.ttk.Scrollbar")
-def test_logpanel_initialization(
+def connected_logpanel(
     mock_scrollbar: Mock,
     mock_style: Mock,
     mock_text: Mock,
-    connected_messenger: RabbitMQMessenger,
+    connected_messenger: StompMessenger,
     mock_tkinter: Mock,
-) -> None:
+) -> BlueskyLogPanel:
     # Configure text widget mock
     text_widget = Mock()
     text_widget.pack = Mock()
@@ -73,11 +80,14 @@ def test_logpanel_initialization(
         window=mock_tkinter,
     )
 
+    return connected_logpanel
+
+
+def test_logpanel_initialisatioin(connected_logpanel: BlueskyLogPanel):
     # Verify basic initialization
     assert connected_logpanel.run is True
     assert connected_logpanel.update_interval == 0.025
-    assert connected_logpanel.messenger == connected_messenger
-    assert connected_logpanel.window == mock_tkinter
+    assert isinstance(connected_logpanel.messenger, StompMessenger)
 
     sample_message = {
         "header": {
@@ -100,3 +110,13 @@ def test_logpanel_initialization(
     # Test cleanup
     connected_logpanel.on_destroy(None)
     assert not connected_logpanel.run  # verify run flag is set to False
+
+
+def test_logpanel_copy_paste(connected_logpanel: BlueskyLogPanel):
+    copy_event = MockEvent(4, "c")
+    paste_event = MockEvent(4, "v")
+    other_event = MockEvent(1, "x")
+
+    assert connected_logpanel.ctrl_event(copy_event) == "break"
+    assert connected_logpanel.ctrl_event(paste_event) == "break"
+    assert connected_logpanel.ctrl_event(other_event) == "break"

@@ -32,7 +32,7 @@ class ScanListener(stomp.ConnectionListener):
         self.messages.append(message_body)
 
 
-class RabbitMQMessenger:
+class StompMessenger:
     def __init__(
         self,
         host: str | None = None,
