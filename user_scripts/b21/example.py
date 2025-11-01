@@ -45,8 +45,6 @@ CLIENT.run(
     detectors=[
         "saxs",
         "waxs",
-        "it",
-        "i0",
     ],  # whatever StandardDetectors that are created for the beamline
 )  # to load all the data onto the panda and the detctors
 
