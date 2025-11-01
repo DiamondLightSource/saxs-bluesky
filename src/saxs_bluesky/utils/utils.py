@@ -33,8 +33,6 @@ def get_saxs_beamline() -> str:
                 f"No beamline is set in metadata. Beamline has defaulted to {beamline}"
             )
 
-        os.environ["BEAMLINE"] = beamline
-
     return beamline
 
 
