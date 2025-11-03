@@ -9,7 +9,7 @@ Python dataclasses and GUI as a replacement for NCDDetectors
 
 import copy
 import json
-import os
+import subprocess
 import tkinter
 from tkinter import filedialog, messagebox, ttk
 from tkinter.simpledialog import askstring
@@ -336,12 +336,12 @@ class PandAGUI:
 
     def open_settings(self):
         try:
-            os.system(f"gedit {CONFIG.__file__} &")
+            subprocess.run(["gedit", str(CONFIG.__file__)])
         except FileNotFoundError as e:
             print(e)
 
     def authenticate(self):
-        os.system(f"blueapi -c {CONFIG.BLUEAPI_CONFIG_PATH} login &")
+        subprocess.run(["blueapi", "-c", CONFIG.BLUEAPI_CONFIG_PATH, "login"])
 
     def show_wiring_config(self):
         fig, ax = plt.subplots(1, 1, figsize=(16, 8))

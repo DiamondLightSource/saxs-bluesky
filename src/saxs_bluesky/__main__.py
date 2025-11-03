@@ -1,6 +1,7 @@
 """Interface for ``python -m saxs_bluesky``."""
 
 import os
+import subprocess
 from datetime import datetime
 from pathlib import Path
 
@@ -39,9 +40,7 @@ def gui():
 
 @main.command(name="login")
 def login():
-    os.system(
-        f"blueapi -c {blueapi_config_path} login"  # noqa
-    )
+    subprocess.run(["blueapi", "-c", blueapi_config_path, "login"])
 
 
 @main.command(name="save_panda")
