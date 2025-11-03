@@ -52,8 +52,6 @@ class BlueAPIPythonClient(BlueapiClient):
         else:
             raise ValueError("Must be a str or a bluesky plan")
 
-        print(kwargs)
-
         task = TaskRequest(
             name=plan_name,
             params=kwargs,
