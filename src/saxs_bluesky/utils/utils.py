@@ -1,4 +1,5 @@
 import os
+import subprocess
 from importlib import import_module
 
 from blueapi.service.interface import config
@@ -10,6 +11,7 @@ from dodal.utils import get_beamline_name
 from ophyd_async.core import StandardDetector
 
 import saxs_bluesky.beamline_configs
+import saxs_bluesky.blueapi_configs
 
 DEFAULT_BEAMLINE = "i22"
 
@@ -77,3 +79,23 @@ def return_standard_detectors(beamline: str) -> list[StandardDetector]:
                 continue
 
     return standard_detector_list
+
+
+def get_config_path(beamline: str | None = None):
+    if beamline is None:
+        beamline = get_saxs_beamline()
+
+    blueapi_config_dir = os.path.dirname(saxs_bluesky.blueapi_configs.__file__)
+
+    blueapi_config_path = f"{blueapi_config_dir}/{beamline}_blueapi_config.yaml"
+
+    return blueapi_config_path
+
+
+def authenticate(beamline: str | None = None):
+    if beamline is None:
+        beamline = get_saxs_beamline()
+
+    blueapi_config_path = get_config_path(beamline)
+
+    subprocess.run(["blueapi", "-c", blueapi_config_path, "login"])

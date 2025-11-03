@@ -17,6 +17,7 @@ from tkinter.simpledialog import askstring
 import matplotlib.pyplot as plt
 from ttkthemes import ThemedTk
 
+# from saxs_bluesky.__main__ import login
 from saxs_bluesky._version import __version__
 from saxs_bluesky.gui.gui_frames import ActiveDetectorsFrame, ClientControlPanel
 from saxs_bluesky.gui.panda_gui_elements import ProfileTab
@@ -28,6 +29,7 @@ from saxs_bluesky.plans.ncd_panda import (
 from saxs_bluesky.utils.beamline_client import BlueAPIPythonClient
 from saxs_bluesky.utils.profile_groups import ExperimentLoader
 from saxs_bluesky.utils.utils import (
+    authenticate,
     get_saxs_beamline,
     load_beamline_config,
 )
@@ -138,7 +140,7 @@ class PandAGUI:
         menubar.add_cascade(label="Config", menu=config_menu)
 
         config_menu = tkinter.Menu(menubar, tearoff=0)
-        config_menu.add_command(label="Login", command=self.authenticate)
+        config_menu.add_command(label="Login", command=self.login)
         menubar.add_cascade(label="Login", menu=config_menu)
 
         instr_menu = tkinter.Menu(menubar, tearoff=0)
@@ -340,8 +342,8 @@ class PandAGUI:
         except FileNotFoundError as e:
             print(e)
 
-    def authenticate(self):
-        subprocess.run(["blueapi", "-c", CONFIG.BLUEAPI_CONFIG_PATH, "login"])
+    def login(self):
+        authenticate()
 
     def show_wiring_config(self):
         fig, ax = plt.subplots(1, 1, figsize=(16, 8))
