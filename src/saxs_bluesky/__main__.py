@@ -14,6 +14,7 @@ from saxs_bluesky.utils.utils import (
     authenticate,
     get_saxs_beamline,
     load_beamline_config,
+    open_scripting,
 )
 
 __all__ = ["main"]
@@ -34,8 +35,13 @@ def gui():
 
 
 @main.command(name="login")
-def login(beamline: str | None = None):
+def login():
     authenticate()
+
+
+@main.command(name="login")
+def script():
+    open_scripting()
 
 
 @main.command(name="save_panda")

@@ -1,6 +1,7 @@
 import os
 import subprocess
 from importlib import import_module
+from pathlib import Path
 
 from blueapi.service.interface import config
 
@@ -35,9 +36,13 @@ def get_saxs_beamline() -> str:
                 f"No beamline is set in metadata. Beamline has defaulted to {beamline}"
             )
 
-        os.environ["BEAMLINE"] = beamline
-
     return beamline
+
+
+def get_beamline_config_path(beamline: str):
+    beamline_config = f"{saxs_bluesky.beamline_configs.__name__}.{beamline}_config"
+
+    return beamline_config
 
 
 def load_beamline_config():
@@ -48,10 +53,9 @@ def load_beamline_config():
         module: The imported beamline configuration module.
     """
     beamline = get_saxs_beamline()
+    beamline_config_path = get_beamline_config_path(beamline)
 
-    beamline_config = import_module(
-        f"{saxs_bluesky.beamline_configs.__name__}.{beamline}_config"
-    )
+    beamline_config = import_module(beamline_config_path)
     return beamline_config
 
 
@@ -81,7 +85,7 @@ def return_standard_detectors(beamline: str) -> list[StandardDetector]:
     return standard_detector_list
 
 
-def get_config_path(beamline: str | None = None):
+def get_blueapi_config_path(beamline: str | None = None):
     if beamline is None:
         beamline = get_saxs_beamline()
 
@@ -96,6 +100,19 @@ def authenticate(beamline: str | None = None):
     if beamline is None:
         beamline = get_saxs_beamline()
 
-    blueapi_config_path = get_config_path(beamline)
+    blueapi_config_path = get_blueapi_config_path(beamline)
 
     subprocess.run(["blueapi", "-c", blueapi_config_path, "login"])
+
+
+def open_scripting(beamline: str | None = None):
+    if beamline is None:
+        beamline = get_saxs_beamline()
+
+    root_path = Path(saxs_bluesky.__file__).parent.parent.parent
+    example_path = os.path.join(root_path, "user_scriptss", beamline)
+
+    try:
+        subprocess.run(["jupyter", example_path])
+    except FileNotFoundError:
+        print("Scripts located at:", example_path)
