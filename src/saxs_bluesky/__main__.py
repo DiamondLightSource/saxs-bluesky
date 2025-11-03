@@ -39,8 +39,8 @@ def login():
     authenticate()
 
 
-@main.command(name="login")
-def script():
+@main.command(name="scripts")
+def scripts():
     open_scripting()
 
 
