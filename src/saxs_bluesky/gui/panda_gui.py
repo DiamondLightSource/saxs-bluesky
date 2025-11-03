@@ -31,6 +31,7 @@ from saxs_bluesky.utils.utils import (
     authenticate,
     get_saxs_beamline,
     load_beamline_config,
+    open_scripting,
 )
 
 ############################################################################################
@@ -136,6 +137,7 @@ class PandAGUI:
 
         config_menu = tkinter.Menu(menubar, tearoff=0)
         config_menu.add_command(label="Edit Config", command=self.open_settings)
+        config_menu.add_command(label="Edit Scripts", command=open_scripting)
         menubar.add_cascade(label="Config", menu=config_menu)
 
         config_menu = tkinter.Menu(menubar, tearoff=0)
