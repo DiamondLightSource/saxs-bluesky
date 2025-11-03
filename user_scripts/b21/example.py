@@ -1,3 +1,12 @@
+import numpy as np
+from dodal.plan_stubs.wrapped import (
+    move,
+    move_relative,
+    set_absolute,
+    set_relative,
+    sleep,
+)
+
 from saxs_bluesky.beamline_configs.b21_config import CLIENT
 from saxs_bluesky.plans.ncd_panda import (
     configure_panda_triggering,
@@ -49,3 +58,34 @@ CLIENT.run(
 )  # to load all the data onto the panda and the detctors
 
 CLIENT.run(run_panda_triggering)  # to actually tun the experiment
+
+
+#########################
+
+print(CLIENT.get_devices())  # to show what devices are available for your beamline
+print(CLIENT.get_plans())  # to show what plans are available
+
+
+CLIENT.run(move, moves={"base.x": 1})  # move base.x to 1
+
+xs = np.arange(0, 0.5, 0.1)  # [0. 0.1 0.2 0.3 0.4]
+ys = np.arange(-9.5, -10, -0.1)  # [-9.5 -9.6 -9.7 -9.8 -9.9]
+
+print(xs, ys)
+
+for x, y in zip(xs, ys, strict=True):
+    CLIENT.run(move, moves={"base.x": x, "base.y": y})  # move base to x, y
+    CLIENT.run(sleep, time=1)  # sleep for 1 second
+
+
+CLIENT.run(move, moves={"base.x": 0})  # move base.x to 0
+CLIENT.run(sleep, time=1)  # sleep for 1 second
+
+for _ in range(5):
+    CLIENT.run(move_relative, moves={"base.x": 0.1})  # increase by +0.1 each time
+    CLIENT.run(sleep, time=1)  # sleep for 1 second
+    # so by the end base.x is at 0.5 again
+
+CLIENT.run(set_absolute, movable="base.x", value=0.1)  # set_abs to 0.1
+CLIENT.run(set_relative, movable="base.x", value=0.1)  # set_relaticve by +0.1
+# So base.x ends at 0.2
