@@ -17,7 +17,6 @@ from tkinter.simpledialog import askstring
 import matplotlib.pyplot as plt
 from ttkthemes import ThemedTk
 
-# from saxs_bluesky.__main__ import login
 from saxs_bluesky._version import __version__
 from saxs_bluesky.gui.gui_frames import ActiveDetectorsFrame, ClientControlPanel
 from saxs_bluesky.gui.panda_gui_elements import ProfileTab
