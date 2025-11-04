@@ -74,6 +74,7 @@ def test_get_beamline_config_module(beamline: str):
 
 def test_open_scripting():
     open_scripting("i22")
+    open_scripting(None)
 
 
 def test_authenticate():
