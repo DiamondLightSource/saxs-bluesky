@@ -84,6 +84,7 @@ CLIENT.run(run_panda_triggering) #to actually tun the experiment
 
 
 ```
+To see more extensive examples see the examples/ixx/example.py files
 
 Certain features can be interacted though the commandline tool, some example commands here. A lot of the configuration can be done through the PandA GUI:
 
