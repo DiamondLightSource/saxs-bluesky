@@ -93,9 +93,8 @@ python -m saxs-bluesky login
 python -m saxs-bluesky gui
 python -m saxs-bluesky scripts
 ```
-
-```
 Assuming this has been set up properly on the beamline you can run
+
 ```
 module load saxs-bluesky
 saxs-bluesky gui
@@ -103,6 +102,5 @@ saxs-bluesky scripts
 ```
 
 To open up the gui and open up the scripting interface
-
 
 If you are operating this repo via the jython terminal and blueAPI then speak to your DAQ person to set it up
