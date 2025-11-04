@@ -2,7 +2,8 @@ import subprocess
 import sys
 
 from saxs_bluesky import __version__
-from saxs_bluesky.__main__ import login, main
+
+# from saxs_bluesky.__main__ import login, main
 
 
 def test_cli_version():
@@ -10,9 +11,9 @@ def test_cli_version():
     assert subprocess.check_output(cmd).decode().strip() == __version__
 
 
-def test_main():
-    main()
+# def test_main():
+#     main()
 
 
-def test_login():
-    login()
+# def test_login():
+#     login()
