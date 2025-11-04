@@ -1,5 +1,6 @@
 import os
 import subprocess
+from datetime import datetime
 from importlib import import_module
 from pathlib import Path
 
@@ -13,6 +14,7 @@ from ophyd_async.core import StandardDetector
 
 import saxs_bluesky.beamline_configs
 import saxs_bluesky.blueapi_configs
+from saxs_bluesky.stubs.panda_stubs import return_connected_device, save_device_to_yaml
 
 DEFAULT_BEAMLINE = "i22"
 
@@ -116,3 +118,42 @@ def open_scripting(beamline: str | None = None):
         subprocess.run(["jupyter", example_path])
     except FileNotFoundError:
         print("Scripts located at:", example_path)
+
+
+def save_panda_cli(
+    beamline: str | None = None,
+    panda_name: str | None = None,
+    yaml_name: str | None = None,
+):
+    from bluesky import RunEngine
+
+    run_engine = RunEngine()
+
+    if beamline is None:
+        beamline = get_saxs_beamline()
+        assert beamline is not None
+
+    if panda_name is None:
+        config = load_beamline_config()
+        panda_name = config.DEFAULT_PANDA
+        assert panda_name is not None
+
+    if yaml_name is None:
+        yaml_name = input("Input name suffix to save:  ")
+    if (yaml_name is None) or (yaml_name == ""):
+        yaml_name = datetime.now().strftime("%Y-%m-%d")
+
+    connected_panda = return_connected_device(beamline, panda_name)
+
+    yaml_dir = os.path.join(os.path.dirname(Path(__file__).parent), "ophyd_panda_yamls")
+    yaml_filename = f"{beamline}_{panda_name}_{yaml_name}"
+
+    run_engine(
+        save_device_to_yaml(
+            yaml_directory=yaml_dir,
+            yaml_file_name=yaml_filename,
+            device=connected_panda,
+        )
+    )
+
+    print(f"Saved PandA yaml to {yaml_dir}/{yaml_filename}.yaml")
