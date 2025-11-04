@@ -103,7 +103,6 @@ def authenticate(beamline: str | None = None):
         beamline = get_saxs_beamline()
 
     blueapi_config_path = get_blueapi_config_path(beamline)
-
     subprocess.run(["blueapi", "-c", blueapi_config_path, "login"], shell=True)
 
 
