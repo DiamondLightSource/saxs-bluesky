@@ -9,7 +9,7 @@ Python dataclasses and GUI as a replacement for NCDDetectors
 
 import copy
 import json
-import os
+import subprocess
 import tkinter
 from tkinter import filedialog, messagebox, ttk
 from tkinter.simpledialog import askstring
@@ -28,8 +28,10 @@ from saxs_bluesky.plans.ncd_panda import (
 from saxs_bluesky.utils.beamline_client import BlueAPIPythonClient
 from saxs_bluesky.utils.profile_groups import ExperimentLoader
 from saxs_bluesky.utils.utils import (
+    authenticate,
     get_saxs_beamline,
     load_beamline_config,
+    open_scripting,
 )
 
 ############################################################################################
@@ -135,10 +137,11 @@ class PandAGUI:
 
         config_menu = tkinter.Menu(menubar, tearoff=0)
         config_menu.add_command(label="Edit Config", command=self.open_settings)
+        config_menu.add_command(label="Edit Scripts", command=open_scripting)
         menubar.add_cascade(label="Config", menu=config_menu)
 
         config_menu = tkinter.Menu(menubar, tearoff=0)
-        config_menu.add_command(label="Login", command=self.authenticate)
+        config_menu.add_command(label="Login", command=self.login)
         menubar.add_cascade(label="Login", menu=config_menu)
 
         instr_menu = tkinter.Menu(menubar, tearoff=0)
@@ -336,12 +339,12 @@ class PandAGUI:
 
     def open_settings(self):
         try:
-            os.system(f"gedit {CONFIG.__file__} &")
+            subprocess.run(["gedit", str(CONFIG.__file__)])
         except FileNotFoundError as e:
             print(e)
 
-    def authenticate(self):
-        os.system(f"blueapi -c {CONFIG.BLUEAPI_CONFIG_PATH} login &")
+    def login(self):
+        authenticate()
 
     def show_wiring_config(self):
         fig, ax = plt.subplots(1, 1, figsize=(16, 8))
