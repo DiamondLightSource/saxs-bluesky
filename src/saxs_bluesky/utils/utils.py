@@ -115,9 +115,14 @@ def open_scripting(beamline: str | None = None):
     example_path = os.path.join(root_path, "user_scripts", beamline)
 
     try:
-        subprocess.run(["jupyter", example_path])
+        subprocess.run(["jupyter-notebook", example_path])
     except FileNotFoundError:
-        print("Scripts located at:", example_path)
+        try:
+            subprocess.run(["module", "load", "vscode", "code", example_path])
+        except FileNotFoundError:
+            print("Scripts located at:", example_path)
+
+    return example_path
 
 
 def save_panda_cli(

@@ -35,7 +35,7 @@ def login():
 
 @main.command(name="scripts")
 def scripts():
-    open_scripting()
+    print(open_scripting())
 
 
 @main.command(name="save_panda")
