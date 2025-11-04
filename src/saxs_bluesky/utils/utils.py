@@ -110,7 +110,7 @@ def open_scripting(beamline: str | None = None):
         beamline = get_saxs_beamline()
 
     root_path = Path(saxs_bluesky.__file__).parent.parent.parent
-    example_path = os.path.join(root_path, "user_scriptss", beamline)
+    example_path = os.path.join(root_path, "user_scripts", beamline)
 
     try:
         subprocess.run(["jupyter", example_path])
