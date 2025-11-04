@@ -1,5 +1,7 @@
 import os
 
+import pytest
+
 import saxs_bluesky.beamline_configs
 import saxs_bluesky.blueapi_configs
 from saxs_bluesky.utils.plotter import ProfilePlotter
@@ -58,9 +60,11 @@ def test_get_blueapi_config_path():
     assert config_path == blueapi_config_path
 
 
-def test_get_beamline_config_module():
-    beamline = "ixx"
-
+@pytest.mark.parametrize(
+    "beamline",
+    (["i22"], ["b21"], ["p38"], ["ixx"]),
+)
+def test_get_beamline_config_module(beamline: str):
     config_path = get_beamline_module_name(beamline)
 
     beamline_config = f"{saxs_bluesky.beamline_configs.__name__}.{beamline}_config"
@@ -69,7 +73,7 @@ def test_get_beamline_config_module():
 
 
 def test_open_scripting():
-    open_scripting("ixx")
+    open_scripting("i22")
 
 
 def test_authenticate():
