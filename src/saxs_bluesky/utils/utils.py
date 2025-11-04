@@ -117,10 +117,7 @@ def open_scripting(beamline: str | None = None):
     try:
         subprocess.run([f"module load vscode; code {example_path}"], shell=True)
     except FileNotFoundError:
-        try:
-            subprocess.run([f"jupyter-notebook {example_path}"], shell=True)
-        except FileNotFoundError:
-            print("Scripts located at:", example_path)
+        print("Scripts located at:", example_path)
 
     return example_path
 
