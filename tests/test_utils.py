@@ -9,6 +9,7 @@ from saxs_bluesky.utils.utils import (
     get_beamline_module_name,
     get_blueapi_config_path,
     load_beamline_config,
+    open_scripting,
     return_standard_detectors,
 )
 
@@ -47,9 +48,9 @@ def test_return_standard_detectors():
 
 
 def test_get_blueapi_config_path():
-    beamline = "i22"
+    beamline = "ixx"
 
-    config_path = get_blueapi_config_path("i22")
+    config_path = get_blueapi_config_path(beamline)
 
     blueapi_config_dir = os.path.dirname(saxs_bluesky.blueapi_configs.__file__)
     blueapi_config_path = f"{blueapi_config_dir}/{beamline}_blueapi_config.yaml"
@@ -58,13 +59,17 @@ def test_get_blueapi_config_path():
 
 
 def test_get_beamline_config_module():
-    beamline = "i22"
+    beamline = "ixx"
 
-    config_path = get_beamline_module_name("i22")
+    config_path = get_beamline_module_name(beamline)
 
     beamline_config = f"{saxs_bluesky.beamline_configs.__name__}.{beamline}_config"
 
     assert config_path == beamline_config
+
+
+def test_open_scripting():
+    open_scripting("ixx")
 
 
 def test_authenticate():
