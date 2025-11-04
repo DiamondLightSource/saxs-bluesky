@@ -39,7 +39,7 @@ def get_saxs_beamline() -> str:
     return beamline
 
 
-def get_beamline_config_path(beamline: str):
+def get_beamline_module_name(beamline: str):
     beamline_config = f"{saxs_bluesky.beamline_configs.__name__}.{beamline}_config"
 
     return beamline_config
@@ -53,7 +53,7 @@ def load_beamline_config():
         module: The imported beamline configuration module.
     """
     beamline = get_saxs_beamline()
-    beamline_config_path = get_beamline_config_path(beamline)
+    beamline_config_path = get_beamline_module_name(beamline)
 
     beamline_config = import_module(beamline_config_path)
     return beamline_config
