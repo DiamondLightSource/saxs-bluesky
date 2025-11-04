@@ -92,9 +92,7 @@ def get_blueapi_config_path(beamline: str | None = None):
         beamline = get_saxs_beamline()
 
     blueapi_config_dir = os.path.dirname(saxs_bluesky.blueapi_configs.__file__)
-
     blueapi_config_path = f"{blueapi_config_dir}/{beamline}_blueapi_config.yaml"
-
     return blueapi_config_path
 
 
@@ -103,8 +101,7 @@ def authenticate(beamline: str | None = None):
         beamline = get_saxs_beamline()
 
     blueapi_config_path = get_blueapi_config_path(beamline)
-
-    subprocess.run(["blueapi", "-c", blueapi_config_path, "login"])
+    subprocess.run(["blueapi", "-c", blueapi_config_path, "login"], shell=True)
 
 
 def open_scripting(beamline: str | None = None):
@@ -115,7 +112,7 @@ def open_scripting(beamline: str | None = None):
     example_path = os.path.join(root_path, "user_scripts", beamline)
 
     try:
-        subprocess.run(["jupyter", example_path])
+        subprocess.run([f"module load vscode; code {example_path}"], shell=True)
     except FileNotFoundError:
         print("Scripts located at:", example_path)
 
