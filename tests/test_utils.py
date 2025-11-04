@@ -1,6 +1,13 @@
+import os
+
+import saxs_bluesky.blueapi_configs
 from saxs_bluesky.utils.plotter import ProfilePlotter
 from saxs_bluesky.utils.profile_groups import Group, Profile
-from saxs_bluesky.utils.utils import load_beamline_config, return_standard_detectors
+from saxs_bluesky.utils.utils import (
+    get_blueapi_config_path,
+    load_beamline_config,
+    return_standard_detectors,
+)
 
 CONFIG = load_beamline_config()
 FAST_DETECTORS = CONFIG.FAST_DETECTORS
@@ -34,3 +41,14 @@ def test_fast_detectors_without_beamline_env_var_makes_set():
 def test_return_standard_detectors():
     standard_detector_list_i22 = return_standard_detectors("i22")
     assert "saxs" in standard_detector_list_i22
+
+
+def test_get_blueapi_config_path():
+    beamline = "i22"
+
+    config_path = get_blueapi_config_path("i22")
+
+    blueapi_config_dir = os.path.dirname(saxs_bluesky.blueapi_configs.__file__)
+    blueapi_config_path = f"{blueapi_config_dir}/{beamline}_blueapi_config.yaml"
+
+    assert config_path == blueapi_config_path
