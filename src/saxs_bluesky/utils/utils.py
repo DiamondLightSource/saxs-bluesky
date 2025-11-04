@@ -92,9 +92,7 @@ def get_blueapi_config_path(beamline: str | None = None):
         beamline = get_saxs_beamline()
 
     blueapi_config_dir = os.path.dirname(saxs_bluesky.blueapi_configs.__file__)
-
     blueapi_config_path = f"{blueapi_config_dir}/{beamline}_blueapi_config.yaml"
-
     return blueapi_config_path
 
 
