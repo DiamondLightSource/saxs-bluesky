@@ -104,7 +104,7 @@ def authenticate(beamline: str | None = None):
 
     blueapi_config_path = get_blueapi_config_path(beamline)
 
-    subprocess.run(["blueapi", "-c", blueapi_config_path, "login"])
+    subprocess.run(["blueapi", "-c", blueapi_config_path, "login"], shell=True)
 
 
 def open_scripting(beamline: str | None = None):
