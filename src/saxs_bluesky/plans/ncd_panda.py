@@ -326,26 +326,6 @@ def run_panda_triggering(
     else:
         detectors: list[StandardDetector] = STORED_DETECTORS  # type: ignore
 
-    # get the loaded seq table
-    panda_seq_table = panda.seq[CONFIG.DEFAULT_SEQ]
-    # flyer and prepare fly, sets the sequencers table
-    trigger_logic = StaticSeqTableTriggerLogic(panda_seq_table)
-    flyer = StandardFlyer(trigger_logic)
-
-    # detectors = detectors + [panda]  # panda must be added so we can get HDF
-    all_devices = detectors + DEFAULT_BASELINE
-
-    # STAGE SETS HDF WRITER TO ON
-    yield from bps.stage_all(*all_devices, flyer, group="setup")
-
-    for det in detectors:
-        ###this tells the detector how may triggers to expect and sets the CAN aquir
-        yield from bps.prepare(det, trigger_info, wait=True, group="setup")
-
-    yield from bps.wait(group="setup", timeout=DEFAULT_TIMEOUT * len(detectors))
-
-    ######################
-
     # Collect metadata
     plan_args = {
         "total_frames": trigger_info.number_of_events,
@@ -367,33 +347,44 @@ def run_panda_triggering(
 
     @bpp.baseline_decorator(baseline)
     @bpp.run_decorator(md=_md)
-    def run():
+    def inner_run():
+        # get the loaded seq table
+        panda_seq_table = panda.seq[CONFIG.DEFAULT_SEQ]
+        # flyer and prepare fly, sets the sequencers table
+        trigger_logic = StaticSeqTableTriggerLogic(panda_seq_table)
+        flyer = StandardFlyer(trigger_logic)
+
+        # detectors = detectors + [panda]  # panda must be added so we can get HDF
+        all_devices = detectors + DEFAULT_BASELINE
+
+        # STAGE SETS HDF WRITER TO ON
+        yield from bps.stage_all(*all_devices, flyer, group="setup")
+
+        for det in detectors:
+            ###this tells the detector how may triggers to expect and sets the CAN aquir
+            yield from bps.prepare(det, trigger_info, wait=True, group="setup")
+
+        yield from bps.wait(group="setup", timeout=DEFAULT_TIMEOUT * len(detectors))
+
         yield from fly_and_collect_with_wait(
             stream_name="primary",
             detectors=list(detectors),
             flyer=flyer,
         )
 
-    yield from run()
+        yield from wait_until_complete(panda_seq_table.active, False)
 
-    # name = "run"
-    # yield from bps.declare_stream(*detectors, name=name, collect=True)
-    # yield from bps.kickoff(flyer, wait=True)
-    # for detector in detectors:
-    #     yield from bps.kickoff(detector)
-    # yield from bps.collect_while_completing([flyer], detectors, stream_name=name)
+        # turn off all pulses whether or not using
+        yield from set_panda_pulses(
+            panda=panda, pulses=list(np.array(range(4)) + 1), setting="disarm"
+        )
 
-    ##########################
-    ###########################
-    yield from wait_until_complete(panda_seq_table.active, False)
+        # start diabling and unstaging everything
+        yield from bps.unstage_all(*all_devices, flyer)  # stops the hdf capture mode
 
-    # turn off all pulses whether or not using
-    yield from set_panda_pulses(
-        panda=panda, pulses=list(np.array(range(4)) + 1), setting="disarm"
-    )
-
-    # start diabling and unstaging everything
-    yield from bps.unstage_all(*all_devices, flyer)  # stops the hdf capture mode
+    ########## The main part
+    yield from inner_run()
+    ##########
 
 
 def configure_and_run_panda_triggering(
