@@ -152,3 +152,14 @@ def test_return_detectors(client: BlueAPIPythonClient):
     client.get_devices.assert_called_once()
 
     assert isinstance(result, list)
+
+
+def test_show_devices(client: BlueAPIPythonClient):
+    # Create a method mock for get_detectors
+    client.get_devices = Mock(
+        DeviceResponse,
+        return_value=MockResponse([MockDevice("saxs"), MockDevice("waxs")]),
+    )
+
+    client.show_devices()
+    client.get_devices.assert_called_once()
