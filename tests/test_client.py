@@ -5,7 +5,7 @@ import pytest
 from blueapi.client.client import BlueapiClient
 from blueapi.client.event_bus import EventBusClient
 from blueapi.client.rest import BlueapiRestClient
-from blueapi.service.model import DeviceResponse
+from blueapi.service.model import DeviceResponse, PlanResponse
 
 import saxs_bluesky.blueapi_configs
 from saxs_bluesky.plans.ncd_panda import configure_panda_triggering
@@ -163,3 +163,24 @@ def test_show_devices(client: BlueAPIPythonClient):
 
     client.show_devices()
     client.get_devices.assert_called_once()
+
+
+class MockPlan:
+    def __init__(self, device: str):
+        self.name = device
+
+
+class MockPlanResponse:
+    def __init__(self, plans: list):
+        self.plans = plans
+
+
+def test_show_plans(client: BlueAPIPythonClient):
+    # Create a method mock for get_detectors
+    client.get_plans = Mock(
+        PlanResponse,
+        return_value=MockPlanResponse([MockPlan("count"), MockPlan("test")]),
+    )
+
+    client.show_plans()
+    client.get_plans.assert_called_once()
