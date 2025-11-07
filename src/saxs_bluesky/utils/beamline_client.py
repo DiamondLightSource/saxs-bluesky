@@ -96,3 +96,13 @@ class BlueAPIPythonClient(BlueapiClient):
         """Change the instrument session for the client."""
         print(f"New instrument session: {new_session}")
         self.instrument_session = new_session
+
+    def show_plans(self):
+        plans = self.get_plans().plans
+        for plan in plans:
+            print(plan.name)
+
+    def show_devices(self):
+        devices = self.get_devices().devices
+        for dev in devices:
+            print(dev.name)
