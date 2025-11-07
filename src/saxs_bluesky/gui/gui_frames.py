@@ -117,7 +117,7 @@ class ClientControlPanel:
 
         row_col = next(ROW_COL)
         ttk.Button(
-            self.run_frame, text="Get Plans", command=self.client.get_plans
+            self.run_frame, text="Get Plans", command=self.client.show_plans
         ).grid(
             row=row_col[0],
             column=row_col[1],
@@ -129,7 +129,7 @@ class ClientControlPanel:
 
         row_col = next(ROW_COL)
         ttk.Button(
-            self.run_frame, text="Get Devices", command=self.client.get_devices
+            self.run_frame, text="Get Devices", command=self.client.show_devices
         ).grid(
             row=row_col[0],
             column=row_col[1],
