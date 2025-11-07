@@ -24,7 +24,7 @@ class BlueAPIPythonClient(BlueapiClient):
         beamline: str,
         blueapi_config_path: str | Path,
         instrument_session: str,
-        callback: bool = False,
+        callback: bool = True,
     ):
         self.beamline = beamline
         self.instrument_session = instrument_session
