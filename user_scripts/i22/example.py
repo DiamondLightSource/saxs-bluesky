@@ -61,8 +61,8 @@ CLIENT.run(
 
 CLIENT.run(run_panda_triggering)  # to actually tun the experiment
 
-print(CLIENT.get_devices())  # to show what devices are available for your beamline
-print(CLIENT.get_plans())  # to show what plans are available
+print(CLIENT.show_devices())  # to show what devices are available for your beamline
+print(CLIENT.show_plans())  # to show what plans are available
 
 
 CLIENT.run(move, moves={"base.x": 1})  # move base.x to 1
