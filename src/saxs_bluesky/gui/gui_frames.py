@@ -116,7 +116,9 @@ class ClientControlPanel:
         self.run_frame.pack(fill="y", expand=True, side="right")
 
         row_col = next(ROW_COL)
-        ttk.Button(self.run_frame, text="Get Plans", command=self.get_plans).grid(
+        ttk.Button(
+            self.run_frame, text="Get Plans", command=self.client.show_plans
+        ).grid(
             row=row_col[0],
             column=row_col[1],
             padx=5,
@@ -126,7 +128,9 @@ class ClientControlPanel:
         )
 
         row_col = next(ROW_COL)
-        ttk.Button(self.run_frame, text="Get Devices", command=self.get_devices).grid(
+        ttk.Button(
+            self.run_frame, text="Get Devices", command=self.client.show_devices
+        ).grid(
             row=row_col[0],
             column=row_col[1],
             padx=5,
@@ -254,18 +258,6 @@ class ClientControlPanel:
         )
 
         return None
-
-    def get_plans(self):
-        plans = self.client.get_plans().plans
-
-        for plan in plans:
-            print(plan.name, "\n")
-
-    def get_devices(self):
-        devices = self.client.get_devices().devices
-
-        for dev in devices:
-            print(dev, "\n\n")
 
     def log_detectors_plan(self):
         try:

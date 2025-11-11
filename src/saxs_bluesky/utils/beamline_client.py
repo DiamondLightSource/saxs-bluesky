@@ -1,9 +1,11 @@
+import time
 from collections.abc import Callable
 from pathlib import Path
 
 from blueapi.cli.updates import CliEventRenderer
 from blueapi.client.client import BlueapiClient
 from blueapi.client.event_bus import AnyEvent
+from blueapi.client.rest import BlueskyRemoteControlError
 from blueapi.config import (
     ApplicationConfig,
     ConfigLoader,
@@ -24,11 +26,12 @@ class BlueAPIPythonClient(BlueapiClient):
         beamline: str,
         blueapi_config_path: str | Path,
         instrument_session: str,
-        callback: bool = False,
+        callback: bool = True,
     ):
         self.beamline = beamline
         self.instrument_session = instrument_session
         self.callback = callback
+        self.retries = 5
 
         blueapi_config_path = Path(blueapi_config_path)
 
@@ -83,8 +86,13 @@ class BlueAPIPythonClient(BlueapiClient):
                 raise Exception(f"Task could not run: {e}") from e
 
         else:
-            server_task = self.create_and_start_task(task)
-            print(f"{plan_name} task sent as {server_task.task_id}")
+            for _ in range(self.retries):
+                try:
+                    server_task = self.create_and_start_task(task)
+                    print(f"{plan_name} task sent as {server_task.task_id}")
+                    break
+                except BlueskyRemoteControlError:
+                    time.sleep(1)
             return
 
     def return_detectors(self) -> list[StandardReadable]:
@@ -96,3 +104,13 @@ class BlueAPIPythonClient(BlueapiClient):
         """Change the instrument session for the client."""
         print(f"New instrument session: {new_session}")
         self.instrument_session = new_session
+
+    def show_plans(self):
+        plans = self.get_plans().plans
+        for plan in plans:
+            print(plan.name)
+
+    def show_devices(self):
+        devices = self.get_devices().devices
+        for dev in devices:
+            print(dev.name)
