@@ -463,23 +463,45 @@ class ProfileTab(ttk.Frame):
             self.profile_config_tree = EditableTableview(
                 self, columns=columns_names, show="headings"
             )
+            table_row = 5
+            widths = [100, 100, 150, 150, 150, 150, 150, 150, 150]
+
+            # add the columns headers
+            for i, col in enumerate(columns_names):
+                self.profile_config_tree.heading(i, text=col)
+                self.profile_config_tree.column(
+                    i, minwidth=widths[i], width=widths[i], stretch=True, anchor="w"
+                )
+
+            self.profile_config_tree.grid(
+                column=0,
+                row=table_row,
+                padx=5,
+                pady=5,
+                columnspan=len(columns_names),
+                rowspan=5,
+            )
+            verscrlbar = ttk.Scrollbar(
+                self, orient="vertical", command=self.profile_config_tree.yview
+            )
+            verscrlbar.grid(
+                column=len(widths),
+                row=table_row,
+                padx=0,
+                pady=0,
+                columnspan=1,
+                rowspan=5,
+                sticky="ns",
+            )
+            # Configuring treeview
+            self.profile_config_tree.configure(yscrollcommand=verscrlbar.set)
+
         else:
             self.profile_config_tree.close_popups()
             self.profile_config_tree.destroy()
-            del self.profile_config_tree
-            self.profile_config_tree = EditableTableview(
-                self, columns=columns_names, show="headings"
-            )
 
-        table_row = 5
-        widths = [100, 100, 150, 150, 150, 150, 150, 150, 150]
-
-        # add the columns headers
-        for i, col in enumerate(columns_names):
-            self.profile_config_tree.heading(i, text=col)
-            self.profile_config_tree.column(
-                i, minwidth=widths[i], width=widths[i], stretch=True, anchor="w"
-            )
+            for item in self.profile_config_tree.get_children():
+                self.profile_config_tree.delete(item)
 
         # Insert sample data into the Treeview
         for i in range(len(self.profile.groups)):
@@ -488,31 +510,6 @@ class ProfileTab(ttk.Frame):
             group_list.insert(0, i)
             self.profile_config_tree.insert("", "end", values=group_list)
 
-        self.profile_config_tree.grid(
-            column=0,
-            row=table_row,
-            padx=5,
-            pady=5,
-            columnspan=len(columns_names),
-            rowspan=5,
-        )
-
-        verscrlbar = ttk.Scrollbar(
-            self, orient="vertical", command=self.profile_config_tree.yview
-        )
-
-        verscrlbar.grid(
-            column=len(widths),
-            row=table_row,
-            padx=0,
-            pady=0,
-            columnspan=1,
-            rowspan=5,
-            sticky="ns",
-        )
-
-        # Configuring treeview
-        self.profile_config_tree.configure(yscrollcommand=verscrlbar.set)
         self.profile_config_tree.bind_all(
             "<FocusOut>", self.entry_changed
         )  # regen figures when edited
