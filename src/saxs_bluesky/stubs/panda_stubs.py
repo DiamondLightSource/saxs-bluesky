@@ -106,7 +106,6 @@ def fly_and_collect_with_wait(
             name=stream_name,
         )
     yield from bps.wait(group=group)
-    yield from bps.sleep(2)
 
 
 def get_settings_dir_and_name(
