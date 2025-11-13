@@ -424,15 +424,11 @@ class ProfileTab(ttk.Frame):
     def delete_group_button_action(self):
         rows = self.profile_config_tree.selection()
 
-        print(rows)
-
         if len(rows) == 0:
             messagebox.showinfo("Info", "Select a group to delete")
 
-        for row in rows[::-1]:
-            row_str = "0X" + (row.replace("I", ""))
-            row_int = (int(row_str, 16)) - 1
-            print(row, row_int)
+        for row in rows[::-1]:  # do it in reverse
+            row_int = self.profile_config_tree.index(row)
             self.profile.delete_group(n=row_int)
 
             self.build_profile_tree()
@@ -502,11 +498,10 @@ class ProfileTab(ttk.Frame):
         else:
             self.profile_config_tree.close_popups()
 
-            for item in self.profile_config_tree.get_children():
-                self.profile_config_tree.delete(item)
+            print(self.profile_config_tree.get_children())
 
-        print(self.profile.groups)
-        print(len(self.profile.groups))
+            for item in self.profile_config_tree.get_children():  # delete all rows
+                self.profile_config_tree.delete(item)
 
         # Insert sample data into the Treeview
         for i in range(len(self.profile.groups)):
