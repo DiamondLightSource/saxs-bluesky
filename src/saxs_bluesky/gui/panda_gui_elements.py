@@ -497,9 +497,6 @@ class ProfileTab(ttk.Frame):
 
         else:
             self.profile_config_tree.close_popups()
-
-            print(self.profile_config_tree.get_children())
-
             for item in self.profile_config_tree.get_children():  # delete all rows
                 self.profile_config_tree.delete(item)
 
