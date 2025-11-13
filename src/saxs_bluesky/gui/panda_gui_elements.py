@@ -442,8 +442,7 @@ class ProfileTab(ttk.Frame):
 
             return
 
-        row_str = "0X" + (row.replace("I", ""))
-        row_int = int(row_str, 16)  # - 1
+        row_int = self.profile_config_tree.index(row)
         self.profile.insert_group(n=row_int, group=copy.deepcopy(DEFAULT_GROUP))
         self.build_profile_tree()
         self.generate_info_boxes()
