@@ -30,11 +30,13 @@ class BlueAPIPythonClient(BlueapiClient):
         blueapi_config_path: str | Path,
         instrument_session: str,
         callback: bool = True,
+        timeout: int | float | None = None,
     ):
         self.beamline = beamline
         self.instrument_session = instrument_session
         self.callback = callback
         self.retries = 5
+        self.timeout = timeout
 
         blueapi_config_path = Path(blueapi_config_path)
 
@@ -44,17 +46,26 @@ class BlueAPIPythonClient(BlueapiClient):
         blueapi_class = BlueapiClient.from_config(loaded_config)
         super().__init__(blueapi_class._rest, blueapi_class._events)  # noqa
 
-    def run(
-        self,
-        plan: str | Callable,
-        timeout: float | None = None,
-        **kwargs,
-    ):
+    def run(self, plan: str | Callable, *args, **kwargs):
         """Run a bluesky plan via BlueAPI."""
         if isinstance(plan, str):
             plan_name = plan
         elif hasattr(plan, "__name__"):
             plan_name = plan.__name__
+            if args and (not kwargs) and hasattr(plan, "__code__"):
+                arg_names = plan.__code__.co_varnames
+
+                inferred_kwargs = {}
+
+                for key, val in zip(arg_names, args):  # noqa intentionally not strict
+                    inferred_kwargs[key] = val
+
+                kwargs = inferred_kwargs
+            else:
+                raise ValueError(
+                    "If you pass the bluesky plan str, you must give kwargs"
+                )
+
         else:
             raise ValueError("Must be a str or a bluesky plan")
 
@@ -74,7 +85,7 @@ class BlueAPIPythonClient(BlueapiClient):
                     elif isinstance(event, DataEvent):
                         callback(event.name, event.doc)
 
-                resp = self.run_task(task, on_event=on_event, timeout=timeout)
+                resp = self.run_task(task, on_event=on_event, timeout=self.timeout)
 
                 if (
                     (resp.task_status is not None)
