@@ -128,8 +128,10 @@ class BlueAPIPythonClient(BlueapiClient):
         plans = self.get_plans().plans
         for plan in plans:
             print(plan.name)
+        print(f"Total plans: {len(plans)} \n")
 
     def show_devices(self):
         devices = self.get_devices().devices
         for dev in devices:
             print(dev.name)
+        print(f"Total devices: {len(devices)} \n")
