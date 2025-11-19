@@ -48,30 +48,35 @@ class BlueAPIPythonClient(BlueapiClient):
 
     def run(self, plan: str | Callable, *args, **kwargs):
         """Run a bluesky plan via BlueAPI."""
+
         if isinstance(plan, str):
             plan_name = plan
-        elif hasattr(plan, "__name__"):
+        elif hasattr(plan, "__name__") and hasattr(plan, "__code__"):
             plan_name = plan.__name__
-            if args and (not kwargs) and hasattr(plan, "__code__"):
-                arg_names = plan.__code__.co_varnames
-
-                inferred_kwargs = {}
-
-                for key, val in zip(arg_names, args):  # noqa intentionally not strict
-                    inferred_kwargs[key] = val
-
-                kwargs = inferred_kwargs
-            else:
-                raise ValueError(
-                    "If you pass the bluesky plan str, you must give kwargs"
-                )
-
         else:
-            raise ValueError("Must be a str or a bluesky plan")
+            raise ValueError("Must be a str or a bluesky plan funtcion")
+
+        if not args or kwargs:
+            params = {}
+        elif (
+            args
+            and (not kwargs)
+            and hasattr(plan, "__code__")
+            and not isinstance(plan, str)
+        ):
+            arg_names = plan.__code__.co_varnames
+
+            inferred_kwargs = {}
+
+            for key, val in zip(arg_names, args):  # noqa intentionally not strict
+                inferred_kwargs[key] = val
+            params = inferred_kwargs
+        else:
+            raise ValueError("If you pass the bluesky plan str, you must give kwargs")
 
         task = TaskRequest(
             name=plan_name,
-            params=kwargs,
+            params=params,
             instrument_session=self.instrument_session,
         )
         if self.callback:
