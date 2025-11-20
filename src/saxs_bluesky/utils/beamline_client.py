@@ -83,8 +83,6 @@ class BlueAPIPythonClient(BlueapiClient):
         else:
             raise ValueError("Could not infer parameters from args and kwargs")
 
-        print(params)
-
         return params
 
     def run(self, plan: str | Callable, *args, **kwargs):
