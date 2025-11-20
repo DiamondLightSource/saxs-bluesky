@@ -60,7 +60,11 @@ class BlueAPIPythonClient(BlueapiClient):
         self, plan: Callable | str, args: tuple, kwargs: dict
     ) -> dict:
         if not args and not kwargs:
+            print(1)
             params = {}
+            return params
+        elif kwargs and (not args):
+            params = kwargs
             return params
         elif (
             args
@@ -68,6 +72,7 @@ class BlueAPIPythonClient(BlueapiClient):
             and hasattr(plan, "__code__")
             and not isinstance(plan, str)
         ):
+            print(3)
             params = self._convert_args_to_kwargs(plan, args)
             return params
 
@@ -77,12 +82,8 @@ class BlueAPIPythonClient(BlueapiClient):
             params = self._convert_args_to_kwargs(plan, args)
             params.update(kwargs)
             return params
-        elif isinstance(plan, str) and not kwargs:
-            raise ValueError("If you pass the bluesky plan str, you must give kwargs")
-        elif isinstance(plan, str) and args and (not kwargs):
-            raise ValueError(
-                "If you pass the bluesky plan str, you must give kwargs only"
-            )
+        elif isinstance(plan, str) and args:
+            raise ValueError("If you pass the bluesky plan str, you can't pass args ")
         else:
             raise ValueError("Could not infer parameters from args and kwargs")
 

@@ -99,23 +99,13 @@ def test_blueapi_python_client_without_callback_run(
         client_without_callback.run(configure_panda_triggering)
 
 
-class Mockcode:
-    def __init__(self, name: str):
-        self.co_varnames = ("arg1", "arg2", "arg3")
-
-
-class MockPlanName:
-    def __init__(self, name: str):
-        self.__name__ = name
-        self.__code__ = Mockcode(name)
-
-
 @pytest.mark.parametrize(
     "plan, args, kwargs",
     (
         ["plan", (), {}],
-        [MockPlanName("plan"), (1, 2, 3), {}],
-        [MockPlanName("plan"), (1, 2, 3), {"a": 1}],
+        [configure_panda_triggering, (1, 2, 3), {}],
+        [configure_panda_triggering, (1, 2, 3), {"a": 1}],
+        [configure_panda_triggering, (), {"a": 1}],
     ),
 )
 def test_run_with_valid_paraneters(
@@ -165,7 +155,7 @@ def test_run_fails_with_invalid_paraneters(
 
         # Call run while the instance methods are patched
         with pytest.raises(ValueError):  # noqa
-            client.run(plan, args=args, kwargs=kwargs)
+            client.run(plan, *args, **kwargs)
 
 
 class MockDevice:
