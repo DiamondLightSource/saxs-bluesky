@@ -161,7 +161,7 @@ class BlueAPIPythonClient(BlueapiClient):
                 server_task = self.create_and_start_task(task)
                 print(f"{plan_name} task sent as {server_task.task_id}")
                 success = True
-                break
+                return
             except BlueskyRemoteControlError:
                 time.sleep(1)
 
