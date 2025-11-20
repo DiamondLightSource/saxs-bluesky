@@ -99,11 +99,22 @@ def test_blueapi_python_client_without_callback_run(
         client_without_callback.run(configure_panda_triggering)
 
 
+class MockPlanName:
+    def __init__(self, name: str):
+        self.name = name
+
+
 @pytest.mark.parametrize(
-    "plan",
-    (None, 1),
+    "plan, args, kwargs",
+    (
+        [None, (), {}],
+        ["plan", (1, 2, 3), {}],
+        ["plan", (1, 2, 3), {"a": 1}],
+    ),
 )
-def test_run_fails_with_invalid_paraneters(client: BlueAPIPythonClient, plan):
+def test_run_fails_with_invalid_paraneters(
+    client: BlueAPIPythonClient, plan, args: tuple, kwargs: dict
+):
     # Patch instance methods so run executes but no re calls happen.
     with (
         patch.object(client, "run_task", return_value=Mock()),
@@ -120,7 +131,7 @@ def test_run_fails_with_invalid_paraneters(client: BlueAPIPythonClient, plan):
 
         # Call run while the instance methods are patched
         with pytest.raises(ValueError):  # noqa
-            client.run(plan)
+            client.run(plan, args=args, kwargs=kwargs)
 
 
 class MockDevice:
