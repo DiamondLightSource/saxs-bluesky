@@ -60,7 +60,6 @@ class BlueAPIPythonClient(BlueapiClient):
         self, plan: Callable | str, args: tuple, kwargs: dict
     ) -> dict:
         if not args and not kwargs:
-            print(1)
             params = {}
             return params
         elif kwargs and (not args):
@@ -72,7 +71,6 @@ class BlueAPIPythonClient(BlueapiClient):
             and hasattr(plan, "__code__")
             and not isinstance(plan, str)
         ):
-            print(3)
             params = self._convert_args_to_kwargs(plan, args)
             return params
 
@@ -92,10 +90,10 @@ class BlueAPIPythonClient(BlueapiClient):
 
         if isinstance(plan, str):
             plan_name = plan
-        elif hasattr(plan, "__name__"):
+        elif hasattr(plan, "__name__") and hasattr(plan, "__code__"):
             plan_name = plan.__name__
         else:
-            raise ValueError("Must be a str or a bluesky plan funtcion")
+            raise ValueError("Must be a str or a bluesky plan function")
 
         params = self._args_and_kwargs_to_params(plan, args=args, kwargs=kwargs)
 
