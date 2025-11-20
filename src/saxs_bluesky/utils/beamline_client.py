@@ -72,7 +72,6 @@ class BlueAPIPythonClient(BlueapiClient):
         ):
             params = self._convert_args_to_kwargs(plan, args)
             return params
-
         elif (
             args and kwargs and hasattr(plan, "__code__") and not isinstance(plan, str)
         ):
