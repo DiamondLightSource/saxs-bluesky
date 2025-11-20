@@ -61,6 +61,7 @@ class BlueAPIPythonClient(BlueapiClient):
     ) -> dict:
         if not args and not kwargs:
             params = {}
+            return params
         elif (
             args
             and (not kwargs)
@@ -68,12 +69,14 @@ class BlueAPIPythonClient(BlueapiClient):
             and not isinstance(plan, str)
         ):
             params = self._convert_args_to_kwargs(plan, args)
+            return params
 
         elif (
             args and kwargs and hasattr(plan, "__code__") and not isinstance(plan, str)
         ):
             params = self._convert_args_to_kwargs(plan, args)
             params.update(kwargs)
+            return params
         elif isinstance(plan, str) and not kwargs:
             raise ValueError("If you pass the bluesky plan str, you must give kwargs")
         elif isinstance(plan, str) and args and (not kwargs):
@@ -82,8 +85,6 @@ class BlueAPIPythonClient(BlueapiClient):
             )
         else:
             raise ValueError("Could not infer parameters from args and kwargs")
-
-        return params
 
     def run(self, plan: str | Callable, *args, **kwargs):
         """Run a bluesky plan via BlueAPI."""
@@ -95,7 +96,7 @@ class BlueAPIPythonClient(BlueapiClient):
         else:
             raise ValueError("Must be a str or a bluesky plan funtcion")
 
-        params = self._args_and_kwargs_to_params(plan, *args, **kwargs)
+        params = self._args_and_kwargs_to_params(plan, args=args, kwargs=kwargs)
 
         task = TaskRequest(
             name=plan_name,

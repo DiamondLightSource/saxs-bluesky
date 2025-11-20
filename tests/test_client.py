@@ -101,7 +101,7 @@ def test_blueapi_python_client_without_callback_run(
 
 class MockPlanName:
     def __init__(self, name: str):
-        self.name = name
+        self.__name__ = name
 
 
 @pytest.mark.parametrize(
