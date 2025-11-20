@@ -48,7 +48,6 @@ class BlueAPIPythonClient(BlueapiClient):
 
     def _convert_args_to_kwargs(self, plan: Callable, args: tuple) -> dict:
         arg_names = plan.__code__.co_varnames
-
         inferred_kwargs = {}
 
         for key, val in zip(arg_names, args):  # noqa intentionally not strict
@@ -103,39 +102,9 @@ class BlueAPIPythonClient(BlueapiClient):
             instrument_session=self.instrument_session,
         )
         if self.callback:
-            try:
-                progress_bar = CliEventRenderer()
-                callback = BestEffortCallback()
-
-                def on_event(event: AnyEvent) -> None:
-                    if isinstance(event, ProgressEvent):
-                        progress_bar.on_progress_event(event)
-                    elif isinstance(event, DataEvent):
-                        callback(event.name, event.doc)
-
-                resp = self.run_task(task, on_event=on_event, timeout=self.timeout)
-
-                if (
-                    (resp.task_status is not None)
-                    and (resp.task_status.task_complete)
-                    and (not resp.task_status.task_failed)
-                ):
-                    print(f"{plan_name} succeeded")
-
-                return
-
-            except Exception as e:
-                raise Exception(f"Task could not run: {e}") from e
-
+            self.send_with_callback(plan_name, task)
         else:
-            for _ in range(self.retries):
-                try:
-                    server_task = self.create_and_start_task(task)
-                    print(f"{plan_name} task sent as {server_task.task_id}")
-                    break
-                except BlueskyRemoteControlError:
-                    time.sleep(1)
-            return
+            self.send_without_callback(plan_name, task)
 
     def return_detectors(self) -> list[StandardReadable]:
         """Return a list of StandardReadable for the current beamline."""
@@ -158,3 +127,43 @@ class BlueAPIPythonClient(BlueapiClient):
         for dev in devices:
             print(dev.name)
         print(f"Total devices: {len(devices)} \n")
+
+    def send_with_callback(self, plan_name: str, task: TaskRequest):
+        try:
+            progress_bar = CliEventRenderer()
+            callback = BestEffortCallback()
+
+            def on_event(event: AnyEvent) -> None:
+                if isinstance(event, ProgressEvent):
+                    progress_bar.on_progress_event(event)
+                elif isinstance(event, DataEvent):
+                    callback(event.name, event.doc)
+
+            resp = self.run_task(task, on_event=on_event, timeout=self.timeout)
+
+            if (
+                (resp.task_status is not None)
+                and (resp.task_status.task_complete)
+                and (not resp.task_status.task_failed)
+            ):
+                print(f"{plan_name} succeeded")
+
+            return
+
+        except Exception as e:
+            raise Exception(f"Task could not run: {e}") from e
+
+    def send_without_callback(self, plan_name: str, task: TaskRequest):
+        success = False
+
+        for _ in range(self.retries):
+            try:
+                server_task = self.create_and_start_task(task)
+                print(f"{plan_name} task sent as {server_task.task_id}")
+                success = True
+                break
+            except BlueskyRemoteControlError:
+                time.sleep(1)
+
+        if not success:
+            raise Exception("Task could not be executed")
