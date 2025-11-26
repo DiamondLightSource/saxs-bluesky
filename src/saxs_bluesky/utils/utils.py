@@ -108,8 +108,8 @@ def open_scripting(beamline: str | None = None):
     if beamline is None:
         beamline = get_saxs_beamline()
 
-    root_path = Path(saxs_bluesky.__file__).parent.parent.parent
-    example_path = os.path.join(root_path, "user_scripts", f"{beamline}")
+    root_path = Path(saxs_bluesky.__file__).parent.parent.parent.parent
+    example_path = os.path.join(root_path, "saxs-bluesky","user_scripts", f"{beamline}")
 
     try:
         subprocess.run([f"module load vscode; code {example_path}"], shell=True)
