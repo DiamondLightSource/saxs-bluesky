@@ -119,6 +119,30 @@ def open_scripting(beamline: str | None = None):
         print("Scripts located at:", example_path)
 
 
+def open_gda_client(beamline: str | None = None):
+    if beamline is None:
+        beamline = get_saxs_beamline()
+
+    command_list = ["gda", "client", "--properties"]
+    beamline_gda_properties = f"/dls_sw/{beamline}/software/gda_versions/gda/workspace_git/gda-diamond.git/configurations/{beamline}-config/properties/live/bluesky.properties"  # noqa
+
+    command_list.append(beamline_gda_properties)
+    command_str = " ".join(command_list)
+    subprocess.run(command_str, shell=True, start_new_session=True)
+
+
+def restart_gda_server(beamline: str | None = None):
+    if beamline is None:
+        beamline = get_saxs_beamline()
+
+    command_list = ["gda", "servers", "restart", "--properties"]
+    beamline_gda_properties = f"/dls_sw/{beamline}/software/gda_versions/gda/workspace_git/gda-diamond.git/configurations/{beamline}-config/properties/live/bluesky.properties"  # noqa
+
+    command_list.append(beamline_gda_properties)
+    command_str = " ".join(command_list)
+    subprocess.run(command_str, shell=True, start_new_session=True)
+
+
 def save_panda_cli(
     beamline: str | None = None,
     panda_name: str | None = None,

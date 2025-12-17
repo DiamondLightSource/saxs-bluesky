@@ -7,7 +7,9 @@ from saxs_bluesky.gui.panda_gui import PandAGUI
 from saxs_bluesky.utils.utils import (
     authenticate,
     load_beamline_config,
+    open_gda_client,
     open_scripting,
+    restart_gda_server,
     save_panda_cli,
 )
 
@@ -31,6 +33,16 @@ def gui():
 @main.command(name="login")
 def login():
     authenticate()
+
+
+@main.command(name="gdaclient")
+def gdaclient():
+    open_gda_client()
+
+
+@main.command(name="gdaserver")
+def gdaserver():
+    restart_gda_server()
 
 
 @main.command(name="scripts")
