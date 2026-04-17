@@ -6,7 +6,7 @@ import bluesky.plan_stubs as bps
 import pytest
 from bluesky import RunEngine
 from dodal.devices.motors import Motor
-from ophyd_async.core import StandardDetector, TriggerInfo, init_devices
+from ophyd_async.core import TriggerInfo, init_devices
 from ophyd_async.epics.adpilatus import PilatusDetector
 from ophyd_async.fastcs.panda import HDFPanda
 
@@ -30,7 +30,7 @@ from saxs_bluesky.stubs.panda_stubs import (
     get_settings_dir_and_name,
     load_settings_to_panda,
     log_deadtime,
-    make_beamline_devices,
+    # make_beamline_devices,
     return_module_name,
     save_device_to_yaml,
     wait_until_complete,
@@ -223,14 +223,14 @@ def test_return_module_name():
     assert module_name == f"dodal.beamlines.{beamline}"
 
 
-def test_make_beamline_devices():
-    beamline = "i22"
+# def test_make_beamline_devices():
+#     beamline = "i22"
 
-    beamline_devices = make_beamline_devices(beamline)
+#     beamline_devices = make_beamline_devices(beamline)
 
-    saxs_standard_detector = beamline_devices["saxs"]
+#     saxs_standard_detector = beamline_devices["saxs"]
 
-    assert isinstance(saxs_standard_detector, StandardDetector)
+#     assert isinstance(saxs_standard_detector, StandardDetector)
 
 
 @patch("saxs_bluesky.stubs.panda_stubs.LOGGER")

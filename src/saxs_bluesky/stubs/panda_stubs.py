@@ -7,7 +7,7 @@ import bluesky.plan_stubs as bps
 from bluesky.utils import MsgGenerator, short_uid
 from dodal.beamlines import module_name_for_beamline
 from dodal.log import LOGGER
-from dodal.utils import AnyDevice, make_all_devices, make_device
+from dodal.utils import make_device
 from ophyd_async.core import (
     StandardDetector,
     StandardFlyer,
@@ -57,16 +57,21 @@ def return_module_name(beamline: str) -> str:
     return f"dodal.beamlines.{module_name}"
 
 
-def make_beamline_devices(beamline: str) -> dict[str, AnyDevice]:
-    """
-    Takes the name of a beamline and async creates all the devices for a beamline,
-    whether they are connected or not.
-    """
+# def make_beamline_devices(beamline: str) -> dict[str, AnyDevice]:
+#     """
+#     Takes the name of a beamline and async creates all the devices for a beamline,
+#     whether they are connected or not.
+#     """
 
-    module = return_module_name(beamline)
-    beamline_devices, _ = make_all_devices(module)
+#     module = return_module_name(beamline)
 
-    return beamline_devices
+#     beamline_devices, _ = make_all_devices(module)
+
+#     print(module)
+
+#     print(beamline_devices, _)
+
+#     return beamline_devices
 
 
 def fly_and_collect_with_wait(
