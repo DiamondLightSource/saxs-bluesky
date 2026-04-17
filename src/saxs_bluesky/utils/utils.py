@@ -8,7 +8,6 @@ from blueapi.service.interface import config
 
 ############################################################################################
 from dodal.common import inject
-from dodal.log import LOGGER
 from dodal.utils import get_beamline_name
 from ophyd_async.core import StandardDetector
 
@@ -26,17 +25,17 @@ def get_saxs_beamline() -> str:
     Returns:
         str: The beamline name.
     """
-    beamline = get_beamline_name(os.getenv("BEAMLINE"))  # type: ignore
+    beamline = None
 
-    if beamline is None:
+    try:
         blueapi_metadata = config().env.metadata
         if blueapi_metadata is not None:
             beamline = blueapi_metadata.instrument
-        else:
-            beamline = DEFAULT_BEAMLINE
-            LOGGER.info(
-                f"No beamline is set in metadata. Beamline has defaulted to {beamline}"
-            )
+    except Exception:
+        beamline = get_beamline_name(DEFAULT_BEAMLINE)
+
+    if beamline is None:
+        raise ValueError("No beamline set")
 
     return beamline
 
