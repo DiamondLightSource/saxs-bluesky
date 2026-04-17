@@ -14,7 +14,7 @@ from saxs_bluesky.utils.utils import (
     get_blueapi_config_path,
     load_beamline_config,
     open_scripting,
-    return_standard_detectors,
+    # return_standard_detectors,
     save_panda_cli,
 )
 
@@ -47,9 +47,9 @@ def test_fast_detectors_without_beamline_env_var_makes_set():
     assert len(FAST_DETECTORS) == 4
 
 
-def test_return_standard_detectors():
-    standard_detector_list_i22 = return_standard_detectors("i22")
-    assert "saxs" in standard_detector_list_i22
+# def test_return_standard_detectors():
+#     standard_detector_list_i22 = return_standard_detectors("i22")
+#     assert "saxs" in standard_detector_list_i22
 
 
 @pytest.mark.parametrize(

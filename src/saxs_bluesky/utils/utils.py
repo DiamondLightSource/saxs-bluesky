@@ -7,10 +7,7 @@ from pathlib import Path
 from blueapi.service.interface import config
 
 ############################################################################################
-from dodal.common import inject
-from dodal.log import LOGGER
 from dodal.utils import get_beamline_name
-from ophyd_async.core import StandardDetector
 
 import saxs_bluesky.beamline_configs
 import saxs_bluesky.blueapi_configs
@@ -26,17 +23,17 @@ def get_saxs_beamline() -> str:
     Returns:
         str: The beamline name.
     """
-    beamline = get_beamline_name(os.getenv("BEAMLINE"))  # type: ignore
+    beamline = None
+
+    blueapi_metadata = config().env.metadata
+    if blueapi_metadata is not None:
+        beamline = blueapi_metadata.instrument
 
     if beamline is None:
-        blueapi_metadata = config().env.metadata
-        if blueapi_metadata is not None:
-            beamline = blueapi_metadata.instrument
-        else:
-            beamline = DEFAULT_BEAMLINE
-            LOGGER.info(
-                f"No beamline is set in metadata. Beamline has defaulted to {beamline}"
-            )
+        beamline = get_beamline_name(DEFAULT_BEAMLINE)
+
+    if beamline is None:
+        raise ValueError("No beamline set")
 
     return beamline
 
@@ -61,30 +58,30 @@ def load_beamline_config():
     return beamline_config
 
 
-def return_standard_detectors(beamline: str) -> list[StandardDetector]:
-    """
-    Attempt to return a list of standard detectors for the given beamline.
+# def return_standard_detectors(beamline: str) -> list[StandardDetector]:
+#     """
+#     Attempt to return a list of standard detectors for the given beamline.
 
-    Args:
-        beamline: The beamline name (e.g., "i22").
+#     Args:
+#         beamline: The beamline name (e.g., "i22").
 
-    Returns:
-        list[StandardDetector]: List of instantiated standard detectors.
-    """
-    standard_detector_list = []
-    # Import the beamline module dynamically
-    beamline_module = import_module(f"dodal.beamlines.{beamline}")
+#     Returns:
+#         list[StandardDetector]: List of instantiated standard detectors.
+#     """
+#     standard_detector_list = []
+#     # Import the beamline module dynamically
+#     beamline_module = import_module(f"dodal.beamlines.{beamline}")
 
-    for variable in dir(beamline_module):
-        if variable.islower():  # only devices will be lowercase
-            try:
-                obj = getattr(beamline_module, variable)("", None)
-                if isinstance(obj, StandardDetector):
-                    standard_detector_list.append(inject(variable))
-            except Exception:
-                continue
+#     for variable in dir(beamline_module):
+#         if variable.islower():  # only devices will be lowercase
+#             try:
+#                 obj = getattr(beamline_module, variable)("", None)
+#                 if isinstance(obj, StandardDetector):
+#                     standard_detector_list.append(inject(variable))
+#             except Exception:
+#                 continue
 
-    return standard_detector_list
+#     return standard_detector_list
 
 
 def get_blueapi_config_path(beamline: str | None = None):
