@@ -14,9 +14,13 @@ from ophyd_async.core import (
     YamlSettingsProvider,
     wait_for_value,
 )
-from ophyd_async.fastcs.panda import HDFPanda, PcompInfo, SeqTableInfo
-from ophyd_async.plan_stubs import (
+from ophyd_async.fastcs.panda import (
+    HDFPanda,
+    PcompInfo,
+    SeqTableInfo,
     apply_panda_settings,
+)
+from ophyd_async.plan_stubs import (
     apply_settings_if_different,
     retrieve_settings,
     store_settings,
