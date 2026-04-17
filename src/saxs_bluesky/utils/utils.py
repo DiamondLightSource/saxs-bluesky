@@ -27,11 +27,11 @@ def get_saxs_beamline() -> str:
     """
     beamline = None
 
-    try:
-        blueapi_metadata = config().env.metadata
-        if blueapi_metadata is not None:
-            beamline = blueapi_metadata.instrument
-    except Exception:
+    blueapi_metadata = config().env.metadata
+    if blueapi_metadata is not None:
+        beamline = blueapi_metadata.instrument
+
+    if beamline is None:
         beamline = get_beamline_name(DEFAULT_BEAMLINE)
 
     if beamline is None:
