@@ -345,6 +345,9 @@ class PandAGUI:
 
     def login(self):
         authenticate()
+        self.commit_config()
+        self.window.destroy()
+        PandAGUI(configuration=self.configuration)
 
     def show_wiring_config(self):
         fig, ax = plt.subplots(1, 1, figsize=(16, 8))
