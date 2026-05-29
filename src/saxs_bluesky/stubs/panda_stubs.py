@@ -92,7 +92,9 @@ def fly_and_collect_with_wait(
     yield from bps.declare_stream(*detectors, name=stream_name, collect=True)
     yield from bps.kickoff(flyer, wait=True)
     for detector in detectors:
-        yield from bps.kickoff(detector)
+        yield from bps.kickoff(detector, wait=True)
+
+    LOGGER.info("Done kickoff")
 
     # collect_while_completing
     group = short_uid(label="complete")

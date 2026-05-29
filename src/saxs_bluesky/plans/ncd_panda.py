@@ -1,3 +1,4 @@
+import copy
 from typing import Annotated, Any
 
 import bluesky.plan_stubs as bps
@@ -7,6 +8,7 @@ import numpy as np
 from bluesky.utils import MsgGenerator
 from dodal.common import inject
 from dodal.devices.motors import Motor
+from dodal.devices.tetramm import TetrammDetector
 from dodal.log import LOGGER
 from dodal.plan_stubs.data_session import attach_data_session_metadata_decorator
 from ophyd_async.core import (
@@ -26,6 +28,7 @@ from ophyd_async.fastcs.panda import (
 from ophyd_async.plan_stubs import (
     ensure_connected,
 )
+from ophyd_async.plan_stubs._wait_for_awaitable import wait_for_awaitable
 from pydantic import validate_call
 
 from saxs_bluesky.stubs.panda_stubs import (
@@ -109,14 +112,19 @@ def set_panda_pulses(
 
 def return_deadtime(
     detectors: list[StandardDetector], exposure: float = 1.0
-) -> np.ndarray:
+) -> MsgGenerator[np.ndarray]:
     """
     Given a list of connected detector devices, and an exposure time,
     it returns an array of the deadtime for each detector
     """
 
+    deadtimes = []
+    for det in detectors:
+        (det_deadtime,) = yield from bps.wait_for([det.get_trigger_deadtime])
+        deadtimes.append(det_deadtime.result()[1])
+
     deadtime = (
-        np.array([det._controller.get_deadtime(exposure) for det in detectors])  # noqa: SLF001
+        np.array(deadtimes)  # noqa: SLF001
         + 20e-6  # Buffer added to deadtime to handle minor discrepencies between det
         # and panda clocks
     )
@@ -127,13 +135,15 @@ def generate_repeated_trigger_info(
     profile: Profile,
     max_deadtime: float,
     livetime: float,
-    trigger=DetectorTrigger.CONSTANT_GATE,
+    trigger=DetectorTrigger.EXTERNAL_LEVEL,
 ) -> list[TriggerInfo]:
     repeated_trigger_info = []
 
     # [3, 1, 1, 1, 1] or something
-    n_triggers = [group.frames for group in profile.groups]
+    n_triggers = sum([group.frames for group in profile.groups if group.run_pulses[2]])
     repeats = profile.repeats
+
+    LOGGER.info(f"Setting up with {profile}")
 
     if profile.multiplier is not None:
         for multiplier in profile.multiplier:
@@ -142,8 +152,8 @@ def generate_repeated_trigger_info(
                 trigger=trigger,
                 deadtime=max_deadtime,
                 livetime=profile.duration,
-                exposures_per_event=multiplier,
-                exposure_timeout=None,
+                collections_per_event=multiplier,
+                exposure_timeout=100000,  # Needs a fix
             )
 
             repeated_trigger_info.append(trigger_info)
@@ -255,7 +265,7 @@ def configure_panda_triggering(
     for det in detectors:
         LOGGER.info(str(det))
 
-    detector_deadtime = return_deadtime(
+    detector_deadtime = yield from return_deadtime(
         detectors=list(detectors), exposure=profile.duration
     )
 
@@ -302,7 +312,6 @@ def configure_panda_triggering(
     yield from set_trigger_info(trigger_info=trigger_info)  # store the profile globally
 
 
-@attach_data_session_metadata_decorator()
 @validate_call(config={"arbitrary_types_allowed": True})
 def run_panda_triggering(
     panda: HDFPanda = DEFAULT_PANDA,
@@ -312,7 +321,7 @@ def run_panda_triggering(
     """
 
     This will run whatever flyscanning settings
-    are currenly loaded on the PandA and start it triggering
+    are currently loaded on the PandA and start it triggering
 
     """
 
@@ -325,6 +334,17 @@ def run_panda_triggering(
         raise ValueError("No detectors have been set, use set_detectors")
     else:
         detectors: list[StandardDetector] = STORED_DETECTORS  # type: ignore
+
+    if STORED_PROFILE is None:
+        raise ValueError("No profile has been set, use configure_panda_triggering")
+    else:
+        profile: Profile = STORED_PROFILE  # type: ignore
+
+    count_times = []
+    for group in profile.groups:
+        # Assumes det only triggered on run
+        if group.run_pulses[2]:  # Pull into det const
+            count_times.extend([group.run_time_s] * group.frames)
 
     # Collect metadata
     plan_args = {
@@ -339,6 +359,7 @@ def run_panda_triggering(
     _md = {
         "detectors": {device.name for device in detectors},
         "plan_args": plan_args,
+        "count_time": count_times,
         "hints": {},
     }
     _md.update(metadata or {})
@@ -354,15 +375,30 @@ def run_panda_triggering(
         trigger_logic = StaticSeqTableTriggerLogic(panda_seq_table)
         flyer = StandardFlyer(trigger_logic)
 
+        nonlocal detectors
+
         # detectors = detectors + [panda]  # panda must be added so we can get HDF
         all_devices = detectors + DEFAULT_BASELINE
 
         # STAGE SETS HDF WRITER TO ON
         yield from bps.stage_all(*all_devices, flyer, group="setup")
 
-        for det in detectors:
+        LOGGER.info("Done stage")
+
+        tetramms = [obj for obj in detectors if isinstance(obj, TetrammDetector)]
+
+        for det in tetramms:
             ###this tells the detector how may triggers to expect and sets the CAN aquir
-            yield from bps.prepare(det, trigger_info, wait=True, group="setup")
+            yield from bps.abs_set(det.driver.values_per_reading, 5)
+            tetramm_trigger = copy.deepcopy(trigger_info)
+            tetramm_trigger.trigger = DetectorTrigger.EXTERNAL_EDGE
+            yield from bps.prepare(det, tetramm_trigger, group="setup")
+
+        for det in [obj for obj in detectors if not isinstance(obj, TetrammDetector)]:
+            ###this tells the detector how may triggers to expect and sets the CAN aquir
+            yield from bps.prepare(det, trigger_info, group="setup")
+
+        LOGGER.info("Done prepare")
 
         yield from bps.wait(group="setup", timeout=DEFAULT_TIMEOUT * len(detectors))
 
@@ -371,6 +407,8 @@ def run_panda_triggering(
             detectors=list(detectors),
             flyer=flyer,
         )
+
+        LOGGER.info("Done flying")
 
         yield from wait_until_complete(panda_seq_table.active, False)
 

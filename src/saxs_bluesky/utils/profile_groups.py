@@ -167,27 +167,30 @@ class Profile(BaseModel):
     @property
     def triggers(self) -> list[int]:
         # [3, 1, 1, 1, 1] or something
-        return [group.frames for group in self.groups if group.active]
+        return [
+            group.frames
+            for group in self.groups
+            if group.active and group.run_pulses[2]
+        ]
 
     def return_trigger_info(
         self,
         max_deadtime: float,
-        trigger_type=DetectorTrigger.VARIABLE_GATE,
+        trigger_type=DetectorTrigger.EXTERNAL_LEVEL,
     ) -> TriggerInfo:
         trigger_info = TriggerInfo(
             number_of_events=self.number_of_events,
             trigger=trigger_type,  # or maybe EDGE_TRIGGER or #VARIABLE_GATE
             deadtime=max_deadtime + ((max_deadtime) / 10),
             livetime=self.max_livetime,
-            exposures_per_event=1,
             exposure_timeout=self.duration + 1,
         )
 
         return trigger_info
 
     @property
-    def number_of_events(self) -> list[int]:
-        return self.triggers * self.repeats
+    def number_of_events(self) -> int:
+        return sum(self.triggers) * self.repeats
 
     def append_group(self, group: Group) -> None:
         self.groups.append(deepcopy(group))
