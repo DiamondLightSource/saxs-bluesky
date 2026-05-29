@@ -13,7 +13,7 @@ classifiers = [
 description = "Bluesky plans, plan stubs and utilities for Small Angle Scattering beamline at DLS"
 dependencies = [
     "dls-dodal @ git+https://github.com/DiamondLightSource/dodal.git@main",
-    "ophyd_async >=v0.16",
+    "ophyd_async == v0.17a4",
     "numpy",
     "blueapi >= 1.2.1",
     "matplotlib",
@@ -50,6 +50,9 @@ GitHub = "https://github.com/DiamondLightSource/saxs-bluesky"
 email = "richard.dixey@diamond.ac.uk"
 name = "Richard Dixey"
 
+[[project.authors]] # Further authors may be added by duplicating this section
+email = "dominic.oram@diamond.ac.uk"
+name = "Dominic Oram"
 
 [tool.setuptools_scm]
 version_file = "src/saxs_bluesky/_version.py"
@@ -64,7 +67,11 @@ addopts = """
     --tb=native -vv
     """
 # https://iscinumpy.gitlab.io/post/bound-version-constraints/#watch-for-warnings
-filterwarnings = "error"
+filterwarnings = [
+    "error",
+    # See https://github.com/open-telemetry/opentelemetry-python/issues/5231
+    "ignore:SelectableGroups dict interface is deprecated:DeprecationWarning",
+]
 # Doctest python code in docs, python code in src docstrings, test functions in tests
 testpaths = "docs src tests"
 
