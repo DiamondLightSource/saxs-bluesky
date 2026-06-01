@@ -710,9 +710,9 @@ def run_panda_triggering(
             ###this tells the detector how may triggers to expect and sets the CAN aquir
             yield from bps.prepare(det, trigger_info, group="setup")
 
-        LOGGER.info("Done prepare")
-
         yield from bps.wait(group="setup", timeout=DEFAULT_TIMEOUT * len(detectors))
+
+        LOGGER.info("Done prepare")
 
         yield from fly_and_collect_with_wait(
             stream_name="primary",
