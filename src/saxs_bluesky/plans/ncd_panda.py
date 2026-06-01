@@ -1,4 +1,5 @@
 import copy
+from functools import partial
 from typing import Annotated, Any
 
 import bluesky.plan_stubs as bps
@@ -7,8 +8,9 @@ import bluesky.preprocessors as bpp
 import numpy as np
 from bluesky.utils import MsgGenerator
 from dodal.common import inject
+from dodal.devices.hutch_shutter import HutchShutter, ShutterDemand
 from dodal.devices.motors import Motor
-from dodal.devices.tetramm import TetrammDetector
+from dodal.devices.tetramm import TetrammDetector, TetrammTrigger
 from dodal.log import LOGGER
 from dodal.plan_stubs.data_session import attach_data_session_metadata_decorator
 from ophyd_async.core import (
@@ -19,6 +21,7 @@ from ophyd_async.core import (
     StandardReadable,
     TriggerInfo,
 )
+from ophyd_async.epics.adpilatus import PilatusDetector
 from ophyd_async.fastcs.panda import (
     HDFPanda,
     PandaBitMux,
@@ -108,6 +111,288 @@ def set_panda_pulses(
 #         yield from bps.prepare(det, trigger_info, wait=False, group=group)
 
 #     yield from bps.wait(group=group, timeout=DEFAULT_TIMEOUT)
+
+import asyncio
+import threading
+from abc import ABCMeta, abstractmethod
+from datetime import datetime, timedelta
+from functools import partial
+
+from bluesky.run_engine import RunEngine
+from ophyd_async.core import SignalR
+
+
+class MySuspenderBase(metaclass=ABCMeta):
+    """An ABC to manage the callbacks between asyincio and pyepics.
+
+
+    Parameters
+    ----------
+    signal : `ophyd.Signal`
+        The signal to watch for changes to determine if the
+        scan should be suspended
+
+    sleep : float, optional
+        How long to wait in seconds after the resume condition is met
+        before marking the event as done.  Defaults to 0
+
+    pre_plan : iterable or iterator or generator function, optional
+            a generator, list, or similar containing `Msg` objects
+
+    post_plan : iterable or iterator or generator function, optional
+            a generator, list, or similar containing `Msg` objects
+
+    tripped_message : str, optional
+        Message to include in the trip notification
+    """
+
+    def __init__(
+        self,
+        signal: SignalR,
+        *,
+        sleep=0,
+        pre_plan=None,
+        post_plan=None,
+        tripped_message="",
+    ):
+        """ """
+        self.RE = None
+        self._ev = None
+        self._tripped = False
+        self._tripped_message = tripped_message
+        self._sleep = sleep
+        self._lock = threading.Lock()
+        self._sig = signal
+        self._pre_plan = pre_plan
+        self._post_plan = post_plan
+
+    def __repr__(self):
+        return (
+            "{}({!r}, sleep={}, pre_plan={}, post_plan={}, tripped_message={})".format(  # noqa: UP032
+                type(self).__name__,
+                self._sig,
+                self._sleep,
+                self._pre_plan,
+                self._post_plan,
+                self._tripped_message,
+            )
+        )
+
+    def install(self, RE: RunEngine, *, event_type=None):
+        """Install callback on signal
+
+        This (re)installs the required callbacks at the pyepics level
+
+        Parameters
+        ----------
+
+        RE : RunEngine
+            The run engine instance this should work on
+
+        event_type : str, optional
+            The event type (subscription type) to watch
+        """
+        with self._lock:
+            self.RE = RE
+        self._sig.subscribe(self)  # , event_type=event_type, run=True)
+
+    def remove(self):
+        """Disable the suspender
+
+        Removes the callback at the pyepics level
+        """
+        self._sig.clear_sub(self)
+        with self._lock:
+            if self.RE is not None:
+                self.__set_event(self.RE._loop)
+            self.RE = None
+            self._tripped = False
+
+    @abstractmethod
+    def _should_suspend(self, value):
+        """
+        Determine if the current value of the signal is such
+        that we need to tell the scan to suspend
+
+        Parameters
+        ----------
+        value : object
+            The value to evaluate to determine if we should
+            suspend
+
+        Returns
+        -------
+        suspend : bool
+            True means suspend
+        """
+        raise NotImplementedError()
+
+    @abstractmethod
+    def _should_resume(self, value):
+        """
+        Determine if the scan is ready to automatically
+        restart.
+
+        Parameters
+        ----------
+        value : object
+            The value to evaluate to determine if we should
+            resume
+
+        Returns
+        -------
+        suspend : bool
+            True means resume
+        """
+        raise NotImplementedError()
+
+    def __call__(self, value, **kwargs):
+        """Make the class callable so that we can
+        pass it off to the ophyd callback stack.
+
+        This expects the massive blob that comes from ophyd
+        """
+        with self._lock:
+            if self.RE is None:
+                return
+            loop = self.RE._loop
+
+            if self._should_suspend(value):
+                self._tripped = True
+                # this does dirty things with internal state
+                if self._ev is None and self.RE is not None:
+                    self.__make_event()
+                    if self._ev is None:
+                        raise RuntimeError("Could not create the suspender event")
+                    cb = partial(
+                        self.RE.request_suspend,
+                        self._ev.wait,
+                        pre_plan=self._pre_plan,
+                        post_plan=self._post_plan,
+                        justification=self._get_justification(),
+                    )
+                    if self.RE.state.is_running:
+                        loop.call_soon_threadsafe(cb)
+            elif self._should_resume(value):
+                self.__set_event(loop)
+                self._tripped = False
+
+    def __make_event(self):
+        """Make or return the asyncio.Event to use as a bridge."""
+        assert self._lock.locked()
+        if self._ev is None and self.RE is not None:
+            if threading.get_ident() == getattr(self.RE._loop, "_thread_id", "unknown"):
+                self._ev = asyncio.Event()
+                return self._ev
+            else:
+                th_ev = threading.Event()
+
+                def really_make_the_event():
+                    self._ev = asyncio.Event()
+                    th_ev.set()
+
+                h = self.RE._loop.call_soon_threadsafe(really_make_the_event)
+                if not th_ev.wait(0.1):
+                    h.cancel()
+        return self._ev
+
+    def __set_event(self, loop):
+        """Notify the event that it can resume"""
+        assert self._lock.locked()
+        if self._ev:
+            ev = self._ev
+            sleep = self._sleep
+
+            def local():
+                ts = (datetime.now() + timedelta(seconds=sleep)).strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                )
+                print(
+                    f"Suspender {self!r} reports a return to nominal "
+                    f"conditions. Will sleep for {sleep} seconds and then "
+                    f"release suspension at {ts}."
+                )
+                # we can use call_later here because this function
+                # is scheduled to be run in the event loop thread
+                # by the `call_soon_threadsafe` call just below.
+                loop.call_later(sleep, ev.set)
+
+            loop.call_soon_threadsafe(local)
+        # clear that we have an event
+        self._ev = None
+
+    def get_futures(self):
+        """Return a list of futures to wait on.
+
+        This will only work correctly if this suspender is 'installed'
+        and watching a signal
+
+        Returns
+        -------
+        futs : list
+            List of futures to wait on
+
+        justification : str
+            String explaining why the suspender is tripped
+        """
+        if not self.tripped:
+            return [], ""
+        with self._lock:
+            return [self.__make_event().wait], self._get_justification()
+
+    @property
+    def tripped(self):
+        return self._tripped
+
+    def _get_justification(self):
+        if not self.tripped:
+            return ""
+
+        template = "Suspender of type {} stopped by signal {!r}"
+        just = template.format(self.__class__.__name__, self._sig)
+        return ": ".join(s for s in (just, self._tripped_message) if s)
+
+
+class CountRateProtectionSuspender(MySuspenderBase):
+    def __init__(
+        self,
+        max_signal,
+        min_exposure_time_seconds: float,
+        close_shutters_plan,
+    ):
+        self.min_exposure_time_seconds = min_exposure_time_seconds
+        self.close_shutters_plan = close_shutters_plan
+
+        super().__init__(
+            max_signal,
+            sleep=0,
+            pre_plan=self.abort,
+            post_plan=None,
+        )
+
+    def abort(self):
+        yield from self.close_shutters_plan()
+        if self.last_value > 1e6:
+            raise Exception(
+                f"Detector saturated with {self.last_value} counts, assuming countrate exceeded and closing shutters"
+            )
+        else:
+            raise Exception(
+                f"Countrate likely exceeded. {self.last_value} counts seen and minimum collection time is {self.min_exposure_time_seconds}s"
+            )
+
+    def _should_suspend(self, value):
+        self.last_value = value[self._sig.name]["value"]
+        return (
+            self.last_value > 1e6
+            or self.last_value / self.min_exposure_time_seconds > 4e6
+        )
+
+    def _should_resume(self, value):
+        return False
+
+    def _get_justification(self):
+        return ""
 
 
 def return_deadtime(
@@ -312,11 +597,20 @@ def configure_panda_triggering(
     yield from set_trigger_info(trigger_info=trigger_info)  # store the profile globally
 
 
+def cleanup_tetramms(tetramms: list[TetrammDetector]):
+    """In general we want to leave the tetramms free running so that we can monitor them
+    in e.g. GDA"""
+    for tetramm in tetramms:
+        yield from bps.mv(tetramm.driver.trigger_mode, TetrammTrigger.FREE_RUN)
+        yield from bps.abs_set(tetramm.driver.acquire, True)
+
+
 @validate_call(config={"arbitrary_types_allowed": True})
 def run_panda_triggering(
     panda: HDFPanda = DEFAULT_PANDA,
     baseline: list[StandardReadable] = DEFAULT_BASELINE,
     metadata: dict[str, Any] | None = None,
+    shutters: list[HutchShutter] = [inject("saxs_shutter"), inject("eh_shutter")],
 ) -> MsgGenerator:
     """
 
@@ -346,6 +640,9 @@ def run_panda_triggering(
         if group.run_pulses[2]:  # Pull into det const
             count_times.extend([group.run_time_s] * group.frames)
 
+    tetramms = [obj for obj in detectors if isinstance(obj, TetrammDetector)]
+    pilatus_detectors = [obj for obj in detectors if isinstance(obj, PilatusDetector)]
+
     # Collect metadata
     plan_args = {
         "total_frames": trigger_info.number_of_events,
@@ -364,10 +661,26 @@ def run_panda_triggering(
     }
     _md.update(metadata or {})
 
+    def close_shutters(shutters):
+        for shutter in shutters:
+            yield from bps.abs_set(shutter, ShutterDemand.CLOSE, group="shutter_close")
+        yield from bps.wait("shutter_close")
+
+    suspenders = [
+        CountRateProtectionSuspender(
+            detector.get_plugin("stats").cursor_x,
+            profile.min_livetime,
+            partial(close_shutters, shutters),
+        )
+        for detector in pilatus_detectors
+    ]
+
     ##################
 
     @bpp.baseline_decorator(baseline)
     @bpp.run_decorator(md=_md)
+    @bpp.finalize_decorator(partial(cleanup_tetramms, tetramms))
+    @bpp.suspend_decorator(suspenders)
     def inner_run():
         # get the loaded seq table
         panda_seq_table = panda.seq[CONFIG.DEFAULT_SEQ]
@@ -385,13 +698,12 @@ def run_panda_triggering(
 
         LOGGER.info("Done stage")
 
-        tetramms = [obj for obj in detectors if isinstance(obj, TetrammDetector)]
-
         for det in tetramms:
             ###this tells the detector how may triggers to expect and sets the CAN aquir
-            yield from bps.abs_set(det.driver.values_per_reading, 5)
+            yield from bps.abs_set(det.driver.values_per_reading, 10)
             tetramm_trigger = copy.deepcopy(trigger_info)
             tetramm_trigger.trigger = DetectorTrigger.EXTERNAL_EDGE
+            tetramm_trigger.livetime = profile.min_livetime
             yield from bps.prepare(det, tetramm_trigger, group="setup")
 
         for det in [obj for obj in detectors if not isinstance(obj, TetrammDetector)]:
@@ -464,14 +776,10 @@ def configure_and_run_panda_triggering(
 
 @validate_call(config={"arbitrary_types_allowed": True})
 def set_detectors(
-    detectors: list[str] | list[StandardDetector],
+    detectors: list[StandardDetector],
 ) -> MsgGenerator:
     global STORED_DETECTORS
-
-    if isinstance(detectors[0], StandardDetector):
-        STORED_DETECTORS = detectors
-    else:
-        STORED_DETECTORS = [inject(f) for f in detectors]  # type: ignore
+    STORED_DETECTORS = detectors
 
     yield from bps.null()
 

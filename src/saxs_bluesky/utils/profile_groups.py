@@ -135,6 +135,10 @@ class Profile(BaseModel):
         return np.amax([g.run_time_s for g in self.groups])
 
     @property
+    def min_livetime(self) -> float:
+        return np.amin([g.run_time_s for g in self.groups])
+
+    @property
     def duration(self) -> float:
         duration = self.duration_per_repeat * self.repeats
         return duration
