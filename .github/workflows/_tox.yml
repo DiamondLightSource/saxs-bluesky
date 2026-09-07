@@ -13,10 +13,14 @@ jobs:
 
     steps:
       - name: Checkout
+<<<<<<< before updating
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+=======
+        uses: actions/checkout@v7
+>>>>>>> after updating
 
-      - name: Install python packages
-        uses: ./.github/actions/install_requirements
+      - name: Install uv
+        uses: astral-sh/setup-uv@v10.0.0
 
       - name: Run tox
-        run: tox -e ${{ inputs.tox }}
+        run: uv run --locked tox -e ${{ inputs.tox }}
