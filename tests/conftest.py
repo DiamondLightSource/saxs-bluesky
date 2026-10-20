@@ -9,10 +9,10 @@ from ophyd_async.core import AsyncStatus, TriggerInfo, init_devices
 from ophyd_async.epics.adpilatus import PilatusDetector
 from ophyd_async.fastcs.panda import HDFPanda
 
-SAXS_bluesky_ROOT = Path(__file__)
+SCM_BLUESKY_ROOT = Path(__file__)
 
 YAML_DIR = os.path.join(
-    SAXS_bluesky_ROOT.parent.parent, "src", "scm_bluesky", "profile_yamls"
+    SCM_BLUESKY_ROOT.parent.parent, "src", "scm_bluesky", "profile_yamls"
 )
 
 

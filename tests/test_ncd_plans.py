@@ -37,10 +37,10 @@ from scm_bluesky.stubs.panda_stubs import (
 )
 from scm_bluesky.utils.profile_groups import Group, Profile
 
-SAXS_bluesky_ROOT = Path(__file__)
+SCM_BLUESKY_ROOT = Path(__file__)
 
 YAML_DIR = os.path.join(
-    SAXS_bluesky_ROOT.parent.parent, "src", "scm_bluesky", "profile_yamls"
+    SCM_BLUESKY_ROOT.parent.parent, "src", "scm_bluesky", "profile_yamls"
 )
 
 
