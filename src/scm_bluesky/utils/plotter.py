@@ -5,8 +5,8 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 
-from saxs_bluesky.utils.ncdcore import NCDCore
-from saxs_bluesky.utils.profile_groups import ExperimentLoader, Profile
+from scm_bluesky.utils.ncdcore import NCDCore
+from scm_bluesky.utils.profile_groups import ExperimentLoader, Profile
 
 
 class ProfilePlotter:
@@ -125,7 +125,7 @@ if __name__ == "__main__":
     _REPO_ROOT = Path(__file__).parent.parent.parent.parent
 
     default_config_path = os.path.join(
-        _REPO_ROOT, "src/saxs_bluesky/profile_yamls", "panda_config.yaml"
+        _REPO_ROOT, "src/scm_bluesky/profile_yamls", "panda_config.yaml"
     )
 
     experimental_profiles = ExperimentLoader.read_from_yaml(default_config_path)

@@ -1,4 +1,4 @@
-from saxs_bluesky.utils.ncdcore import NCDCore
+from scm_bluesky.utils.ncdcore import NCDCore
 
 
 def test_decimal_to_binary():

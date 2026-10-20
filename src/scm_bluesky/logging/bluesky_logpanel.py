@@ -2,7 +2,7 @@ import time
 from datetime import datetime
 from tkinter import Text, Tk, ttk
 
-from saxs_bluesky.logging.bluesky_messenger import MessageUnpacker, StompMessenger
+from scm_bluesky.logging.bluesky_messenger import MessageUnpacker, StompMessenger
 
 
 class BlueskyLogPanel:

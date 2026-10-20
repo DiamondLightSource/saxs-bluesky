@@ -10,7 +10,7 @@ from ophyd_async.fastcs.panda import SeqTable, SeqTableInfo, SeqTrigger
 from pydantic import BaseModel
 
 # from pydantic.dataclasses import dataclass as pydanticdataclass
-from saxs_bluesky.utils.ncdcore import NCDCore
+from scm_bluesky.utils.ncdcore import NCDCore
 
 """
 
@@ -172,14 +172,18 @@ class Profile(BaseModel):
     def return_trigger_info(
         self,
         max_deadtime: float,
-        trigger_type=DetectorTrigger.VARIABLE_GATE,
+        trigger_type=DetectorTrigger.EXTERNAL_LEVEL,  # VARIABLE_GATE,
     ) -> TriggerInfo:
         trigger_info = TriggerInfo(
-            number_of_events=self.number_of_events,
+            number_of_events=self.number_of_events[
+                0
+            ],  # FIXME ACHTUNG this cannot be a list!
+            # TODO figure out what this should actually return
+            # for now just passing first one
             trigger=trigger_type,  # or maybe EDGE_TRIGGER or #VARIABLE_GATE
             deadtime=max_deadtime + ((max_deadtime) / 10),
             livetime=self.max_livetime,
-            exposures_per_event=1,
+            exposures_per_collection=1,
             exposure_timeout=self.duration + 1,
         )
 

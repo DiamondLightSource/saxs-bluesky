@@ -1,4 +1,4 @@
-from saxs_bluesky.utils.utils import (
+from scm_bluesky.utils.utils import (
     get_saxs_beamline,
     load_beamline_config,
 )

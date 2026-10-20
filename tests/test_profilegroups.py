@@ -6,12 +6,12 @@ from ophyd_async.core import TriggerInfo
 from ophyd_async.fastcs.panda import SeqTable
 from pydantic_core import from_json
 
-from saxs_bluesky.utils.profile_groups import ExperimentLoader, Group, Profile
+from scm_bluesky.utils.profile_groups import ExperimentLoader, Group, Profile
 
-SAXS_bluesky_ROOT = Path(__file__)
+SCM_BLUESKY_ROOT = Path(__file__)
 
 yaml_dir = os.path.join(
-    SAXS_bluesky_ROOT.parent.parent, "src", "saxs_bluesky", "profile_yamls"
+    SCM_BLUESKY_ROOT.parent.parent, "src", "scm_bluesky", "profile_yamls"
 )
 
 

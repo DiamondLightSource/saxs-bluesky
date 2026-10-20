@@ -12,9 +12,9 @@ from dodal.common import inject
 from ophyd_async.core import StandardDetector, StandardReadable
 from ophyd_async.fastcs.panda import HDFPanda
 
-import saxs_bluesky.blueapi_configs
-from saxs_bluesky.utils.beamline_client import BlueAPIPythonClient
-from saxs_bluesky.utils.profile_groups import ExperimentLoader, Group, Profile
+import scm_bluesky.blueapi_configs
+from scm_bluesky.utils.beamline_client import BlueAPIPythonClient
+from scm_bluesky.utils.profile_groups import ExperimentLoader, Group, Profile
 
 BL = i22.BL
 
@@ -125,7 +125,7 @@ DEFAULT_EXPERIMENT = ExperimentLoader(
 )
 
 BLUEAPI_CONFIG_PATH = (
-    f"{os.path.dirname(saxs_bluesky.blueapi_configs.__file__)}/{BL}_blueapi_config.yaml"
+    f"{os.path.dirname(scm_bluesky.blueapi_configs.__file__)}/{BL}_blueapi_config.yaml"
 )
 CLIENT = BlueAPIPythonClient(
     BL, BLUEAPI_CONFIG_PATH, DEFAULT_INSTRUMENT_SESSION, callback=True

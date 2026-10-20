@@ -3,7 +3,7 @@
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 
-# saxs_bluesky
+# scm_bluesky
 
 Bluesky plans, plan stubs and utilities for Small Angle Scattering beamline at DLS
 
@@ -24,20 +24,21 @@ pip install -e .
 This module can then be imported and use within your python environment such as:
 
 ```python
-from saxs_bluesky import __version__
+from scm_bluesky import __version__
 
-print(f"Hello saxs_bluesky {__version__}")
+print(f"Hello scm_bluesky {__version__}")
 ```
 
 This package can be used within GDA or seperately from GDA. To use it seperately from GDA, (in python3) can be done in the following way:
 
 ```python
+from scm_bluesky.utils.profile_groups import Group, Profile
 
-from saxs_bluesky.utils.profile_groups import Group, Profile
+my_profile = Profile(
+    repeats=1, groups=[]
+)  # currently has no 'groups' - ie line in seq table
 
-my_profile = Profile(repeats=1,groups=[]) #currently has no 'groups' - ie line in seq table
-
-#now we create a group
+# now we create a group
 group = Group(
     frames=1,
     trigger="IMMEDIATE",
@@ -52,37 +53,38 @@ group = Group(
 
 my_profile.append_group(group)
 
-#now we have a profile with a single group. We can add more, delete them and have a look etc
+# now we have a profile with a single group. We can add more, delete them and have a look etc
 print(f"Duration of profile: {my_profile.duration} seconds")
 print(f"Number of frames: {my_profile.total_frames}")
 
-#you may also plot the PandA triggering sequencer
-from saxs_bluesky.utils.plotter import ProfilePlotter
+# you may also plot the PandA triggering sequencer
+from scm_bluesky.utils.plotter import ProfilePlotter
 
 plotter = ProfilePlotter(my_profile)
 plotter.plot_pulses()
 plotter.show()
-
 ```
 
 To use this in an experiment we can do this through the BlueAPIPythonClient, along with the bluesky plans that are loaded in BlueAPI. The BEAMLINE variable should already be set on the beamline, but if not it should be set first.
 
 ```python
+from scm_bluesky.beamline_configs.i22_config import CLIENT
+from scm_bluesky.plans.ncd_panda import configure_panda_triggering, run_panda_triggering
 
-from saxs_bluesky.beamline_configs.i22_config import CLIENT
-from saxs_bluesky.plans.ncd_panda import configure_panda_triggering, run_panda_triggering
-
-CLIENT.change_session("cm12345-1") # defaults to commissioning. Change the instrument session to your experiment
+CLIENT.change_session(
+    "cm12345-1"
+)  # defaults to commissioning. Change the instrument session to your experiment
 
 CLIENT.run(
     configure_panda_triggering,
     profile=my_profile,
-    detectors=["saxs", "waxs"], #whatever StandardDetectors that are created for the beamline
-) #to load all the data onto the panda and the detctors
+    detectors=[
+        "saxs",
+        "waxs",
+    ],  # whatever StandardDetectors that are created for the beamline
+)  # to load all the data onto the panda and the detctors
 
-CLIENT.run(run_panda_triggering) #to actually tun the experiment
-
-
+CLIENT.run(run_panda_triggering)  # to actually tun the experiment
 ```
 To see more extensive examples see the examples/ixx/example.py files
 

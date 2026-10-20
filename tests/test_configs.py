@@ -1,4 +1,4 @@
-from saxs_bluesky.beamline_configs import b21_config, i11_config, i22_config, p38_config
+from scm_bluesky.beamline_configs import b21_config, i11_config, i22_config, p38_config
 
 
 def test_i22_profile():

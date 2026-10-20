@@ -10,7 +10,7 @@ from ophyd_async.core import TriggerInfo, init_devices
 from ophyd_async.epics.adpilatus import PilatusDetector
 from ophyd_async.fastcs.panda import HDFPanda
 
-from saxs_bluesky.plans.ncd_panda import (
+from scm_bluesky.plans.ncd_panda import (
     append_group,
     configure_panda_triggering,
     create_profile,
@@ -26,7 +26,7 @@ from saxs_bluesky.plans.ncd_panda import (
     set_profile,
     set_trigger_info,
 )
-from saxs_bluesky.stubs.panda_stubs import (
+from scm_bluesky.stubs.panda_stubs import (
     get_settings_dir_and_name,
     load_settings_to_panda,
     log_deadtime,
@@ -35,12 +35,12 @@ from saxs_bluesky.stubs.panda_stubs import (
     save_device_to_yaml,
     wait_until_complete,
 )
-from saxs_bluesky.utils.profile_groups import Group, Profile
+from scm_bluesky.utils.profile_groups import Group, Profile
 
-SAXS_bluesky_ROOT = Path(__file__)
+SCM_BLUESKY_ROOT = Path(__file__)
 
 YAML_DIR = os.path.join(
-    SAXS_bluesky_ROOT.parent.parent, "src", "saxs_bluesky", "profile_yamls"
+    SCM_BLUESKY_ROOT.parent.parent, "src", "scm_bluesky", "profile_yamls"
 )
 
 
@@ -146,7 +146,7 @@ def test_panda_configure(
     )
 
 
-@patch("saxs_bluesky.plans.ncd_panda.DEFAULT_BASELINE")
+@patch("scm_bluesky.plans.ncd_panda.DEFAULT_BASELINE")
 def test_panda_run(
     run_engine: RunEngine,
     panda: HDFPanda,
@@ -233,7 +233,7 @@ def test_return_module_name():
 #     assert isinstance(saxs_standard_detector, StandardDetector)
 
 
-@patch("saxs_bluesky.stubs.panda_stubs.LOGGER")
+@patch("scm_bluesky.stubs.panda_stubs.LOGGER")
 def test_log_deadtime(patch_logger: MagicMock):
     log_deadtime(["saxs", "waxs"], [0.1, 0.2])
 

@@ -14,7 +14,7 @@ docker: false
 docs_type: README
 git_platform: github.com
 github_org: DiamondLightSource
-package_name: saxs_bluesky
+package_name: scm_bluesky
 pypi: false
 repo_name: saxs-bluesky
 strict_typing: false

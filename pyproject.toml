@@ -41,7 +41,7 @@ dev = [
 ]
 
 [project.scripts]
-saxs-bluesky = "saxs_bluesky.__main__:main"
+saxs-bluesky = "scm_bluesky.__main__:main"
 
 [project.urls]
 GitHub = "https://github.com/DiamondLightSource/saxs-bluesky"
@@ -52,7 +52,7 @@ name = "Richard Dixey"
 
 
 [tool.setuptools_scm]
-version_file = "src/saxs_bluesky/_version.py"
+version_file = "src/scm_bluesky/_version.py"
 
 [tool.pyright]
 typeCheckingMode = "standard"
@@ -72,7 +72,7 @@ testpaths = "docs src tests"
 asyncio_mode = "auto"
 
 [tool.coverage.run]
-data_file = "/tmp/saxs_bluesky.coverage"
+data_file = "/tmp/scm_bluesky.coverage"
 
 [tool.coverage.paths]
 # Tests are run from installed location, map back to the src directory
@@ -96,7 +96,7 @@ allowlist_externals =
 commands =
     pre-commit: pre-commit run --all-files --show-diff-on-failure {posargs}
     type-checking: pyright src tests {posargs}
-    tests: pytest --cov=saxs_bluesky --cov-report term --cov-report xml:cov.xml {posargs}
+    tests: pytest --cov=scm_bluesky --cov-report term --cov-report xml:cov.xml {posargs}
 """
 
 [tool.ruff]
