@@ -7,15 +7,15 @@ from blueapi.client.event_bus import EventBusClient
 from blueapi.client.rest import BlueapiRestClient
 from blueapi.service.model import DeviceResponse, PlanResponse
 
-import saxs_bluesky.blueapi_configs
-from saxs_bluesky.plans.ncd_panda import configure_panda_triggering
-from saxs_bluesky.utils.beamline_client import BlueAPIPythonClient
+import scm_bluesky.blueapi_configs
+from scm_bluesky.plans.ncd_panda import configure_panda_triggering
+from scm_bluesky.utils.beamline_client import BlueAPIPythonClient
 
 
 @pytest.fixture(autouse=True)
 def client():
     beamline = "i22"
-    blueapi_config_path = f"{os.path.dirname(saxs_bluesky.blueapi_configs.__file__)}/{beamline}_blueapi_config.yaml"  # noqa
+    blueapi_config_path = f"{os.path.dirname(scm_bluesky.blueapi_configs.__file__)}/{beamline}_blueapi_config.yaml"  # noqa
     client = BlueAPIPythonClient(
         beamline, blueapi_config_path, "cm12345-1", callback=True
     )
@@ -32,7 +32,7 @@ def client():
 @pytest.fixture(autouse=True)
 def client_without_callback():
     beamline = "i22"
-    blueapi_config_path = f"{os.path.dirname(saxs_bluesky.blueapi_configs.__file__)}/{beamline}_blueapi_config.yaml"  # noqa
+    blueapi_config_path = f"{os.path.dirname(scm_bluesky.blueapi_configs.__file__)}/{beamline}_blueapi_config.yaml"  # noqa
     client_without_callback = BlueAPIPythonClient(
         beamline, blueapi_config_path, "cm12345-1", callback=False
     )

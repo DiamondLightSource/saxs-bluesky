@@ -5,10 +5,10 @@ from tkinter import ttk
 from bluesky.plans import count
 from dodal.common import inject
 
-from saxs_bluesky.gui.step_gui import StepWidget
-from saxs_bluesky.logging.bluesky_logpanel import BlueskyLogPanel
-from saxs_bluesky.plans.ncd_panda import log_detectors, set_detectors
-from saxs_bluesky.utils.beamline_client import BlueAPIPythonClient
+from scm_bluesky.gui.step_gui import StepWidget
+from scm_bluesky.logging.bluesky_logpanel import BlueskyLogPanel
+from scm_bluesky.plans.ncd_panda import log_detectors, set_detectors
+from scm_bluesky.utils.beamline_client import BlueAPIPythonClient
 
 
 class ActiveDetectorsFrame(ttk.Frame):

@@ -4,11 +4,11 @@ from unittest.mock import patch
 import pytest
 from ophyd_async.fastcs.panda import HDFPanda
 
-import saxs_bluesky.beamline_configs
-import saxs_bluesky.blueapi_configs
-from saxs_bluesky.utils.plotter import ProfilePlotter
-from saxs_bluesky.utils.profile_groups import Group, Profile
-from saxs_bluesky.utils.utils import (
+import scm_bluesky.beamline_configs
+import scm_bluesky.blueapi_configs
+from scm_bluesky.utils.plotter import ProfilePlotter
+from scm_bluesky.utils.profile_groups import Group, Profile
+from scm_bluesky.utils.utils import (
     authenticate,
     get_beamline_module_name,
     get_blueapi_config_path,
@@ -62,7 +62,7 @@ def test_get_blueapi_config_path(beamline: str | None):
     if beamline is None:
         beamline = "i22"
 
-    blueapi_config_dir = os.path.dirname(saxs_bluesky.blueapi_configs.__file__)
+    blueapi_config_dir = os.path.dirname(scm_bluesky.blueapi_configs.__file__)
     blueapi_config_path = f"{blueapi_config_dir}/{beamline}_blueapi_config.yaml"
 
     assert config_path == blueapi_config_path
@@ -75,7 +75,7 @@ def test_get_blueapi_config_path(beamline: str | None):
 def test_get_beamline_config_module(beamline: str):
     config_path = get_beamline_module_name(beamline)
 
-    beamline_config = f"{saxs_bluesky.beamline_configs.__name__}.{beamline}_config"
+    beamline_config = f"{scm_bluesky.beamline_configs.__name__}.{beamline}_config"
 
     assert config_path == beamline_config
 

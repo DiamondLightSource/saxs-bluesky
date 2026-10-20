@@ -2,9 +2,9 @@
 
 import click
 
-from saxs_bluesky._version import __version__
-from saxs_bluesky.gui.panda_gui import PandAGUI
-from saxs_bluesky.utils.utils import (
+from scm_bluesky._version import __version__
+from scm_bluesky.gui.panda_gui import PandAGUI
+from scm_bluesky.utils.utils import (
     authenticate,
     load_beamline_config,
     open_gda_client,

@@ -5,8 +5,8 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 
-from saxs_bluesky.utils.ncdcore import NCDCore
-from saxs_bluesky.utils.profile_groups import ExperimentLoader, Profile
+from scm_bluesky.utils.ncdcore import NCDCore
+from scm_bluesky.utils.profile_groups import ExperimentLoader, Profile
 
 
 class ProfilePlotter:

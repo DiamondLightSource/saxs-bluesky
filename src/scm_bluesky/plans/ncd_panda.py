@@ -28,13 +28,13 @@ from ophyd_async.plan_stubs import (
 )
 from pydantic import validate_call
 
-from saxs_bluesky.stubs.panda_stubs import (
+from scm_bluesky.stubs.panda_stubs import (
     check_and_apply_panda_settings,
     fly_and_collect_with_wait,
     wait_until_complete,
 )
-from saxs_bluesky.utils.profile_groups import Group, Profile
-from saxs_bluesky.utils.utils import (
+from scm_bluesky.utils.profile_groups import Group, Profile
+from scm_bluesky.utils.utils import (
     get_saxs_beamline,
     load_beamline_config,
 )

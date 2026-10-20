@@ -2,10 +2,10 @@ import tkinter
 
 from dodal.common import inject
 
-from saxs_bluesky.gui.gui_utils import LabelEntryPair
-from saxs_bluesky.plans.ncd_panda import step_rscan, step_scan
-from saxs_bluesky.utils.beamline_client import BlueAPIPythonClient
-from saxs_bluesky.utils.utils import (
+from scm_bluesky.gui.gui_utils import LabelEntryPair
+from scm_bluesky.plans.ncd_panda import step_rscan, step_scan
+from scm_bluesky.utils.beamline_client import BlueAPIPythonClient
+from scm_bluesky.utils.utils import (
     get_saxs_beamline,
     load_beamline_config,
 )

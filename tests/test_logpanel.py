@@ -4,8 +4,8 @@ from unittest.mock import Mock, patch
 import pytest
 from stomp.connect import StompConnection11 as Connection
 
-from saxs_bluesky.logging.bluesky_logpanel import BlueskyLogPanel
-from saxs_bluesky.logging.bluesky_messenger import (
+from scm_bluesky.logging.bluesky_logpanel import BlueskyLogPanel
+from scm_bluesky.logging.bluesky_messenger import (
     StompMessenger,
 )
 

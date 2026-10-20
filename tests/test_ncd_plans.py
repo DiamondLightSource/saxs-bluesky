@@ -10,7 +10,7 @@ from ophyd_async.core import TriggerInfo, init_devices
 from ophyd_async.epics.adpilatus import PilatusDetector
 from ophyd_async.fastcs.panda import HDFPanda
 
-from saxs_bluesky.plans.ncd_panda import (
+from scm_bluesky.plans.ncd_panda import (
     append_group,
     configure_panda_triggering,
     create_profile,
@@ -26,7 +26,7 @@ from saxs_bluesky.plans.ncd_panda import (
     set_profile,
     set_trigger_info,
 )
-from saxs_bluesky.stubs.panda_stubs import (
+from scm_bluesky.stubs.panda_stubs import (
     get_settings_dir_and_name,
     load_settings_to_panda,
     log_deadtime,
@@ -35,7 +35,7 @@ from saxs_bluesky.stubs.panda_stubs import (
     save_device_to_yaml,
     wait_until_complete,
 )
-from saxs_bluesky.utils.profile_groups import Group, Profile
+from scm_bluesky.utils.profile_groups import Group, Profile
 
 SAXS_bluesky_ROOT = Path(__file__)
 

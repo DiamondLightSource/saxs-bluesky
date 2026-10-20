@@ -16,10 +16,10 @@ from ophyd_async.fastcs.panda import (
 )
 from ophyd_async.fastcs.panda._block import PandaTimeUnits
 
-from saxs_bluesky.utils.ncdcore import NCDCore
-from saxs_bluesky.utils.plotter import ProfilePlotter
-from saxs_bluesky.utils.profile_groups import Group, Profile
-from saxs_bluesky.utils.utils import (
+from scm_bluesky.utils.ncdcore import NCDCore
+from scm_bluesky.utils.plotter import ProfilePlotter
+from scm_bluesky.utils.profile_groups import Group, Profile
+from scm_bluesky.utils.utils import (
     get_saxs_beamline,
     load_beamline_config,
 )

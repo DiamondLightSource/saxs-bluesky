@@ -17,17 +17,17 @@ from tkinter.simpledialog import askstring
 import matplotlib.pyplot as plt
 from ttkthemes import ThemedTk
 
-from saxs_bluesky._version import __version__
-from saxs_bluesky.gui.gui_frames import ActiveDetectorsFrame, ClientControlPanel
-from saxs_bluesky.gui.panda_gui_elements import ProfileTab
-from saxs_bluesky.logging.bluesky_logpanel import BlueskyLogPanel
-from saxs_bluesky.plans.ncd_panda import (
+from scm_bluesky._version import __version__
+from scm_bluesky.gui.gui_frames import ActiveDetectorsFrame, ClientControlPanel
+from scm_bluesky.gui.panda_gui_elements import ProfileTab
+from scm_bluesky.logging.bluesky_logpanel import BlueskyLogPanel
+from scm_bluesky.plans.ncd_panda import (
     configure_panda_triggering,
     run_panda_triggering,
 )
-from saxs_bluesky.utils.beamline_client import BlueAPIPythonClient
-from saxs_bluesky.utils.profile_groups import ExperimentLoader
-from saxs_bluesky.utils.utils import (
+from scm_bluesky.utils.beamline_client import BlueAPIPythonClient
+from scm_bluesky.utils.profile_groups import ExperimentLoader
+from scm_bluesky.utils.utils import (
     authenticate,
     get_saxs_beamline,
     load_beamline_config,

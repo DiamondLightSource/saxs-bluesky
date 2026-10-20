@@ -6,7 +6,7 @@ from ophyd_async.core import TriggerInfo
 from ophyd_async.fastcs.panda import SeqTable
 from pydantic_core import from_json
 
-from saxs_bluesky.utils.profile_groups import ExperimentLoader, Group, Profile
+from scm_bluesky.utils.profile_groups import ExperimentLoader, Group, Profile
 
 SAXS_bluesky_ROOT = Path(__file__)
 

@@ -6,7 +6,7 @@ from unittest.mock import Mock
 import pytest
 from stomp.connect import StompConnection11 as Connection  # type: ignore
 
-from saxs_bluesky.logging.bluesky_messenger import (
+from scm_bluesky.logging.bluesky_messenger import (
     MessageUnpacker,
     ScanListener,
     StompMessenger,

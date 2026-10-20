@@ -9,9 +9,9 @@ from blueapi.service.interface import config
 ############################################################################################
 from dodal.utils import get_beamline_name
 
-import saxs_bluesky.beamline_configs
-import saxs_bluesky.blueapi_configs
-from saxs_bluesky.stubs.panda_stubs import return_connected_device, save_device_to_yaml
+import scm_bluesky.beamline_configs
+import scm_bluesky.blueapi_configs
+from scm_bluesky.stubs.panda_stubs import return_connected_device, save_device_to_yaml
 
 DEFAULT_BEAMLINE = "i22"
 
@@ -39,7 +39,7 @@ def get_saxs_beamline() -> str:
 
 
 def get_beamline_module_name(beamline: str):
-    beamline_config = f"{saxs_bluesky.beamline_configs.__name__}.{beamline}_config"
+    beamline_config = f"{scm_bluesky.beamline_configs.__name__}.{beamline}_config"
 
     return beamline_config
 
@@ -88,7 +88,7 @@ def get_blueapi_config_path(beamline: str | None = None):
     if beamline is None:
         beamline = get_saxs_beamline()
 
-    blueapi_config_dir = os.path.dirname(saxs_bluesky.blueapi_configs.__file__)
+    blueapi_config_dir = os.path.dirname(scm_bluesky.blueapi_configs.__file__)
     blueapi_config_path = f"{blueapi_config_dir}/{beamline}_blueapi_config.yaml"
     return blueapi_config_path
 
@@ -105,7 +105,7 @@ def open_scripting(beamline: str | None = None):
     if beamline is None:
         beamline = get_saxs_beamline()
 
-    root_path = Path(saxs_bluesky.__file__).parent.parent.parent.parent
+    root_path = Path(scm_bluesky.__file__).parent.parent.parent.parent
     example_path = os.path.join(
         root_path, "saxs-bluesky", "user_scripts", f"{beamline}"
     )

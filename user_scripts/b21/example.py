@@ -7,13 +7,13 @@ from dodal.plan_stubs.wrapped import (
     sleep,
 )
 
-from saxs_bluesky.beamline_configs.b21_config import CLIENT
-from saxs_bluesky.plans.ncd_panda import (
+from scm_bluesky.beamline_configs.b21_config import CLIENT
+from scm_bluesky.plans.ncd_panda import (
     configure_panda_triggering,
     run_panda_triggering,
 )
-from saxs_bluesky.utils.plotter import ProfilePlotter
-from saxs_bluesky.utils.profile_groups import Group, Profile
+from scm_bluesky.utils.plotter import ProfilePlotter
+from scm_bluesky.utils.profile_groups import Group, Profile
 
 my_profile = Profile(
     repeats=1, groups=[]

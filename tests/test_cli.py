@@ -1,7 +1,7 @@
 import subprocess
 import sys
 
-from saxs_bluesky import __version__
+from scm_bluesky import __version__
 
 
 def test_cli_version():
