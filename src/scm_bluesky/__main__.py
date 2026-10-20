@@ -1,4 +1,4 @@
-"""Interface for ``python -m saxs_bluesky``."""
+"""Interface for ``python -m scm_bluesky``."""
 
 import click
 

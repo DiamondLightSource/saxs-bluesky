@@ -40,7 +40,7 @@ from scm_bluesky.utils.profile_groups import Group, Profile
 SAXS_bluesky_ROOT = Path(__file__)
 
 YAML_DIR = os.path.join(
-    SAXS_bluesky_ROOT.parent.parent, "src", "saxs_bluesky", "profile_yamls"
+    SAXS_bluesky_ROOT.parent.parent, "src", "scm_bluesky", "profile_yamls"
 )
 
 
@@ -146,7 +146,7 @@ def test_panda_configure(
     )
 
 
-@patch("saxs_bluesky.plans.ncd_panda.DEFAULT_BASELINE")
+@patch("scm_bluesky.plans.ncd_panda.DEFAULT_BASELINE")
 def test_panda_run(
     run_engine: RunEngine,
     panda: HDFPanda,
@@ -233,7 +233,7 @@ def test_return_module_name():
 #     assert isinstance(saxs_standard_detector, StandardDetector)
 
 
-@patch("saxs_bluesky.stubs.panda_stubs.LOGGER")
+@patch("scm_bluesky.stubs.panda_stubs.LOGGER")
 def test_log_deadtime(patch_logger: MagicMock):
     log_deadtime(["saxs", "waxs"], [0.1, 0.2])
 

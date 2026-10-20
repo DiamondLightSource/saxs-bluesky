@@ -12,7 +12,7 @@ from ophyd_async.fastcs.panda import HDFPanda
 SAXS_bluesky_ROOT = Path(__file__)
 
 YAML_DIR = os.path.join(
-    SAXS_bluesky_ROOT.parent.parent, "src", "saxs_bluesky", "profile_yamls"
+    SAXS_bluesky_ROOT.parent.parent, "src", "scm_bluesky", "profile_yamls"
 )
 
 

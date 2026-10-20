@@ -49,9 +49,9 @@ def connected_messenger(mock_connection: Mock) -> StompMessenger:
 
 
 @pytest.fixture(autouse=True)
-@patch("saxs_bluesky.logging.bluesky_logpanel.Text")
-@patch("saxs_bluesky.logging.bluesky_logpanel.ttk.Style")
-@patch("saxs_bluesky.logging.bluesky_logpanel.ttk.Scrollbar")
+@patch("scm_bluesky.logging.bluesky_logpanel.Text")
+@patch("scm_bluesky.logging.bluesky_logpanel.ttk.Style")
+@patch("scm_bluesky.logging.bluesky_logpanel.ttk.Scrollbar")
 def connected_logpanel(
     mock_scrollbar: Mock,
     mock_style: Mock,

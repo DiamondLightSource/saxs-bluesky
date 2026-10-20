@@ -11,7 +11,7 @@ from scm_bluesky.utils.profile_groups import ExperimentLoader, Group, Profile
 SAXS_bluesky_ROOT = Path(__file__)
 
 yaml_dir = os.path.join(
-    SAXS_bluesky_ROOT.parent.parent, "src", "saxs_bluesky", "profile_yamls"
+    SAXS_bluesky_ROOT.parent.parent, "src", "scm_bluesky", "profile_yamls"
 )
 
 

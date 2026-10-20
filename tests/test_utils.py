@@ -101,6 +101,6 @@ def test_authenticate():
 async def test_save_panda_cli(
     beamline: str | None, panda_name: str | None, yaml_name: str | None, panda: HDFPanda
 ):
-    with patch("saxs_bluesky.utils.utils.return_connected_device", return_value=panda):
-        with patch("saxs_bluesky.utils.utils.input", return_value="test"):
+    with patch("scm_bluesky.utils.utils.return_connected_device", return_value=panda):
+        with patch("scm_bluesky.utils.utils.input", return_value="test"):
             save_panda_cli(beamline, panda_name, yaml_name)
