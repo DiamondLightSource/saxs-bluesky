@@ -127,7 +127,7 @@ def generate_repeated_trigger_info(
     profile: Profile,
     max_deadtime: float,
     livetime: float,
-    trigger=DetectorTrigger.CONSTANT_GATE,
+    trigger=DetectorTrigger.EXTERNAL_LEVEL,
 ) -> list[TriggerInfo]:
     repeated_trigger_info = []
 
