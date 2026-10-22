@@ -7,10 +7,9 @@ import bluesky.plan_stubs as bps
 from bluesky.utils import MsgGenerator, short_uid
 from dodal.beamlines import module_name_for_beamline
 from dodal.log import LOGGER
-from dodal.utils import make_device
 from ophyd_async.core import (
     StandardDetector,
-    StandardFlyer,
+    StandardFlyable,
     YamlSettingsProvider,
     wait_for_value,
 )
@@ -41,10 +40,8 @@ def return_connected_device(beamline: str, device_name: str):
 
     module_name = module_name_for_beamline(beamline)
 
-    devices = make_device(
-        f"dodal.beamlines.{module_name}", device_name, connect_immediately=True
-    )
-    return devices[device_name]
+    if device := getattr(f"dodal.beamlines.{module_name}", device_name, None):
+        return device.build(connect_immediately=True)
 
 
 def return_module_name(beamline: str) -> str:
@@ -76,7 +73,7 @@ def return_module_name(beamline: str) -> str:
 
 def fly_and_collect_with_wait(
     stream_name: str,
-    flyer: StandardFlyer[SeqTableInfo] | StandardFlyer[PcompInfo],
+    flyer: StandardFlyable[SeqTableInfo, int] | StandardFlyable[PcompInfo, int],
     detectors: list[StandardDetector],
 ):
     """Kickoff, complete and collect with a flyer and multiple detectors and wait.

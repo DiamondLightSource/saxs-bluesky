@@ -8,12 +8,11 @@ from bluesky.utils import MsgGenerator
 from dodal.common import inject
 from dodal.devices.motors import Motor
 from dodal.log import LOGGER
-from dodal.plan_stubs.data_session import attach_data_session_metadata_decorator
 from ophyd_async.core import (
     DEFAULT_TIMEOUT,
     DetectorTrigger,
     StandardDetector,
-    StandardFlyer,
+    StandardFlyable,
     StandardReadable,
     TriggerInfo,
 )
@@ -21,7 +20,7 @@ from ophyd_async.fastcs.panda import (
     HDFPanda,
     PandaBitMux,
     SeqTableInfo,
-    StaticSeqTableTriggerLogic,
+    StaticSeqTableFlyableLogic,
 )
 from ophyd_async.plan_stubs import (
     ensure_connected,
@@ -215,7 +214,6 @@ def turn_off(device: str) -> MsgGenerator:
         yield from set_panda_output(output_type, output, 0)
 
 
-# @attach_data_session_metadata_decorator()
 @validate_call(config={"arbitrary_types_allowed": True})
 def configure_panda_triggering(
     profile: Annotated[
@@ -289,8 +287,8 @@ def configure_panda_triggering(
 
     ############################################################
     # flyer and prepare fly, sets the sequencers table
-    trigger_logic = StaticSeqTableTriggerLogic(panda.seq[CONFIG.DEFAULT_SEQ])
-    flyer = StandardFlyer(trigger_logic)
+    trigger_logic = StaticSeqTableFlyableLogic(panda.seq[CONFIG.DEFAULT_SEQ])
+    flyer = StandardFlyable(trigger_logic)
 
     # setup triggering on panda - changes the sequence table
     # !! wait otherwise risking _context missing error
@@ -302,7 +300,6 @@ def configure_panda_triggering(
     yield from set_trigger_info(trigger_info=trigger_info)  # store the profile globally
 
 
-@attach_data_session_metadata_decorator()
 @validate_call(config={"arbitrary_types_allowed": True})
 def run_panda_triggering(
     panda: HDFPanda = DEFAULT_PANDA,
@@ -351,8 +348,8 @@ def run_panda_triggering(
         # get the loaded seq table
         panda_seq_table = panda.seq[CONFIG.DEFAULT_SEQ]
         # flyer and prepare fly, sets the sequencers table
-        trigger_logic = StaticSeqTableTriggerLogic(panda_seq_table)
-        flyer = StandardFlyer(trigger_logic)
+        trigger_logic = StaticSeqTableFlyableLogic(panda_seq_table)
+        flyer = StandardFlyable(trigger_logic)
 
         # detectors = detectors + [panda]  # panda must be added so we can get HDF
         all_devices = detectors + DEFAULT_BASELINE
@@ -577,7 +574,6 @@ def create_steps(start: float, stop: float | None, step: float | None):
     return step_list
 
 
-@attach_data_session_metadata_decorator()
 @bpp.baseline_decorator(DEFAULT_BASELINE)
 @validate_call(config={"arbitrary_types_allowed": True})
 def step_scan(
@@ -593,7 +589,6 @@ def step_scan(
     yield from bsp.scan(detectors, axis, start, stop, num)
 
 
-@attach_data_session_metadata_decorator()
 @bpp.baseline_decorator(DEFAULT_BASELINE)
 @validate_call(config={"arbitrary_types_allowed": True})
 def step_rscan(
@@ -609,7 +604,6 @@ def step_rscan(
     yield from bsp.rel_scan(detectors, axis, start, stop, num)
 
 
-@attach_data_session_metadata_decorator()
 @bpp.baseline_decorator(DEFAULT_BASELINE)
 @validate_call(config={"arbitrary_types_allowed": True})
 def centre_sample(
