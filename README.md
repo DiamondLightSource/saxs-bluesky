@@ -9,8 +9,9 @@ Bluesky plans, plan stubs and utilities for Small Angle Scattering beamline at D
 
 This repo is currently designed to work with i22, b21 and will be expanded to work with other beamslines that also use a PandA for hardware triggering. 
 
-Source          | <https://github.com/DiamondLightSource/saxs-bluesky>
+What            | Where
 :---:           | :---:
+Source          | <https://github.com/DiamondLightSource/saxs-bluesky>
 Releases        | <https://github.com/DiamondLightSource/saxs-bluesky/releases>
 
 To install saxs-bluesky clone this repo, navigate into the directory containing this repo and install it via:
