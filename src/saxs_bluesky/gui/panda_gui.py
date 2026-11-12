@@ -54,6 +54,8 @@ class PandAGUI:
     ):
         self.panda_config_yaml = panda_config_yaml
 
+        authenticate()
+
         if (self.panda_config_yaml is not None) and (configuration is None):
             self.configuration = ExperimentLoader.read_from_yaml(self.panda_config_yaml)
         elif (self.panda_config_yaml is None) and (configuration is not None):
